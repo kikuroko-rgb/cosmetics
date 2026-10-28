@@ -1,4 +1,80 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>化妆品与药品临期管家</title>
+  <style>
+    :root {
+      --bg: #F4F4F6;
+      --surface: #FFFFFF;
+      --surface-subtle: #F9FAFB;
+      --text-main: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --border-subtle: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --primary: #0F172A;
+      --accent: #E11D48;
+      --accent-soft: #FFE4E6;
+      --danger: #EF4444;
+      --danger-bg: #FEE2E2;
+      --warning: #D97706;
+      --warning-bg: #FEF3C7;
+      --success: #059669;
+      --success-bg: #D1FAE5;
+      --purple: #8B5CF6;
+      --purple-bg: #EDE9FE;
+      --blue: #0284C7;
+      --blue-bg: #E0F2FE;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+      --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+      --shadow-card-hover: 0 12px 20px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+      --shadow-popover: 0 16px 36px -4px rgba(15, 23, 42, 0.16), 0 6px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      padding-bottom: 120px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 14px 10px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
     .app-title-group {
       display: flex;
       align-items: center;
@@ -7,8 +83,8 @@
     }
 
     .btn-menu-trigger {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: var(--radius-md);
       background: var(--surface);
       border: 1px solid var(--border-subtle);
@@ -16,11 +92,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 700;
       cursor: pointer;
       box-shadow: var(--shadow-sm);
-      transition: background 0.15s ease, transform 0.1s ease;
+      transition: all 0.15s ease;
       flex-shrink: 0;
     }
 
@@ -30,24 +106,56 @@
     }
 
     .app-title-group h1 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
       color: var(--text-main);
     }
 
-    /* Anchored Top-Left Floating Menu Popover */
+    .badge-sync {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: #E2E8F0;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .badge-sync.online {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .btn-batch-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+
+    .btn-batch-toggle.active {
+      background: var(--primary);
+      color: #FFF;
+      border-color: var(--primary);
+    }
+
     .menu-popover {
       position: absolute;
       top: 44px;
       left: 0;
-      width: 250px;
+      width: 240px;
       background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
-      box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08);
+      box-shadow: var(--shadow-popover);
       padding: 6px;
       z-index: 100;
       display: none;
@@ -70,7 +178,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
@@ -113,13 +221,839 @@
       display: block;
     }
 
-    .badge-sync {
-<!-- ... existing code ... -->
-  <!-- iOS Styled Header -->
+    .controls-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-input-wrap input {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px 0 32px;
+      background: #E8ECEF;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .search-input-wrap .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .btn-tool {
+      height: 36px;
+      padding: 0 10px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .btn-tool:active {
+      transform: scale(0.96);
+    }
+
+    .btn-tool.active-tool {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .category-pills-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .category-pills-bar::-webkit-scrollbar { display: none; }
+
+    .cat-pill {
+      flex-shrink: 0;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: var(--radius-full);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+
+    .cat-pill.active {
+      background: var(--primary);
+      color: #FFF;
+      border-color: var(--primary);
+    }
+
+    .pill-count {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: var(--radius-full);
+      background: #E2E8F0;
+      color: var(--text-secondary);
+      font-family: ui-monospace, Menlo, monospace;
+    }
+
+    .cat-pill.active .pill-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFF;
+    }
+
+    .status-segmented-bar {
+      display: flex;
+      background: #EAEBED;
+      padding: 3px;
+      border-radius: var(--radius-md);
+      gap: 3px;
+      margin-top: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .status-segmented-bar::-webkit-scrollbar { display: none; }
+
+    .segment-tab {
+      flex: 1;
+      min-width: 60px;
+      height: 32px;
+      border-radius: calc(var(--radius-md) - 2px);
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      white-space: nowrap;
+    }
+
+    .segment-tab.active {
+      background: var(--surface);
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    .segment-badge {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: var(--radius-full);
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--text-secondary);
+      font-family: ui-monospace, Menlo, monospace;
+    }
+
+    .segment-tab.active .segment-badge {
+      background: #E2E8F0;
+      color: var(--text-main);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 12px 14px;
+    }
+
+    .tab-page {
+      display: none;
+    }
+
+    .tab-page.active {
+      display: block;
+    }
+
+    .list-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease, border-color 0.16s ease;
+      user-select: none;
+    }
+
+    .item-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    .item-card.press-active {
+      transform: scale(0.985);
+    }
+
+    .item-card.selected {
+      border-color: var(--accent);
+      background: #FFFBFB;
+    }
+
+    .list-mode .item-card {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-md);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .card-thumb .fallback-icon {
+      font-size: 28px;
+    }
+
+    .card-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge-tags-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .tag-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tag-cat { background: #F1F5F9; color: #475569; }
+    .tag-status-inuse { background: var(--blue-bg); color: var(--blue); }
+    .tag-status-unopened { background: #F1F5F9; color: var(--text-tertiary); }
+    .tag-status-repurchase { background: #FCE7F3; color: #DB2777; }
+    .tag-status-dislike { background: #F3F4F6; color: #6B7280; }
+    .tag-added {
+      background: #F8FAFC;
+      color: #0F172A;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid #CBD5E1;
+      padding: 2px 7px;
+    }
+    .tag-custom { background: #FAF5FF; color: var(--purple); border: 1px solid #F3E8FF; }
+    .tag-location { background: #FEF3C7; color: #B45309; }
+    .tag-estimate { background: #ECFDF5; color: #047857; font-size: 10px; }
+
+    .card-meta-text {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .card-right-status {
+      text-align: right;
+      min-width: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .countdown-number {
+      font-size: 19px;
+      font-weight: 800;
+      font-family: ui-monospace, Menlo, monospace;
+      line-height: 1;
+    }
+
+    .status-capsule {
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 4px;
+      padding: 2px 6px;
+      border-radius: var(--radius-full);
+    }
+
+    .btn-quick-open {
+      margin-top: 6px;
+      background: #E0F2FE;
+      color: #0284C7;
+      border: 1px solid #BAE6FD;
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      cursor: pointer;
+    }
+
+    .grid-mode {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .grid-mode .item-card {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .grid-mode .card-thumb {
+      width: 100%;
+      height: 120px;
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .grid-mode .card-content {
+      padding: 10px;
+      gap: 6px;
+    }
+
+    .grid-mode .card-title {
+      font-size: 13px;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .grid-mode .card-right-status {
+      align-items: stretch;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .grid-mode .status-capsule {
+      text-align: center;
+    }
+
+    .state-good { color: var(--success); }
+    .state-warning { color: var(--warning); }
+    .state-danger { color: var(--danger); }
+    .capsule-good { background: var(--success-bg); color: var(--success); }
+    .capsule-warning { background: var(--warning-bg); color: var(--warning); }
+    .capsule-danger { background: var(--danger-bg); color: var(--danger); }
+
+    .select-checkbox {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      background: #FFF;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      font-size: 11px;
+      font-weight: 800;
+      color: transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .batch-mode .select-checkbox {
+      display: flex;
+    }
+
+    .item-card.selected .select-checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #FFF;
+    }
+
+    .batch-panel {
+      position: fixed;
+      bottom: 74px;
+      left: 14px;
+      right: 14px;
+      max-width: 772px;
+      margin: 0 auto;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-popover);
+      padding: 10px 14px;
+      z-index: 60;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .batch-panel.show {
+      display: flex;
+    }
+
+    .batch-panel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .batch-pill-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      color: #FFF;
+      cursor: pointer;
+    }
+
+    .batch-btn-danger {
+      background: var(--danger);
+      border: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      color: #FFF;
+      cursor: pointer;
+    }
+
+    .batch-cat-select {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      color: #FFF;
+      font-size: 12px;
+      outline: none;
+    }
+    .batch-cat-select option {
+      color: var(--text-main);
+      background: #FFF;
+    }
+
+    .batch-btn-confirm {
+      background: #FFF;
+      color: var(--text-main);
+      border: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .calendar-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .calendar-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .cal-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .cal-grid-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+
+    .cal-grid-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+
+    .cal-day-cell {
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      position: relative;
+    }
+
+    .cal-day-cell.other-month {
+      color: #CBD5E1;
+    }
+
+    .cal-day-cell.selected {
+      background: var(--primary) !important;
+      color: #FFF !important;
+    }
+
+    .cal-day-cell.today:not(.selected) {
+      background: #E2E8F0;
+      color: var(--accent);
+    }
+
+    .cal-dots-row {
+      display: flex;
+      gap: 2px;
+      margin-top: 2px;
+      height: 5px;
+    }
+
+    .cal-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+    }
+
+    .dot-expiry-good { background: var(--success); }
+    .dot-expiry-warning { background: var(--warning); }
+    .dot-expiry-danger { background: var(--danger); }
+    .dot-opened { background: var(--purple); }
+    .dot-added { background: var(--blue); }
+
+    .bottom-tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 50;
+      padding: 0 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-tertiary);
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+    }
+
+    .tab-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .tab-title {
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .fab-cat-container {
+      position: fixed;
+      bottom: 74px;
+      right: 18px;
+      z-index: 55;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .fab-cat-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8B5CF6, #EC4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.38);
+      border: 3px solid #FFF;
+      cursor: pointer;
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease;
+    }
+
+    .fab-cat-circle:active, .fab-cat-circle.pressing {
+      transform: scale(0.92);
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 120;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-sheet {
+      background: #FFF;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 24px 24px 0 0;
+      padding: 18px 20px 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: sheetUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .sheet-head h2 {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .sheet-close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-subtle);
+      border: none;
+      color: var(--text-tertiary);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .photo-capture-banner {
+      width: 100%;
+      height: 140px;
+      border: 2px dashed #CBD5E1;
+      border-radius: var(--radius-lg);
+      background: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 14px;
+      transition: all 0.15s ease;
+    }
+
+    .photo-capture-banner:active {
+      background: #F1F5F9;
+      border-color: #94A3B8;
+    }
+
+    .photo-capture-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #FFF;
+    }
+
+    .photo-preview-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(15, 23, 42, 0.7);
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      background: var(--surface-subtle);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .btn-submit {
+      flex: 1;
+      padding: 12px;
+      background: var(--primary);
+      color: #FFF;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      padding: 12px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-del {
+      padding: 12px;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hidden File Input for Image Capture -->
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoUpload(event)">
+  <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+
+  <!-- Header -->
   <header>
     <div class="top-bar">
       <div class="app-title-group">
-        <button class="btn-menu-trigger" id="btnMenuTrigger" onclick="toggleMenuPopover(event)" title="打开菜单">☰</button>
+        <button class="btn-menu-trigger" id="btnMenuTrigger" onclick="toggleMenuPopover(event)" title="管家菜单">☰</button>
         <h1>临期管家</h1>
         <span class="badge-sync" id="syncStatusBadge">● 本地</span>
 
@@ -157,95 +1091,1495 @@
     </div>
 
     <!-- Backdrop for click-outside dismissal -->
-    <div class="popover-backdrop" id="popoverBackdrop" onclick="closeMenuPopover()"></div>
+    <div class="popover-backdrop" id="popoverBackdrop" onclick="closeAllPopovers()"></div>
 
-    <!-- Integrated Search & Actions -->
-<!-- ... existing code ... -->
-    <button class="tab-btn" onclick="openModal()" title="手动添加新物品">
-      <span class="tab-icon" style="color:var(--accent);">➕</span>
-      <span class="tab-title">添加</span>
+    <!-- Search Bar & Popover Action Buttons -->
+    <div class="controls-row">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="searchInput" placeholder="搜索品名、标签或位置..." oninput="renderCards()">
+      </div>
+
+      <button class="btn-tool" id="btnCycleSort" onclick="cycleNextSort()" title="点击切换排序规则">
+        <span id="sortBtnText">🕒 添加时间 ↓</span>
+      </button>
+
+      <button class="btn-tool" id="btnOpenFilter" onclick="openFilterSheet()" title="筛选">
+        <span>☰ 筛选</span>
+      </button>
+    </div>
+
+    <!-- Horizontal Category Scroll Pills with Badges -->
+    <div class="category-pills-bar" id="categoryPillsBar"></div>
+
+    <!-- Top Lifecycle Status Segmented Control (全部 -> 不好用 -> 会回购 -> 未开封 -> 使用中) -->
+    <div class="status-segmented-bar" id="statusSegmentedBar">
+      <button class="segment-tab active" data-status="全部" onclick="selectLifeStatus('全部')">
+        <span>全部</span>
+        <span class="segment-badge" id="cnt-status-all">0</span>
+      </button>
+      <button class="segment-tab" data-status="不好用" onclick="selectLifeStatus('不好用')">
+        <span>👎 不好用</span>
+        <span class="segment-badge" id="cnt-status-dislike">0</span>
+      </button>
+      <button class="segment-tab" data-status="会回购" onclick="selectLifeStatus('会回购')">
+        <span>❤️ 会回购</span>
+        <span class="segment-badge" id="cnt-status-repurchase">0</span>
+      </button>
+      <button class="segment-tab" data-status="未开封" onclick="selectLifeStatus('未开封')">
+        <span>📦 未开封</span>
+        <span class="segment-badge" id="cnt-status-unopened">0</span>
+      </button>
+      <button class="segment-tab" data-status="使用中" onclick="selectLifeStatus('使用中')">
+        <span>🧴 使用中</span>
+        <span class="segment-badge" id="cnt-status-inuse">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Views -->
+  <main class="container">
+    <div id="tabInventory" class="tab-page active">
+      <div id="cardsContainer" class="list-mode"></div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div style="font-size:38px; margin-bottom:8px;">🧴</div>
+        <p style="font-weight:700;">没有找到符合条件的物品</p>
+        <p style="font-size:12px; margin-top:4px;">轻点右下角小猫导入，或长按小猫手动添加</p>
+      </div>
+    </div>
+
+    <div id="tabCalendar" class="tab-page">
+      <div class="calendar-card">
+        <div class="calendar-header">
+          <button class="cal-nav-btn" onclick="prevMonth()">＜</button>
+          <div class="calendar-title" id="calMonthTitle">2026年 10月</div>
+          <button class="cal-nav-btn" onclick="nextMonth()">＞</button>
+        </div>
+        <div class="cal-grid-weekdays">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="cal-grid-days" id="calDaysGrid"></div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <h3 id="calSelectedDateText" style="font-size:14px; font-weight:700; color:var(--text-secondary); margin-bottom:10px;">当天事件</h3>
+        <div id="calDayEventList" class="list-mode"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom-Right Single Cat Button (Tap: AI Import, Long-Press: Manual Add) -->
+  <div class="fab-cat-container" id="fabCatContainer">
+    <div class="fab-cat-circle" id="fabCatBtn" title="轻点AI导入 · 长按手动添加">🐱</div>
+  </div>
+
+  <!-- Floating Batch Action Toolbar -->
+  <div class="batch-panel" id="batchPanel">
+    <div class="batch-panel-row">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="batch-pill-btn" onclick="selectAll()">全选本页</button>
+        <button class="batch-pill-btn" onclick="deselectAll()">清空选择</button>
+        <span style="font-size:12px; font-weight:700; color:#FFF; margin-left:4px;" id="batchCountBadge">已选 0 项</span>
+      </div>
+      <button class="batch-btn-danger" onclick="deleteSelected()">🗑️ 彻底删除</button>
+    </div>
+    <div class="batch-panel-row" style="border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px;">
+      <span style="font-size:12px; color:#CBD5E1; font-weight:600;">划入分类：</span>
+      <div style="display:flex; gap:6px; flex:1; justify-content:flex-end;">
+        <select id="batchTargetCatSelect" class="batch-cat-select"></select>
+        <button class="batch-btn-confirm" onclick="applyBatchCategory()">修改分类</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-tabbar">
+    <button class="tab-btn active" id="navInventory" onclick="switchNavTab('inventory')">
+      <span class="tab-icon">📦</span>
+      <span class="tab-title">清单</span>
+    </button>
+    <button class="tab-btn" id="navCalendar" onclick="switchNavTab('calendar')">
+      <span class="tab-icon">📅</span>
+      <span class="tab-title">日历</span>
     </button>
   </nav>
 
-  <!-- Sheet 1: Sorting Drawer -->
-<!-- ... existing code ... -->
-    /* Modal Controls */
+  <!-- Filter Sheet -->
+  <div class="modal-overlay" id="filterModal" onclick="closeFilterSheet()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <h2>快速筛选</h2>
+        <button class="sheet-close-btn" onclick="closeFilterSheet()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>到期状态</label>
+        <select id="filterExpirySelect">
+          <option value="全部">全部状态</option>
+          <option value="正常">正常使用 (剩余充足)</option>
+          <option value="临期">即将临期 (30天内)</option>
+          <option value="过期">已过期</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>开封状态</label>
+        <select id="filterOpenSelect">
+          <option value="全部">全部</option>
+          <option value="已开封">已开封</option>
+          <option value="未开封">未开封</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-cancel" onclick="resetAdvancedFilter()">重置</button>
+        <button type="button" class="btn-submit" onclick="applyAdvancedFilter()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Management Sheet -->
+  <div class="modal-overlay" id="catManageModal" onclick="closeCatManageSheet()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <h2>🏷️ 管理分类与顺序</h2>
+        <button class="sheet-close-btn" onclick="closeCatManageSheet()">✕</button>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <input type="text" id="newCatNameInput" placeholder="输入新分类名称..." style="flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--border-subtle); font-size:13px;">
+        <button onclick="addNewCategory()" class="btn-submit" style="flex:none; padding:8px 14px;">添加</button>
+      </div>
+      <div id="catManageListContainer" style="max-height:50vh; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+  </div>
+
+  <!-- GitHub Cloud Sync Settings -->
+  <div class="modal-overlay" id="repoModal" onclick="closeRepoConfigModal()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <h2>🔑 GitHub 云同步配置</h2>
+        <button class="sheet-close-btn" onclick="closeRepoConfigModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Personal Access Token (ghp_...)</label>
+        <input type="password" id="repoTokenInput" placeholder="粘贴拥有 repo 权限的 Token">
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-cancel" onclick="closeRepoConfigModal()">取消</button>
+        <button type="button" class="btn-submit" onclick="saveRepoConfig()">保存并连接</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gemini Import Modal -->
+  <div class="modal-overlay" id="aiModal" onclick="closeAISync()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <h2>✨ Gemini 极速导入</h2>
+        <button class="sheet-close-btn" onclick="closeAISync()">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-tertiary); margin-bottom:10px;">粘贴由 AI 识别生成的 JSON 数据，一键录入：</p>
+      <div class="form-group">
+        <textarea id="aiInput" rows="6" placeholder="在此粘贴 JSON 代码..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-cancel" onclick="pasteClip()">粘贴剪贴板</button>
+        <button type="button" class="btn-submit" onclick="applyAI()">确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Item Modal -->
+  <div class="modal-overlay" id="manualModal" onclick="closeModal()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-head">
+        <h2 id="modalTitle">添加物品</h2>
+        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <form id="itemForm" onsubmit="saveItem(event)">
+        <input type="hidden" id="itemId">
+        <input type="hidden" id="itemImage">
+
+        <!-- Top Camera Capture Banner -->
+        <div class="photo-capture-banner" id="photoBanner" onclick="triggerCameraCapture()">
+          <div id="photoPlaceholder" style="display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-secondary);">
+            <span style="font-size:32px;">📷</span>
+            <span style="font-size:13px; font-weight:700;">点击拍摄或选取物品照片</span>
+            <span style="font-size:11px; color:var(--text-tertiary);">清晰包装可提升识别与查看体验</span>
+          </div>
+          <div id="photoPreviewContainer" style="display:none; width:100%; height:100%; position:relative;">
+            <img id="photoPreviewImg" src="" alt="预览图">
+            <span class="photo-preview-actions">重拍 / 更改</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>品名 *</label>
+          <input type="text" id="itemName" required placeholder="如：小黑瓶精华肌底液">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>单字分类 *</label>
+            <select id="itemCategory" required></select>
+          </div>
+          <div class="form-group">
+            <label>生命周期状态</label>
+            <select id="itemStatus" onchange="handleModalStatusChange()">
+              <option value="未开封">📦 未开封</option>
+              <option value="使用中">🧴 使用中</option>
+              <option value="会回购">❤️ 会回购</option>
+              <option value="不好用">👎 不好用</option>
+              <option value="已废弃">🗑️ 已废弃</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>到期日期 *</label>
+            <input type="date" id="itemExpiry" required>
+          </div>
+          <div class="form-group">
+            <label>开封日期</label>
+            <input type="date" id="itemOpened">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>添加时间 *</label>
+            <input type="date" id="itemAdded" required>
+          </div>
+          <div class="form-group">
+            <label>开封保质期(月)</label>
+            <input type="number" id="itemPao" min="1" max="60" placeholder="如：6 或 12">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>规格容量 (ml/g)</label>
+            <input type="text" id="itemVolume" placeholder="如：30ml 或 50g">
+          </div>
+          <div class="form-group">
+            <label>规格类型</label>
+            <select id="itemIsSample">
+              <option value="0">正装</option>
+              <option value="1">小样 / 试用装</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>功效标签 (多选/逗号分隔)</label>
+          <input type="text" id="itemTags" placeholder="如：美白, 去角质, 去黑头, 修护">
+        </div>
+
+        <div class="form-group">
+          <label>存放位置 (选填)</label>
+          <input type="text" id="itemLocation" placeholder="如：梳妆台第一层, 浴室镜柜">
+        </div>
+
+        <div class="form-group">
+          <label>备注说明 (选填)</label>
+          <textarea id="itemNotes" rows="2" placeholder="使用心得、批号或搭配提醒..."></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-del" id="btnDelete" onclick="delItem()" style="display:none;">删除</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn-submit">保存入库</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Application Logic -->
+  <script>
+    const STORAGE_KEY = "cosmetics_data_pro_v3";
+    const CAT_KEY = "cosmetics_cats_pro_v3";
+    const SORT_KEY = "cosmetics_sort_pro_v3";
+    const LAYOUT_KEY = "cosmetics_layout_pro_v3";
+    const TOKEN_KEY = "github_token_pro_v3";
+
+    const REPO_OWNER = "q9656";
+    const REPO_NAME = "q";
+    const FILE_PATH = "data.json";
+
+    const DEFAULT_CATEGORIES = ["唇", "口", "精", "霜", "乳", "水", "眼", "妆", "体", "药", "其"];
+
+    // 排序循环列表：点击直接切换，不使用下拉菜单
+    const SORT_CYCLE_LIST = [
+      { key: "added_desc", label: "🕒 添加时间 ↓" },
+      { key: "expiry_asc", label: "⏰ 到期时间 ↑" },
+      { key: "name_asc", label: "🔤 品名 A-Z" }
+    ];
+
+    let currentFileSha = null;
+    let currentCategory = "全部";
+    let currentLifeStatus = "全部";
+    let currentSort = localStorage.getItem(SORT_KEY) || "added_desc";
+    let currentLayout = localStorage.getItem(LAYOUT_KEY) || "list";
+
+    let filterExpiryStatus = "全部";
+    let filterOpenStatus = "全部";
+
+    let isBatchMode = false;
+    let selectedIds = new Set();
+    let longPressTimer = null;
+    let pressStartX = 0;
+    let pressStartY = 0;
+
+    let calViewDate = new Date();
+    let calSelectedDateStr = new Date().toISOString().slice(0, 10);
+
+    /* Storage Helpers */
+    function getCategories() {
+      const s = localStorage.getItem(CAT_KEY);
+      if (!s) return [...DEFAULT_CATEGORIES];
+      try {
+        const arr = JSON.parse(s);
+        return Array.isArray(arr) && arr.length > 0 ? arr : [...DEFAULT_CATEGORIES];
+      } catch (e) {
+        return [...DEFAULT_CATEGORIES];
+      }
+    }
+
+    function saveCategories(cats) {
+      localStorage.setItem(CAT_KEY, JSON.stringify(cats));
+      renderCategoryPills();
+      updateCategorySelects();
+    }
+
+    function getItems() {
+      const s = localStorage.getItem(STORAGE_KEY);
+      if (!s) return [];
+      try {
+        const arr = JSON.parse(s);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveItems(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      renderCategoryPills();
+      updateLifecycleBadges();
+      pushToRepo(items);
+    }
+
+    function calcDays(expiryDateStr) {
+      if (!expiryDateStr) return 9999;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(expiryDateStr);
+      target.setHours(0, 0, 0, 0);
+      return Math.round((target - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function getItemTimestamp(item) {
+      if (!item) return 0;
+      if (item.createdAt) {
+        const t = new Date(item.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      return 0;
+    }
+
+    /* Consumption Estimator */
+    function estimateConsumptionDuration(item) {
+      const volMatch = (item.volume || "").match(/(\d+(?:\.\d+)?)/);
+      if (!volMatch) return null;
+      const vol = parseFloat(volMatch[1]);
+      if (isNaN(vol) || vol <= 0) return null;
+
+      let dailyUsage = 0.5;
+      const cat = item.category || "";
+      if (cat === "精") dailyUsage = 0.6;
+      else if (cat === "霜") dailyUsage = 0.8;
+      else if (cat === "乳") dailyUsage = 1.0;
+      else if (cat === "水") dailyUsage = 1.8;
+      else if (cat === "眼") dailyUsage = 0.2;
+      else if (cat === "妆") dailyUsage = 0.4;
+      else if (cat === "体") dailyUsage = 4.0;
+      else if (cat === "口" || cat === "唇") dailyUsage = 0.05;
+
+      const days = Math.round(vol / dailyUsage);
+      if (item.isSample) return `🧪 小样 约用 ${Math.min(days, 20)} 次`;
+      if (days > 365) return `🧴 约用 ${(days / 30).toFixed(0)} 个月`;
+      return `🧴 预计可用 ${days} 天`;
+    }
+
+    /* Sorting and Cycle Logic */
+    function cycleNextSort() {
+      const idx = SORT_CYCLE_LIST.findIndex(s => s.key === currentSort);
+      const nextIdx = (idx + 1) % SORT_CYCLE_LIST.length;
+      currentSort = SORT_CYCLE_LIST[nextIdx].key;
+      localStorage.setItem(SORT_KEY, currentSort);
+      updateSortButtonLabel();
+      renderCards();
+    }
+
+    function updateSortButtonLabel() {
+      const btnText = document.getElementById("sortBtnText");
+      if (!btnText) return;
+      const match = SORT_CYCLE_LIST.find(s => s.key === currentSort) || SORT_CYCLE_LIST[0];
+      btnText.innerText = match.label;
+    }
+
+    /* Category & Lifecycle Pills */
+    function renderCategoryPills() {
+      const container = document.getElementById("categoryPillsBar");
+      if (!container) return;
+      const cats = getCategories();
+      const allItems = getItems();
+
+      let html = `
+        <div class="cat-pill ${currentCategory === '全部' ? 'active' : ''}" onclick="selectCategoryPill('全部')">
+          <span>全部</span>
+          <span class="pill-count">${allItems.length}</span>
+        </div>
+      `;
+
+      cats.forEach(c => {
+        const count = allItems.filter(i => i.category === c).length;
+        html += `
+          <div class="cat-pill ${currentCategory === c ? 'active' : ''}" onclick="selectCategoryPill('${c}')">
+            <span>${c}</span>
+            <span class="pill-count">${count}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      updateLifecycleBadges();
+    }
+
+    function selectCategoryPill(cat) {
+      currentCategory = cat;
+      renderCategoryPills();
+      renderCards();
+    }
+
+    function selectLifeStatus(status) {
+      currentLifeStatus = status;
+      document.querySelectorAll(".segment-tab").forEach(tab => {
+        tab.classList.toggle("active", tab.getAttribute("data-status") === status);
+      });
+      renderCards();
+    }
+
+    function updateLifecycleBadges() {
+      const items = getItems();
+      const setCnt = (id, n) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = n;
+      };
+
+      setCnt("cnt-status-all", items.length);
+      setCnt("cnt-status-dislike", items.filter(i => (i.status || "") === "不好用").length);
+      setCnt("cnt-status-repurchase", items.filter(i => (i.status || "") === "会回购").length);
+      setCnt("cnt-status-unopened", items.filter(i => (i.status || (i.openedAt ? "使用中" : "未开封")) === "未开封").length);
+      setCnt("cnt-status-inuse", items.filter(i => (i.status || (i.openedAt ? "使用中" : "未开封")) === "使用中").length);
+    }
+
+    function updateCategorySelects() {
+      const cats = getCategories();
+      const formCat = document.getElementById("itemCategory");
+      const batchCat = document.getElementById("batchTargetCatSelect");
+
+      if (formCat) {
+        formCat.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
+      }
+      if (batchCat) {
+        batchCat.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join("");
+      }
+    }
+
+    /* Filter Engine */
+    function getFilteredItems() {
+      let items = getItems();
+      const s = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+
+      // 1. 生命周期过滤
+      if (currentLifeStatus !== "全部") {
+        items = items.filter(it => {
+          const st = it.status || (it.openedAt ? "使用中" : "未开封");
+          return st === currentLifeStatus;
+        });
+      }
+
+      // 2. 分类过滤
+      if (currentCategory !== "全部") {
+        items = items.filter(it => it.category === currentCategory);
+      }
+
+      // 3. 高级筛选弹窗条件
+      if (filterExpiryStatus !== "全部") {
+        items = items.filter(it => {
+          const d = calcDays(it.expiry);
+          if (filterExpiryStatus === "正常") return d > 30;
+          if (filterExpiryStatus === "临期") return d >= 0 && d <= 30;
+          if (filterExpiryStatus === "过期") return d < 0;
+          return true;
+        });
+      }
+
+      if (filterOpenStatus !== "全部") {
+        items = items.filter(it => {
+          const isOpened = Boolean(it.openedAt || it.status === "使用中");
+          return filterOpenStatus === "已开封" ? isOpened : !isOpened;
+        });
+      }
+
+      // 4. 关键字搜索 (品名、备注、标签、位置)
+      if (s) {
+        items = items.filter(it => {
+          const name = (it.name || "").toLowerCase();
+          const notes = (it.notes || "").toLowerCase();
+          const tags = Array.isArray(it.tags) ? it.tags.join(" ").toLowerCase() : (it.tags || "").toLowerCase();
+          const loc = (it.location || "").toLowerCase();
+          return name.includes(s) || notes.includes(s) || tags.includes(s) || loc.includes(s);
+        });
+      }
+
+      // 5. 排序引擎
+      items.sort((a, b) => {
+        if (currentSort === "added_desc") {
+          return getItemTimestamp(b) - getItemTimestamp(a);
+        }
+        if (currentSort === "expiry_asc") {
+          return new Date(a.expiry || "9999-12-31") - new Date(b.expiry || "9999-12-31");
+        }
+        if (currentSort === "name_asc") {
+          return (a.name || "").localeCompare(b.name || "", "zh-Hans-CN", { sensitivity: "base" });
+        }
+        return 0;
+      });
+
+      return items;
+    }
+
+    /* Render Cards */
+    function renderCards() {
+      const container = document.getElementById("cardsContainer");
+      const emptyState = document.getElementById("emptyState");
+      if (!container) return;
+
+      container.className = currentLayout === "grid" ? "grid-mode" : "list-mode";
+      if (isBatchMode) container.classList.add("batch-mode");
+
+      const items = getFilteredItems();
+      if (items.length === 0) {
+        container.innerHTML = "";
+        if (emptyState) emptyState.style.display = "block";
+        return;
+      }
+
+      if (emptyState) emptyState.style.display = "none";
+      container.innerHTML = "";
+
+      items.forEach(item => {
+        const el = createCardElement(item);
+        container.appendChild(el);
+      });
+
+      hydrateThumbs(items);
+    }
+
+    function createCardElement(item) {
+      const card = document.createElement("div");
+      card.className = "item-card" + (selectedIds.has(item.id) ? " selected" : "");
+      card.setAttribute("data-id", item.id);
+
+      const d = calcDays(item.expiry);
+      let dayClass = "state-good";
+      let capsuleClass = "capsule-good";
+      let countdownText = `${d}天`;
+      let statusDesc = "正常使用";
+
+      if (d < 0) {
+        dayClass = "state-danger";
+        capsuleClass = "capsule-danger";
+        countdownText = "过期";
+        statusDesc = `已过期 ${Math.abs(d)} 天`;
+      } else if (d <= 30) {
+        dayClass = "state-warning";
+        capsuleClass = "capsule-warning";
+        statusDesc = d === 0 ? "今天到期" : "即将临期";
+      }
+
+      const lifeStatus = item.status || (item.openedAt ? "使用中" : "未开封");
+      let lifeBadge = "";
+      if (lifeStatus === "使用中") lifeBadge = `<span class="tag-badge tag-status-inuse">🧴 使用中</span>`;
+      else if (lifeStatus === "未开封") lifeBadge = `<span class="tag-badge tag-status-unopened">📦 未开封</span>`;
+      else if (lifeStatus === "会回购") lifeBadge = `<span class="tag-badge tag-status-repurchase">❤️ 会回购</span>`;
+      else if (lifeStatus === "不好用") lifeBadge = `<span class="tag-badge tag-status-dislike">👎 不好用</span>`;
+      else if (lifeStatus === "已废弃") lifeBadge = `<span class="tag-badge" style="background:#FEE2E2; color:#991B1B;">🗑️ 已废弃</span>`;
+
+      const addedDateStr = item.createdAt ? item.createdAt.slice(0, 10) : "";
+      const addedTag = addedDateStr ? `<span class="tag-badge tag-added">🕒 入库 ${addedDateStr}</span>` : "";
+
+      let tagsBadges = "";
+      if (item.tags) {
+        const tagArr = Array.isArray(item.tags) ? item.tags : item.tags.split(/[,，\s]+/);
+        tagsBadges = tagArr.filter(Boolean).map(t => `<span class="tag-badge tag-custom">#${t}</span>`).join("");
+      }
+
+      const locBadge = item.location ? `<span class="tag-badge tag-location">📍 ${item.location}</span>` : "";
+      const estimateText = estimateConsumptionDuration(item);
+      const estimateBadge = estimateText ? `<span class="tag-badge tag-estimate">${estimateText}</span>` : "";
+
+      const quickOpenBtn = (lifeStatus === "未开封") ?
+        `<button class="btn-quick-open" onclick="quickOpenItem(event, '${item.id}')">⚡ 拆封</button>` : "";
+
+      card.innerHTML = `
+        <div class="select-checkbox">✓</div>
+        <div class="card-thumb" data-thumb-id="${item.id}"></div>
+        <div class="card-content">
+          <div class="card-title">${item.name || "未命名物品"}</div>
+          <div class="badge-tags-row">
+            <span class="tag-badge tag-cat">${item.category || "其"}</span>
+            ${lifeBadge}
+            ${addedTag}
+            ${locBadge}
+            ${tagsBadges}
+            ${estimateBadge}
+          </div>
+          <div class="card-meta-text">到期: ${item.expiry || "未设置"} ${item.openedAt ? "· 开封: " + item.openedAt : ""}</div>
+        </div>
+        <div class="card-right-status">
+          <div class="countdown-number ${dayClass}">${countdownText}</div>
+          <div class="status-capsule ${capsuleClass}">${statusDesc}</div>
+          ${quickOpenBtn}
+        </div>
+      `;
+
+      card.onclick = (e) => {
+        if (isBatchMode) {
+          toggleSelect(item.id);
+        } else {
+          openModal(item);
+        }
+      };
+
+      attachLongPress(card, item.id);
+      return card;
+    }
+
+    function quickOpenItem(e, id) {
+      e.stopPropagation();
+      let items = getItems();
+      const today = new Date().toISOString().slice(0, 10);
+      items = items.map(it => {
+        if (it.id === id) {
+          return { ...it, status: "使用中", openedAt: today };
+        }
+        return it;
+      });
+      saveItems(items);
+      renderCards();
+      renderCalendar();
+    }
+
+    /* Modal Form Logic */
+    function triggerCameraCapture() {
+      const input = document.getElementById("cameraInput");
+      if (input) input.click();
+    }
+
+    function handlePhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 480;
+          let w = img.width;
+          let h = img.height;
+          if (w > h && w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedB64 = canvas.toDataURL("image/jpeg", 0.75);
+
+          document.getElementById("itemImage").value = compressedB64;
+          document.getElementById("photoPreviewImg").src = compressedB64;
+          document.getElementById("photoPlaceholder").style.display = "none";
+          document.getElementById("photoPreviewContainer").style.display = "block";
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    }
+
+    function openModal(item = null) {
+      closeAllPopovers();
+      const modal = document.getElementById("manualModal");
+      const title = document.getElementById("modalTitle");
+      const btnDel = document.getElementById("btnDelete");
+
+      updateCategorySelects();
+
+      if (item) {
+        title.innerText = "编辑物品";
+        btnDel.style.display = "block";
+        document.getElementById("itemId").value = item.id;
+        document.getElementById("itemName").value = item.name || "";
+        document.getElementById("itemCategory").value = item.category || "唇";
+        document.getElementById("itemStatus").value = item.status || (item.openedAt ? "使用中" : "未开封");
+        document.getElementById("itemExpiry").value = item.expiry || "";
+        document.getElementById("itemOpened").value = item.openedAt || "";
+        document.getElementById("itemAdded").value = item.createdAt ? item.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10);
+        document.getElementById("itemPao").value = item.pao || "";
+        document.getElementById("itemVolume").value = item.volume || "";
+        document.getElementById("itemIsSample").value = item.isSample ? "1" : "0";
+        document.getElementById("itemTags").value = Array.isArray(item.tags) ? item.tags.join(", ") : (item.tags || "");
+        document.getElementById("itemLocation").value = item.location || "";
+        document.getElementById("itemNotes").value = item.notes || "";
+        document.getElementById("itemImage").value = item.image || "";
+
+        if (item.image) {
+          document.getElementById("photoPreviewImg").src = item.image;
+          document.getElementById("photoPlaceholder").style.display = "none";
+          document.getElementById("photoPreviewContainer").style.display = "block";
+        } else {
+          document.getElementById("photoPlaceholder").style.display = "flex";
+          document.getElementById("photoPreviewContainer").style.display = "none";
+        }
+      } else {
+        title.innerText = "添加物品";
+        btnDel.style.display = "none";
+        document.getElementById("itemForm").reset();
+        document.getElementById("itemId").value = "";
+        document.getElementById("itemImage").value = "";
+        document.getElementById("itemAdded").value = new Date().toISOString().slice(0, 10);
+        document.getElementById("itemStatus").value = "未开封";
+        document.getElementById("photoPlaceholder").style.display = "flex";
+        document.getElementById("photoPreviewContainer").style.display = "none";
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("manualModal").style.display = "none";
+    }
+
+    function handleModalStatusChange() {
+      const status = document.getElementById("itemStatus").value;
+      const openedInput = document.getElementById("itemOpened");
+      if (status === "使用中" && !openedInput.value) {
+        openedInput.value = new Date().toISOString().slice(0, 10);
+      }
+    }
+
+    function saveItem(e) {
+      e.preventDefault();
+      const id = document.getElementById("itemId").value || "item_" + Date.now();
+      const rawTags = document.getElementById("itemTags").value.trim();
+      const tags = rawTags ? rawTags.split(/[,，\s]+/).filter(Boolean) : [];
+
+      const item = {
+        id: id,
+        name: document.getElementById("itemName").value.trim(),
+        category: document.getElementById("itemCategory").value,
+        status: document.getElementById("itemStatus").value,
+        expiry: document.getElementById("itemExpiry").value,
+        openedAt: document.getElementById("itemOpened").value || null,
+        createdAt: document.getElementById("itemAdded").value || new Date().toISOString().slice(0, 10),
+        pao: document.getElementById("itemPao").value ? parseInt(document.getElementById("itemPao").value, 10) : null,
+        volume: document.getElementById("itemVolume").value.trim() || null,
+        isSample: document.getElementById("itemIsSample").value === "1",
+        tags: tags,
+        location: document.getElementById("itemLocation").value.trim() || null,
+        notes: document.getElementById("itemNotes").value.trim() || null,
+        image: document.getElementById("itemImage").value || null
+      };
+
+      let items = getItems();
+      const idx = items.findIndex(x => x.id === id);
+      if (idx >= 0) items[idx] = item;
+      else items.unshift(item);
+
+      saveItems(items);
+      closeModal();
+      renderCards();
+      renderCalendar();
+    }
+
+    function delItem() {
+      const id = document.getElementById("itemId").value;
+      if (!id) return;
+      if (confirm("确定要删除这件物品吗？")) {
+        let items = getItems().filter(x => x.id !== id);
+        saveItems(items);
+        closeModal();
+        renderCards();
+        renderCalendar();
+      }
+    }
+
+    /* AI / JSON Import */
+    function openAISync() {
+      document.getElementById("aiInput").value = "";
+      document.getElementById("aiModal").style.display = "flex";
+    }
+
+    function closeAISync() {
+      document.getElementById("aiModal").style.display = "none";
+    }
+
+    function pasteClip() {
+      document.getElementById("aiInput").focus();
+      document.execCommand('paste');
+    }
+
+    function applyAI() {
+      const text = document.getElementById("aiInput").value.trim();
+      if (!text) return;
+
+      try {
+        let clean = text;
+        const match = text.match(/```(?:json)?([\s\S]*?)```/);
+        if (match) clean = match[1].trim();
+        const parsed = JSON.parse(clean);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+
+        let items = getItems();
+        list.forEach(p => {
+          items.unshift({
+            id: "item_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+            name: p.name || p.品名 || "AI导入物品",
+            category: p.category || p.单字分类 || p.分类 || "其",
+            status: p.status || p.生命周期 || "未开封",
+            expiry: p.expiry || p.到期日期 || "",
+            openedAt: p.openedAt || p.开封日期 || null,
+            createdAt: p.createdAt || new Date().toISOString().slice(0, 10),
+            pao: p.pao || null,
+            volume: p.volume || p.容量 || null,
+            isSample: Boolean(p.isSample || p.是否小样),
+            tags: Array.isArray(p.tags) ? p.tags : (p.功效标签 ? [p.功效标签] : []),
+            location: p.location || p.存放位置 || null,
+            notes: p.notes || p.备注 || null,
+            image: p.image || null
+          });
+        });
+
+        saveItems(items);
+        closeAISync();
+        renderCards();
+        renderCalendar();
+      } catch (err) {
+        alert("JSON 格式解析失败，请检查数据");
+      }
+    }
+
+    /* Tab Switcher */
+    function switchNavTab(tab) {
+      document.getElementById("navInventory").classList.toggle("active", tab === "inventory");
+      document.getElementById("navCalendar").classList.toggle("active", tab === "calendar");
+      document.getElementById("tabInventory").classList.toggle("active", tab === "inventory");
+      document.getElementById("tabCalendar").classList.toggle("active", tab === "calendar");
+
+      const fab = document.getElementById("fabCatContainer");
+      if (fab) fab.style.display = tab === "inventory" ? "flex" : "none";
+
+      if (tab === "calendar") renderCalendar();
+      else renderCards();
+    }
+
+    /* Single Floating Cat FAB Gestures: Tap for AI, Long-press for Add */
+    function setupFabGestures() {
+      const fab = document.getElementById("fabCatBtn");
+      if (!fab) return;
+
+      let timer = null;
+      let isLongPressed = false;
+
+      const triggerLongPress = () => {
+        isLongPressed = true;
+        fab.classList.remove("pressing");
+        if (navigator.vibrate) navigator.vibrate(50);
+        openModal();
+      };
+
+      fab.addEventListener("touchstart", (e) => {
+        isLongPressed = false;
+        fab.classList.add("pressing");
+        timer = setTimeout(triggerLongPress, 450);
+      }, { passive: true });
+
+      fab.addEventListener("touchend", (e) => {
+        clearTimeout(timer);
+        fab.classList.remove("pressing");
+        if (!isLongPressed) {
+          openAISync();
+        }
+      });
+
+      fab.addEventListener("touchcancel", () => {
+        clearTimeout(timer);
+        fab.classList.remove("pressing");
+      });
+
+      fab.addEventListener("mousedown", (e) => {
+        isLongPressed = false;
+        fab.classList.add("pressing");
+        timer = setTimeout(triggerLongPress, 450);
+      });
+
+      fab.addEventListener("mouseup", (e) => {
+        clearTimeout(timer);
+        fab.classList.remove("pressing");
+        if (!isLongPressed) {
+          openAISync();
+        }
+      });
+
+      fab.addEventListener("mouseleave", () => {
+        clearTimeout(timer);
+        fab.classList.remove("pressing");
+      });
+    }
+
+    /* Long-press for Batch Selection on Cards */
+    function attachLongPress(el, id) {
+      el.addEventListener('touchstart', (e) => {
+        pressStartX = e.touches[0].clientX;
+        pressStartY = e.touches[0].clientY;
+        el.classList.add("press-active");
+        longPressTimer = setTimeout(() => {
+          if (!isBatchMode) toggleBatchMode();
+          toggleSelect(id);
+          if (navigator.vibrate) navigator.vibrate(40);
+        }, 500);
+      }, { passive: true });
+
+      el.addEventListener('touchmove', (e) => {
+        const dx = Math.abs(e.touches[0].clientX - pressStartX);
+        const dy = Math.abs(e.touches[0].clientY - pressStartY);
+        if (dx > 8 || dy > 8) {
+          clearTimeout(longPressTimer);
+          el.classList.remove("press-active");
+        }
+      }, { passive: true });
+
+      el.addEventListener('touchend', () => {
+        clearTimeout(longPressTimer);
+        el.classList.remove("press-active");
+      });
+
+      el.addEventListener('touchcancel', () => {
+        clearTimeout(longPressTimer);
+        el.classList.remove("press-active");
+      });
+    }
+
+    /* Batch Actions */
+    function toggleBatchMode() {
+      isBatchMode = !isBatchMode;
+      selectedIds.clear();
+      const btn = document.getElementById("btnBatchToggle");
+      const panel = document.getElementById("batchPanel");
+      const container = document.getElementById("cardsContainer");
+
+      if (isBatchMode) {
+        btn.innerText = "完成";
+        btn.classList.add("active");
+        panel.classList.add("show");
+        container.classList.add("batch-mode");
+      } else {
+        btn.innerText = "批量";
+        btn.classList.remove("active");
+        panel.classList.remove("show");
+        container.classList.remove("batch-mode");
+      }
+      updateBatchCount();
+      renderCards();
+    }
+
+    function toggleSelect(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateBatchCount();
+      renderCards();
+    }
+
+    function selectAll() {
+      getFilteredItems().forEach(i => selectedIds.add(i.id));
+      updateBatchCount();
+      renderCards();
+    }
+
+    function deselectAll() {
+      selectedIds.clear();
+      updateBatchCount();
+      renderCards();
+    }
+
+    function updateBatchCount() {
+      const badge = document.getElementById("batchCountBadge");
+      if (badge) badge.innerText = `已选 ${selectedIds.size} 项`;
+    }
+
+    function deleteSelected() {
+      if (selectedIds.size === 0) return;
+      if (confirm(`确定要彻底删除已选中的 ${selectedIds.size} 件物品吗？`)) {
+        let items = getItems().filter(x => !selectedIds.has(x.id));
+        selectedIds.clear();
+        saveItems(items);
+        updateBatchCount();
+        renderCards();
+        renderCalendar();
+      }
+    }
+
+    function applyBatchCategory() {
+      if (selectedIds.size === 0) return;
+      const targetCat = document.getElementById("batchTargetCatSelect").value;
+      let items = getItems().map(x => selectedIds.has(x.id) ? { ...x, category: targetCat } : x);
+      saveItems(items);
+      selectedIds.clear();
+      toggleBatchMode();
+      renderCards();
+    }
+
+    /* Hydrate Thumbnails */
+    function hydrateThumbs(items) {
+      document.querySelectorAll("[data-thumb-id]").forEach(el => {
+        const id = el.getAttribute("data-thumb-id");
+        const item = items.find(x => x.id === id);
+        if (!item) return;
+
+        if (item.image && item.image.trim()) {
+          const img = document.createElement("img");
+          img.src = item.image;
+          img.onerror = () => { el.innerHTML = `<span class="fallback-icon">${item.category || "🧴"}</span>`; };
+          el.innerHTML = "";
+          el.appendChild(img);
+        } else {
+          el.innerHTML = `<span class="fallback-icon">${item.category || "🧴"}</span>`;
+        }
+      });
+    }
+
+    /* Popovers & Toolbars */
     function toggleMenuPopover(e) {
       if (e) e.stopPropagation();
       const popover = document.getElementById("menuPopover");
       const backdrop = document.getElementById("popoverBackdrop");
-      const isShowing = popover.classList.contains("show");
-      if (isShowing) {
-        closeMenuPopover();
-      } else {
-        updatePopoverLayoutLabel();
+      const isVisible = popover.classList.contains("show");
+      closeAllPopovers();
+      if (!isVisible) {
         popover.classList.add("show");
         backdrop.classList.add("show");
+        document.getElementById("popoverLayoutLabel").innerText = currentLayout === "list" ? "🔲 切换为画廊视图" : "📋 切换为列表视图";
       }
     }
 
-    function closeMenuPopover() {
-      const popover = document.getElementById("menuPopover");
-      const backdrop = document.getElementById("popoverBackdrop");
-      if (popover) popover.classList.remove("show");
-      if (backdrop) backdrop.classList.remove("show");
-    }
-
-    function updatePopoverLayoutLabel() {
-      const label = document.getElementById("popoverLayoutLabel");
-      if (label) {
-        label.innerText = currentLayout === "list" ? "🔲 切换为画廊视图" : "📋 切换为列表视图";
-      }
+    function closeAllPopovers() {
+      document.getElementById("menuPopover").classList.remove("show");
+      document.getElementById("popoverBackdrop").classList.remove("show");
     }
 
     function toggleLayoutFromMenu() {
-      toggleLayout();
-      updatePopoverLayoutLabel();
-      closeMenuPopover();
+      currentLayout = currentLayout === "list" ? "grid" : "list";
+      localStorage.setItem(LAYOUT_KEY, currentLayout);
+      document.getElementById("popoverLayoutLabel").innerText = currentLayout === "list" ? "🔲 切换为画廊视图" : "📋 切换为列表视图";
+      closeAllPopovers();
+      renderCards();
     }
 
-    function openCatManageSheet() {
-      closeMenuPopover();
-      renderCatManageList();
-      document.getElementById("catManageModal").style.display = "flex";
-    }
-    function closeCatManageSheet() { document.getElementById("catManageModal").style.display = "none"; }
-<!-- ... existing code ... -->
     function triggerMenuAction(action) {
-      closeMenuPopover();
-      if (action === 'backup') exportData();
-      else if (action === 'restore') document.getElementById('importFile').click();
-      else if (action === 'clear') {
+      closeAllPopovers();
+      if (action === 'backup') {
+        const a = document.createElement("a");
+        a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getItems(), null, 2));
+        a.download = `临期管家备份_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+      } else if (action === 'restore') {
+        document.getElementById('importFile').click();
+      } else if (action === 'clear') {
         if (confirm("确定要清空全部物品数据吗？此操作不可逆！")) {
           saveItems([]);
           renderCards();
           renderCalendar();
-          alert("数据已清空！");
         }
       }
     }
 
+    function importData(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = evt => {
+        try {
+          const d = JSON.parse(evt.target.result);
+          if (Array.isArray(d)) {
+            saveItems(d);
+            renderCards();
+            renderCalendar();
+          }
+        } catch (err) {
+          console.error("恢复数据解析失败", err);
+        }
+      };
+      r.readAsText(f);
+      e.target.value = "";
+    }
+
+    /* GitHub Cloud Sync (UTF-8 Native Support) */
+    function updateSyncBadge(online) {
+      const badge = document.getElementById("syncStatusBadge");
+      if (!badge) return;
+      if (online) {
+        badge.innerText = "☁️ 仓库已连接";
+        badge.className = "badge-sync online";
+      } else {
+        badge.innerText = "● 本地";
+        badge.className = "badge-sync";
+      }
+    }
+
+    async function pullFromRepo() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+      const headers = { "Accept": "application/vnd.github.v3+json" };
+      if (token) headers["Authorization"] = `token ${token}`;
+
+      try {
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          currentFileSha = data.sha;
+          const cleanB64 = data.content.replace(/\s/g, '');
+          const binaryStr = atob(cleanB64);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          const content = new TextDecoder('utf-8').decode(bytes);
+          const cloudItems = JSON.parse(content);
+          if (Array.isArray(cloudItems) && cloudItems.length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudItems));
+            renderCategoryPills();
+            renderCards();
+            renderCalendar();
+          }
+          if (token) updateSyncBadge(true);
+        } else {
+          updateSyncBadge(false);
+        }
+      } catch (err) {
+        console.warn("云端同步或拉取跳过:", err);
+        updateSyncBadge(false);
+      }
+    }
+
+    async function pushToRepo(items) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return;
+
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+      const jsonStr = JSON.stringify(items, null, 2);
+      const bytes = new TextEncoder().encode(jsonStr);
+      let binaryStr = "";
+      for (let i = 0; i < bytes.length; i++) {
+        binaryStr += String.fromCharCode(bytes[i]);
+      }
+      const b64Content = btoa(binaryStr);
+
+      try {
+        const bodyData = { message: "update cosmetics data", content: b64Content };
+        if (currentFileSha) bodyData.sha = currentFileSha;
+
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github.v3+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(bodyData)
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          currentFileSha = resData.content.sha;
+          updateSyncBadge(true);
+        }
+      } catch (err) {
+        console.error("推送仓库数据失败:", err);
+      }
+    }
+
     function openRepoConfigModal() {
-      closeMenuPopover();
+      closeAllPopovers();
       document.getElementById("repoTokenInput").value = localStorage.getItem(TOKEN_KEY) || "";
       document.getElementById("repoModal").style.display = "flex";
     }
-    function closeRepoConfigModal() { document.getElementById("repoModal").style.display = "none"; }
-    
+
+    function closeRepoConfigModal() {
+      document.getElementById("repoModal").style.display = "none";
+    }
+
     function saveRepoConfig() {
       const token = document.getElementById("repoTokenInput").value.trim();
-      if (!token) return alert("请粘贴 Token");
+      if (!token) {
+        localStorage.removeItem(TOKEN_KEY);
+        updateSyncBadge(false);
+        closeRepoConfigModal();
+        return;
+      }
       localStorage.setItem(TOKEN_KEY, token);
       closeRepoConfigModal();
       pullFromRepo();
-      alert("Token 保存成功，正在连接 GitHub 仓库！");
     }
 
     function triggerManualSync() {
-      closeMenuPopover();
+      closeAllPopovers();
       pullFromRepo();
-      alert("正在同步 GitHub 仓库数据...");
     }
 
-    function openAISync(){ document.getElementById("aiModal").style.display = "flex"; document.getElementById("aiInput").value = ""; }
-<!-- ... existing code ... -->
+    /* Category Management Sheet */
+    function openCatManageSheet() {
+      closeAllPopovers();
+      renderCatManageList();
+      document.getElementById("catManageModal").style.display = "flex";
+    }
+
+    function closeCatManageSheet() {
+      document.getElementById("catManageModal").style.display = "none";
+    }
+
+    function renderCatManageList() {
+      const cats = getCategories();
+      const container = document.getElementById("catManageListContainer");
+      container.innerHTML = "";
+      cats.forEach((c, idx) => {
+        const div = document.createElement("div");
+        div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; padding:8px 12px; border-radius:8px;";
+        div.innerHTML = `
+          <span style="font-weight:700; font-size:14px;">${c}</span>
+          <div style="display:flex; gap:4px;">
+            <button class="batch-pill-btn" style="background:#E2E8F0; color:#334155; padding:3px 8px;" onclick="moveCategory(${idx}, -1)">⬆️</button>
+            <button class="batch-pill-btn" style="background:#E2E8F0; color:#334155; padding:3px 8px;" onclick="moveCategory(${idx}, 1)">⬇️</button>
+            <button class="batch-pill-btn" style="background:#FEE2E2; color:#EF4444; padding:3px 8px;" onclick="deleteCategory('${c}')">删除</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addNewCategory() {
+      const input = document.getElementById("newCatNameInput");
+      const name = input.value.trim();
+      if (!name) return;
+      let cats = getCategories();
+      if (cats.includes(name)) return;
+      cats.push(name);
+      saveCategories(cats);
+      input.value = "";
+      renderCatManageList();
+    }
+
+    function moveCategory(idx, dir) {
+      let cats = getCategories();
+      const target = idx + dir;
+      if (target < 0 || target >= cats.length) return;
+      const temp = cats[idx];
+      cats[idx] = cats[target];
+      cats[target] = temp;
+      saveCategories(cats);
+      renderCatManageList();
+    }
+
+    function deleteCategory(name) {
+      let cats = getCategories();
+      if (cats.length <= 1) return;
+      if (confirm(`确定删除分类【${name}】吗？`)) {
+        cats = cats.filter(c => c !== name);
+        saveCategories(cats);
+        renderCatManageList();
+      }
+    }
+
+    /* Filter Sheet Handlers */
+    function openFilterSheet() {
+      document.getElementById("filterExpirySelect").value = filterExpiryStatus;
+      document.getElementById("filterOpenSelect").value = filterOpenStatus;
+      document.getElementById("filterModal").style.display = "flex";
+    }
+
+    function closeFilterSheet() {
+      document.getElementById("filterModal").style.display = "none";
+    }
+
+    function applyAdvancedFilter() {
+      filterExpiryStatus = document.getElementById("filterExpirySelect").value;
+      filterOpenStatus = document.getElementById("filterOpenSelect").value;
+      const isFiltered = filterExpiryStatus !== "全部" || filterOpenStatus !== "全部";
+      document.getElementById("btnOpenFilter").classList.toggle("active-tool", isFiltered);
+      closeFilterSheet();
+      renderCards();
+    }
+
+    function resetAdvancedFilter() {
+      filterExpiryStatus = "全部";
+      filterOpenStatus = "全部";
+      document.getElementById("btnOpenFilter").classList.remove("active-tool");
+      closeFilterSheet();
+      renderCards();
+    }
+
+    /* Calendar Handlers */
+    function prevMonth() {
+      calViewDate.setMonth(calViewDate.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      calViewDate.setMonth(calViewDate.getMonth() + 1);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = calViewDate.getFullYear();
+      const month = calViewDate.getMonth();
+      document.getElementById("calMonthTitle").innerText = `${year}年 ${month + 1}月`;
+
+      const daysGrid = document.getElementById("calDaysGrid");
+      if (!daysGrid) return;
+      daysGrid.innerHTML = "";
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let startDay = firstDayOfMonth.getDay() - 1;
+      if (startDay === -1) startDay = 6;
+
+      const items = getItems();
+      const dateMap = {};
+
+      items.forEach(it => {
+        if (it.expiry) {
+          if (!dateMap[it.expiry]) dateMap[it.expiry] = [];
+          dateMap[it.expiry].push({ type: 'expiry', item: it });
+        }
+        if (it.openedAt) {
+          if (!dateMap[it.openedAt]) dateMap[it.openedAt] = [];
+          dateMap[it.openedAt].push({ type: 'opened', item: it });
+        }
+        if (it.createdAt) {
+          const cDate = it.createdAt.slice(0, 10);
+          if (!dateMap[cDate]) dateMap[cDate] = [];
+          dateMap[cDate].push({ type: 'added', item: it });
+        }
+      });
+
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      for (let i = startDay - 1; i >= 0; i--) {
+        const dCell = document.createElement("div");
+        dCell.className = "cal-day-cell other-month";
+        dCell.innerText = prevMonthDays - i;
+        daysGrid.appendChild(dCell);
+      }
+
+      const todayStr = new Date().toISOString().slice(0, 10);
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dCell = document.createElement("div");
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        let cellClass = "cal-day-cell";
+        if (dateStr === todayStr) cellClass += " today";
+        if (dateStr === calSelectedDateStr) cellClass += " selected";
+        dCell.className = cellClass;
+
+        let dotsHtml = "";
+        if (dateMap[dateStr]) {
+          const events = dateMap[dateStr];
+          dotsHtml = `<div class="cal-dots-row">`;
+          if (events.some(e => e.type === 'expiry')) {
+            const minExpiryDays = Math.min(...events.filter(e => e.type === 'expiry').map(e => calcDays(e.item.expiry)));
+            if (minExpiryDays < 0) dotsHtml += `<span class="cal-dot dot-expiry-danger"></span>`;
+            else if (minExpiryDays <= 30) dotsHtml += `<span class="cal-dot dot-expiry-warning"></span>`;
+            else dotsHtml += `<span class="cal-dot dot-expiry-good"></span>`;
+          }
+          if (events.some(e => e.type === 'opened')) dotsHtml += `<span class="cal-dot dot-opened"></span>`;
+          if (events.some(e => e.type === 'added')) dotsHtml += `<span class="cal-dot dot-added"></span>`;
+          dotsHtml += `</div>`;
+        }
+
+        dCell.innerHTML = `<span>${day}</span>${dotsHtml}`;
+        dCell.onclick = () => {
+          calSelectedDateStr = dateStr;
+          renderCalendar();
+        };
+        daysGrid.appendChild(dCell);
+      }
+
+      renderCalendarDayEvents(dateMap[calSelectedDateStr] || []);
+    }
+
+    function renderCalendarDayEvents(events) {
+      const listEl = document.getElementById("calDayEventList");
+      document.getElementById("calSelectedDateText").innerText = `${calSelectedDateStr} 事件清单 (${events.length}件)`;
+      listEl.innerHTML = "";
+
+      if (events.length === 0) {
+        listEl.innerHTML = `<div class="empty-state" style="padding:24px 10px;"><p style="font-size:12px;">当天没有记录任何到期、开封或入库事件</p></div>`;
+        return;
+      }
+
+      events.forEach(ev => {
+        const it = ev.item;
+        let eventTag = "";
+        if (ev.type === 'expiry') eventTag = `<span class="tag-badge" style="background:#FEE2E2; color:#EF4444;">⏰ 到期</span>`;
+        else if (ev.type === 'opened') eventTag = `<span class="tag-badge" style="background:#EDE9FE; color:#8B5CF6;">🧴 开封</span>`;
+        else if (ev.type === 'added') eventTag = `<span class="tag-badge" style="background:#E0F2FE; color:#0284C7;">📦 入库</span>`;
+
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.style.padding = "10px 12px";
+        card.onclick = () => openModal(it);
+        card.innerHTML = `
+          <div class="card-thumb" data-thumb-id="${it.id}" style="width:48px; height:48px;"></div>
+          <div class="card-content">
+            <div class="card-title">${it.name}</div>
+            <div class="badge-tags-row">
+              ${eventTag}
+              <span class="tag-badge tag-cat">${it.category}</span>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+
+      hydrateThumbs(events.map(e => e.item));
+    }
+
+    /* Initialization */
+    window.addEventListener("DOMContentLoaded", () => {
+      renderCategoryPills();
+      updateCategorySelects();
+      setupFabGestures();
+      updateSortButtonLabel();
+      pullFromRepo();
+    });
+
+    renderCards();
+  </script>
+</body>
+</html>
