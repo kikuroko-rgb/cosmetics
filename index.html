@@ -1240,7 +1240,6 @@
       </div>
       <form id="itemForm" onsubmit="saveItem(event)">
         <input type="hidden" id="itemId">
-        <input type="hidden" id="itemCreatedAt">
         
         <div class="form-cell">
           <label>品名 / 规格型号 *</label>
@@ -1252,13 +1251,24 @@
           <select id="itemCat"></select>
         </div>
         
+        <div style="display:flex; gap:10px;">
+          <div class="form-cell" style="flex:1;">
+            <label>添加日期 *</label>
+            <input type="date" id="itemCreatedAt" required>
+          </div>
+          <div class="form-cell" style="flex:1;">
+            <label>开封日期 (可选)</label>
+            <input type="date" id="itemOpenedAt">
+          </div>
+        </div>
+
         <div class="form-cell">
           <label>到期日期 *</label>
           <input type="date" id="itemExpiry" required>
         </div>
         
         <div class="form-cell">
-          <label>状态与备注（如：已开封 PAO 12M / 梳妆台收纳）</label>
+          <label>状态与备注（如：PAO 12M / 梳妆台收纳）</label>
           <input type="text" id="itemNotes" placeholder="状态、批号或存放位置">
         </div>
         
@@ -1356,6 +1366,17 @@
       const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day} 添加`;
+    }
+
+    function formatOpenedTag(item) {
+      if (item.openedAt) {
+        return `<span class="tag-meta tag-opened">已开封 (${item.openedAt})</span>`;
+      }
+      const isNotesOpened = item.notes && (item.notes.includes("开封") || item.notes.includes("已开"));
+      if (isNotesOpened) {
+        return `<span class="tag-meta tag-opened">已开封</span>`;
+      }
+      return `<span class="tag-meta tag-unopened">未开封</span>`;
     }
 
     function updateSyncBadge(online) {
@@ -1641,7 +1662,7 @@
         if (filterExpiryStatus === "临期" && (d < 0 || d > 30)) return false;
         if (filterExpiryStatus === "过期" && d >= 0) return false;
 
-        const isOpened = i.notes && (i.notes.includes("开封") || i.notes.includes("已开"));
+        const isOpened = Boolean(i.openedAt) || (i.notes && (i.notes.includes("开封") || i.notes.includes("已开")));
         if (filterOpenStatus === "已开封" && !isOpened) return false;
         if (filterOpenStatus === "未开封" && isOpened) return false;
 
@@ -1660,11 +1681,7 @@
       card.className = "item-card" + (isSel ? " selected" : "");
       card.onclick = () => isBatchMode ? toggleSelect(i.id) : openModal(i);
 
-      const isOpened = i.notes && (i.notes.includes("开封") || i.notes.includes("已开"));
-      const openTag = isOpened 
-        ? `<span class="tag-meta tag-opened">已开封</span>` 
-        : `<span class="tag-meta tag-unopened">未开封</span>`;
-      
+      const openTag = formatOpenedTag(i);
       const addedLabel = formatAddedDate(i);
 
       if (!isGrid) {
@@ -1933,11 +1950,12 @@
           if(x.name && x.expiry) {
             items.push({ 
               id: (Date.now() + idx).toString(), 
-              createdAt: x.createdAt || nowIso,
+              createdAt: x.createdAt || x.addedDate || nowIso,
+              openedAt: x.openedAt || x.openedDate || "",
               name: x.name, 
               category: x.category || "面霜/乳液", 
               expiry: x.expiry, 
-              notes: x.notes || "未开封", 
+              notes: x.notes || (x.openedAt || x.openedDate ? "已开封" : "未开封"), 
               icon: x.icon || "🐱", 
               image: x.image || "" 
             }); 
@@ -1951,10 +1969,13 @@
       const m = document.getElementById("manualModal"); 
       document.getElementById("itemForm").reset();
       updateCategorySelects();
+      const todayDateStr = new Date().toISOString().slice(0, 10);
       if (i) {
         document.getElementById("modalTitle").innerText = "编辑物品"; 
         document.getElementById("itemId").value = i.id;
-        document.getElementById("itemCreatedAt").value = i.createdAt || "";
+        const initialCreated = i.createdAt ? i.createdAt.slice(0, 10) : todayDateStr;
+        document.getElementById("itemCreatedAt").value = initialCreated;
+        document.getElementById("itemOpenedAt").value = i.openedAt || "";
         document.getElementById("itemName").value = i.name; 
         document.getElementById("itemCat").value = i.category;
         document.getElementById("itemExpiry").value = i.expiry; 
@@ -1965,7 +1986,8 @@
       } else {
         document.getElementById("modalTitle").innerText = "添加物品"; 
         document.getElementById("itemId").value = "";
-        document.getElementById("itemCreatedAt").value = "";
+        document.getElementById("itemCreatedAt").value = todayDateStr;
+        document.getElementById("itemOpenedAt").value = "";
         document.getElementById("itemIcon").value = "🐱"; 
         document.getElementById("itemImage").value = "";
         document.getElementById("btnDel").style.display = "none";
@@ -1977,7 +1999,8 @@
     function saveItem(e){
       e.preventDefault(); 
       const id = document.getElementById("itemId").value;
-      const createdAtVal = document.getElementById("itemCreatedAt").value;
+      const createdAtInput = document.getElementById("itemCreatedAt").value;
+      const openedAt = document.getElementById("itemOpenedAt").value.trim();
       const name = document.getElementById("itemName").value.trim();
       const category = document.getElementById("itemCat").value;
       const expiry = document.getElementById("itemExpiry").value;
@@ -1985,17 +2008,19 @@
       const icon = document.getElementById("itemIcon").value.trim() || "🐱";
       const image = document.getElementById("itemImage").value.trim() || "";
       
+      const createdIso = createdAtInput ? new Date(createdAtInput + "T12:00:00").toISOString() : new Date().toISOString();
       let items = getItems();
       if (id) {
         items = items.map(x => x.id === id ? {
           ...x, 
-          name, category, expiry, notes, icon, image, 
-          createdAt: createdAtVal || x.createdAt || new Date().toISOString()
+          name, category, expiry, notes, icon, image, openedAt,
+          createdAt: createdIso
         } : x);
       } else {
         items.push({ 
           id: Date.now().toString(), 
-          createdAt: new Date().toISOString(), 
+          createdAt: createdIso, 
+          openedAt,
           name, category, expiry, notes, icon, image 
         });
       }
@@ -2058,7 +2083,8 @@
             list.forEach((x, idx) => {
               if (x.name && x.expiry) items.push({
                 id: (Date.now() + idx).toString(),
-                createdAt: x.createdAt || nowIso,
+                createdAt: x.createdAt || x.addedDate || nowIso,
+                openedAt: x.openedAt || x.openedDate || "",
                 name: x.name,
                 category: x.category || "面霜/乳液",
                 expiry: x.expiry,
@@ -2073,1266 +2099,6 @@
             alert("成功导入 " + list.length + " 件物品！");
           }
         } catch(e) { console.error("URL解析失败", e); }
-      }
-    });
-
-    renderCards();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <meta name="referrer" content="no-referrer">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>化妆品与药品临期管家</title>
-  <style>
-    :root {
-      --bg: #F8F9FA; --card: #FFFFFF; --text: #1F2937; --sub: #8E8E93;
-      --danger: #EF4444; --danger-bg: #FEE2E2; --warning: #F59E0B; --warning-bg: #FEF3C7;
-      --success: #10B981; --success-bg: #D1FAE5; --primary: #FF5A79; --ai: #8B5CF6;
-      --border: #F0F0F2; --radius: 14px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 140px; }
-
-    header {
-      position: sticky; top: 0; z-index: 20; background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(12px); padding: 12px 14px 10px; border-bottom: 1px solid var(--border);
-    }
-    .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .header-left { display: flex; align-items: center; gap: 8px; }
-    .header-title h1 { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.3px; }
-    .sync-badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: #E5E7EB; color: #6B7280; font-weight: 500; }
-    .sync-badge.online { background: #D1FAE5; color: #047857; }
-    
-    .btn-batch { background: #F3F4F6; border: none; color: var(--sub); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 12px; cursor: pointer; }
-    .btn-batch.active { background: var(--primary); color: #fff; }
-
-    .controls-row { display: flex; gap: 6px; align-items: center; }
-    .cat-select-dropdown {
-      background: #F3F4F6; border: 1px solid var(--border); border-radius: 10px;
-      padding: 8px 8px; font-size: 13px; font-weight: 600; color: #1F2937;
-      outline: none; cursor: pointer; flex-shrink: 0;
-    }
-    .search-box {
-      flex: 1; min-width: 0; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
-      font-size: 13px; outline: none; background: #F4F4F6; color: var(--text);
-    }
-    .btn-action-group { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-    .btn-tool {
-      background: var(--card); border: 1px solid var(--border); border-radius: 9px;
-      padding: 7px 8px; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer;
-      display: flex; align-items: center; gap: 2px; white-space: nowrap;
-    }
-    .btn-tool.active-tool { border-color: var(--primary); color: var(--primary); background: #FFF0F2; }
-
-    .container { max-width: 800px; margin: 0 auto; padding: 10px 14px 14px; }
-    .tab-page { display: none; }
-    .tab-page.active { display: block; }
-
-    .list-mode { display: flex; flex-direction: column; gap: 10px; }
-    .list-mode .item-card {
-      background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
-      padding: 12px; display: flex; align-items: center; gap: 12px; position: relative; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-    .list-mode .item-card.selected { border-color: var(--primary); background: #FFF9FA; }
-    .list-mode .card-thumb {
-      width: 68px; height: 68px; border-radius: 10px; background: #F9FAFB;
-      flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
-      border: 1px solid #F0F0F2; position: relative;
-    }
-    .list-mode .card-thumb img { width: 100%; height: 100%; object-fit: contain; }
-    .list-mode .card-thumb .fallback-icon { font-size: 28px; }
-
-    .list-mode .card-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-    .list-mode .title-row { display: flex; align-items: center; gap: 6px; }
-    .list-mode .item-name { font-size: 15px; font-weight: 600; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .list-mode .badge-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 1px; }
-    .tag-pill { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
-    .tag-category { background: #FEF3C7; color: #D97706; }
-    .tag-opened { background: #E0F2FE; color: #0284C7; }
-    .tag-unopened { background: #F3F4F6; color: #6B7280; }
-    .tag-date { background: #F3F4F6; color: #4B5563; }
-    .list-mode .expiry-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
-
-    .list-mode .card-right { text-align: right; flex-shrink: 0; min-width: 65px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
-    .list-mode .countdown-days { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .list-mode .status-desc { font-size: 10px; font-weight: 600; margin-top: 1px; }
-
-    .grid-mode { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-    .grid-mode .item-card { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; cursor: pointer; position: relative; }
-    .grid-mode .item-card.selected { border-color: var(--primary); background: #FFF9FA; }
-    .grid-mode .card-thumb { width: 100%; height: 130px; background: #F9FAFB; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-    .grid-mode .card-thumb img { width: 100%; height: 100%; object-fit: contain; }
-    .grid-mode .card-thumb .fallback-icon { font-size: 38px; }
-    .grid-mode .card-main { padding: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 5px; }
-    .grid-mode .item-name { font-size: 13px; font-weight: 600; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-    .grid-mode .expiry-sub { font-size: 11px; color: var(--sub); }
-    .grid-mode .card-right { font-size: 12px; font-weight: 700; padding: 4px 6px; border-radius: 6px; text-align: center; }
-
-    .state-danger { color: var(--danger); } .state-warning { color: var(--warning); } .state-good { color: var(--success); }
-    .bg-danger { background: var(--danger-bg); color: var(--danger); } .bg-warning { background: var(--warning-bg); color: #B45309; } .bg-good { background: var(--success-bg); color: #047857; }
-
-    .select-checkbox { position: absolute; top: 10px; right: 10px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CBD5E1; background: #FFF; display: none; align-items: center; justify-content: center; z-index: 6; font-size: 11px; color: transparent; }
-    .batch-mode .select-checkbox { display: flex; }
-    .item-card.selected .select-checkbox { background: var(--primary); border-color: var(--primary); color: #fff; }
-
-    .calendar-card { background: #FFF; border-radius: 16px; border: 1px solid var(--border); padding: 16px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 16px; }
-    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 8px; }
-    .calendar-title { font-size: 17px; font-weight: 700; color: #111; }
-    .cal-nav-btn { background: #F3F4F6; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; color: #4B5563; }
-    .cal-grid-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: var(--sub); font-weight: 500; margin-bottom: 8px; }
-    .cal-grid-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-    .cal-day-cell { height: 48px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; font-size: 14px; font-weight: 600; color: #1F2937; }
-    .cal-day-cell.other-month { color: #D1D5DB; }
-    .cal-day-cell.selected { background: #111827 !important; color: #FFF !important; }
-    .cal-day-cell.today:not(.selected) { background: #F3F4F6; color: var(--primary); }
-    .cal-dot-box { display: flex; gap: 2px; margin-top: 2px; height: 4px; }
-    .cal-dot { width: 4px; height: 4px; border-radius: 50%; }
-    .dot-danger { background: var(--danger); } .dot-warning { background: var(--warning); } .dot-good { background: var(--success); }
-    .cal-event-section h3 { font-size: 14px; color: var(--sub); margin-bottom: 10px; font-weight: 600; }
-
-    .bottom-tabbar {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
-      background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border); display: flex; align-items: center;
-      justify-content: space-between; z-index: 80; padding: 0 10px;
-    }
-    .tab-item {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      flex: 1; height: 100%; color: var(--sub); cursor: pointer; font-size: 11px; font-weight: 500; gap: 3px;
-    }
-    .tab-item.active { color: #111827; font-weight: 700; }
-    .tab-item .tab-icon { font-size: 20px; line-height: 1; }
-
-    .tab-cat-center {
-      flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      position: relative; top: -12px; cursor: pointer;
-    }
-    .cat-avatar-btn {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: linear-gradient(135deg, #8B5CF6, #EC4899);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px; box-shadow: 0 6px 14px rgba(139, 92, 246, 0.4);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      border: 3px solid #FFFFFF;
-    }
-    .cat-avatar-btn:active { transform: scale(0.92); box-shadow: 0 3px 8px rgba(139, 92, 246, 0.3); }
-    .cat-btn-label { font-size: 10px; font-weight: 700; color: #8B5CF6; margin-top: 2px; }
-
-    /* 双层批量管理操作面板 */
-    .batch-panel {
-      position: fixed; bottom: 60px; left: 0; right: 0;
-      background: #FFFFFF; border-top: 1px solid #E5E7EB;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.08); z-index: 75;
-      display: none; flex-direction: column; padding: 8px 12px; gap: 8px;
-    }
-    .batch-panel.show { display: flex; }
-    
-    .batch-panel-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .batch-btn-pill {
-      background: #F3F4F6; border: none; padding: 6px 10px; border-radius: 8px;
-      font-size: 12px; font-weight: 600; color: #374151; cursor: pointer;
-    }
-    .batch-btn-del {
-      background: #FEE2E2; color: var(--danger); border: none;
-      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-    .batch-btn-apply {
-      background: var(--primary); color: #FFF; border: none;
-      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
-    }
-
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100;
-      display: none; align-items: flex-end; justify-content: center;
-    }
-    .modal-sheet {
-      background: #fff; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0;
-      padding: 20px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.2s ease;
-    }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .sheet-header h2 { font-size: 17px; font-weight: 700; color: #111; margin: 0; }
-    .sheet-close { width: 28px; height: 28px; border-radius: 50%; background: #F3F4F6; border: none; color: var(--sub); font-size: 14px; cursor: pointer; }
-
-    .menu-options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-    .menu-opt-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; background: #F9FAFB; border: 1px solid #E5E7EB;
-      border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; color: #1F2937;
-    }
-    .menu-opt-row:active { background: #F3F4F6; }
-    .menu-opt-left { display: flex; align-items: center; gap: 10px; }
-    .menu-opt-icon { font-size: 20px; }
-
-    .cat-manage-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 12px; background: #F9FAFB; border: 1px solid #E5E7EB;
-      border-radius: 10px; margin-bottom: 8px; font-size: 14px; font-weight: 500;
-    }
-    .cat-manage-actions { display: flex; gap: 6px; }
-    .btn-cat-act { background: #F3F4F6; border: 1px solid #D1D5DB; padding: 4px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-
-    .sort-list-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-    .sort-opt-item {
-      padding: 13px 14px; border-radius: 10px; border: 1px solid #E5E7EB; background: #F9FAFB;
-      font-size: 14px; color: #4B5563; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-    }
-    .sort-opt-item.active { background: #FFF1F2; color: var(--primary); border-color: var(--primary); font-weight: 600; }
-
-    .sheet-section-title { font-size: 13px; font-weight: 600; color: #374151; margin: 14px 0 8px; }
-    .filter-pills-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-    .filter-opt-btn {
-      padding: 7px 14px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB;
-      font-size: 13px; color: #4B5563; font-weight: 500; cursor: pointer;
-    }
-    .filter-opt-btn.active { background: #FFF1F2; color: var(--primary); border-color: var(--primary); font-weight: 600; }
-    .sheet-footer-btns { display: flex; gap: 10px; margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .btn-sheet-reset { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #E5E7EB; background: #FFF; font-size: 14px; font-weight: 600; color: #6B7280; cursor: pointer; }
-    .btn-sheet-confirm { flex: 2; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: #FFF; font-size: 14px; font-weight: 600; cursor: pointer; }
-
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 5px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; }
-    .btn-row { display: flex; gap: 8px; margin-top: 18px; }
-    .btn-p { flex: 1; padding: 11px; background: var(--primary); color: #fff; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
-    .btn-ai-c { flex: 1; padding: 11px; background: var(--ai); color: #fff; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
-    .btn-s { padding: 11px; background: #F3F4F6; color: var(--text); font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
-    .btn-d { padding: 11px; background: #FEE2E2; color: var(--danger); font-weight: 600; border: none; border-radius: 8px; cursor: pointer; }
-    .empty-state { text-align: center; padding: 50px 20px; color: var(--sub); }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="header-title">
-      <div class="header-left">
-        <h1 id="pageTitle">临期管家</h1>
-        <span class="sync-badge" id="syncStatusBadge">本地模式</span>
-        <button class="btn-batch" id="btnBatchToggle" onclick="toggleBatchMode()">批量管理</button>
-      </div>
-    </div>
-
-    <div class="controls-row" id="controlsRow">
-      <select class="cat-select-dropdown" id="categorySelect" onchange="changeCategory(this.value)">
-        <option value="全部">全部分类</option>
-      </select>
-
-      <input type="search" class="search-box" id="searchInput" placeholder="搜索品名或备注..." oninput="renderCards()">
-
-      <div class="btn-action-group">
-        <button class="btn-tool" id="btnLayoutToggle" onclick="toggleLayout()" title="切换列表/画廊">
-          <span id="layoutText">📋 列表</span>
-        </button>
-        <button class="btn-tool" id="btnOpenSort" onclick="openSortSheet()" title="点击排序">
-          <span id="sortBtnText">⇅ 排序</span>
-        </button>
-        <button class="btn-tool" id="btnOpenFilter" onclick="openFilterSheet()" title="点击筛选">
-          <span>☰ 筛选</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="container">
-    <div id="tabInventory" class="tab-page active">
-      <div id="cardsContainer" class="list-mode"></div>
-      <div class="empty-state" id="emptyState" style="display:none;">
-        <div style="font-size:38px;margin-bottom:8px;">🧴</div>
-        <p>没有符合条件的物品</p>
-        <p style="font-size:12px;margin-top:4px;color:#9CA3AF;">点击底部中间小猫「导入」或右侧「添加」</p>
-      </div>
-    </div>
-
-    <div id="tabCalendar" class="tab-page">
-      <div class="calendar-card">
-        <div class="calendar-header">
-          <button class="cal-nav-btn" onclick="prevMonth()">＜</button>
-          <div class="calendar-title" id="calMonthTitle">2026年 10月</div>
-          <button class="cal-nav-btn" onclick="nextMonth()">＞</button>
-        </div>
-        <div class="cal-grid-weekdays">
-          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-        </div>
-        <div class="cal-grid-days" id="calDaysGrid"></div>
-      </div>
-
-      <div class="cal-event-section">
-        <h3 id="calSelectedDateText">当天事件</h3>
-        <div id="calDayEventList" class="list-mode"></div>
-      </div>
-    </div>
-  </main>
-
-  <!-- 排序抽屉 -->
-  <div class="modal-overlay" id="sortModal" onclick="closeSortSheet()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-header">
-        <h2>选择排序方式</h2>
-        <button class="sheet-close" onclick="closeSortSheet()">✕</button>
-      </div>
-      <div class="sort-list-group" id="sortOptionsGroup">
-        <div class="sort-opt-item" data-sort="added_desc" onclick="selectSortOption('added_desc')">
-          <span>添加时间：最新优先</span>
-          <span class="sort-check"></span>
-        </div>
-        <div class="sort-opt-item" data-sort="added_asc" onclick="selectSortOption('added_asc')">
-          <span>添加时间：最早优先</span>
-          <span class="sort-check"></span>
-        </div>
-        <div class="sort-opt-item" data-sort="expiry_asc" onclick="selectSortOption('expiry_asc')">
-          <span>到期时间：由近到远（临期优先）</span>
-          <span class="sort-check"></span>
-        </div>
-        <div class="sort-opt-item" data-sort="expiry_desc" onclick="selectSortOption('expiry_desc')">
-          <span>到期时间：由远到近</span>
-          <span class="sort-check"></span>
-        </div>
-        <div class="sort-opt-item" data-sort="name_asc" onclick="selectSortOption('name_asc')">
-          <span>品名首字母：A → Z（拼音/字母正序）</span>
-          <span class="sort-check"></span>
-        </div>
-        <div class="sort-opt-item" data-sort="name_desc" onclick="selectSortOption('name_desc')">
-          <span>品名首字母：Z → A（拼音/字母倒序）</span>
-          <span class="sort-check"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 筛选抽屉 -->
-  <div class="modal-overlay" id="filterModal" onclick="closeFilterSheet()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-header">
-        <h2>快速筛选</h2>
-        <button class="sheet-close" onclick="closeFilterSheet()">✕</button>
-      </div>
-      <div class="sheet-section-title">是否过期</div>
-      <div class="filter-pills-grid" id="filterExpiryGroup">
-        <button class="filter-opt-btn active" data-val="全部" onclick="setFilterOpt('expiryStatus', '全部', this)">全部</button>
-        <button class="filter-opt-btn" data-val="正常" onclick="setFilterOpt('expiryStatus', '正常', this)">正常使用</button>
-        <button class="filter-opt-btn" data-val="临期" onclick="setFilterOpt('expiryStatus', '临期', this)">临近过期 (30天内)</button>
-        <button class="filter-opt-btn" data-val="过期" onclick="setFilterOpt('expiryStatus', '过期', this)">已过期</button>
-      </div>
-      <div class="sheet-section-title">是否开封</div>
-      <div class="filter-pills-grid" id="filterOpenGroup">
-        <button class="filter-opt-btn active" data-val="全部" onclick="setFilterOpt('openStatus', '全部', this)">全部</button>
-        <button class="filter-opt-btn" data-val="已开封" onclick="setFilterOpt('openStatus', '已开封', this)">已开封</button>
-        <button class="filter-opt-btn" data-val="未开封" onclick="setFilterOpt('openStatus', '未开封', this)">未开封</button>
-      </div>
-      <div class="sheet-footer-btns">
-        <button class="btn-sheet-reset" onclick="resetAdvancedFilter()">重置</button>
-        <button class="btn-sheet-confirm" onclick="applyAdvancedFilter()">确定</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 分类管理抽屉 -->
-  <div class="modal-overlay" id="catManageModal" onclick="closeCatManageSheet()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-header">
-        <h2>🏷️ 管理分类与排序</h2>
-        <button class="sheet-close" onclick="closeCatManageSheet()">✕</button>
-      </div>
-      <div style="margin-bottom:14px; display:flex; gap:8px;">
-        <input type="text" id="newCatNameInput" placeholder="输入新分类名称..." style="flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:13px;">
-        <button onclick="addNewCategory()" style="padding:8px 14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:13px;">添加</button>
-      </div>
-      <div id="catManageListContainer" style="max-height:50vh; overflow-y:auto; margin-bottom:10px;"></div>
-    </div>
-  </div>
-
-  <!-- 菜单抽屉 -->
-  <div class="modal-overlay" id="menuModal" onclick="closeMenuSheet()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-header">
-        <h2>管家菜单</h2>
-        <button class="sheet-close" onclick="closeMenuSheet()">✕</button>
-      </div>
-      <div class="menu-options-list">
-        <div class="menu-opt-row" onclick="openCatManageSheet()">
-          <div class="menu-opt-left">
-            <span class="menu-opt-icon">🏷️</span>
-            <span>管理分类与排序</span>
-          </div>
-          <span style="color:#9CA3AF;">›</span>
-        </div>
-        <div class="menu-opt-row" onclick="openRepoConfigModal()">
-          <div class="menu-opt-left">
-            <span class="menu-opt-icon">🔑</span>
-            <span>配置 GitHub 仓库云同步</span>
-          </div>
-          <span style="color:#9CA3AF;">›</span>
-        </div>
-        <div class="menu-opt-row" onclick="triggerManualSync()">
-          <div class="menu-opt-left">
-            <span class="menu-opt-icon">🔄</span>
-            <span>立即与云端双向拉取</span>
-          </div>
-          <span style="color:#9CA3AF;">›</span>
-        </div>
-        <div class="menu-opt-row" onclick="triggerMenuAction('backup')">
-          <div class="menu-opt-left">
-            <span class="menu-opt-icon">💾</span>
-            <span>备份数据到本地文件</span>
-          </div>
-          <span style="color:#9CA3AF;">›</span>
-        </div>
-        <div class="menu-opt-row" onclick="triggerMenuAction('restore')">
-          <div class="menu-opt-left">
-            <span class="menu-opt-icon">📂</span>
-            <span>从本地文件恢复数据</span>
-          </div>
-          <span style="color:#9CA3AF;">›</span>
-        </div>
-        <div class="menu-opt-row" onclick="triggerMenuAction('clear')" style="color:#EF4444;">
-          <div class="menu-opt-left">
-            <span class="menu-opt-icon">🗑️</span>
-            <span>清空所有数据</span>
-          </div>
-          <span style="color:#EF4444;">›</span>
-        </div>
-      </div>
-      <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-    </div>
-  </div>
-
-  <!-- GitHub 仓库同步配置弹窗 -->
-  <div class="modal-overlay" id="repoModal" onclick="closeRepoConfigModal()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <div class="sheet-header">
-        <h2>🔑 GitHub 仓库云同步配置</h2>
-        <button class="sheet-close" onclick="closeRepoConfigModal()">✕</button>
-      </div>
-      <div class="form-group">
-        <label>Personal Access Token (ghp_...)</label>
-        <input type="password" id="repoTokenInput" placeholder="粘贴你的 GitHub Token">
-      </div>
-      <div class="btn-row">
-        <button type="button" class="btn-s" onclick="closeRepoConfigModal()">取消</button>
-        <button type="button" class="btn-p" onclick="saveRepoConfig()">保存并连接</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 双层批量管理操作面板 -->
-  <div class="batch-panel" id="batchPanel">
-    <div class="batch-panel-row">
-      <div style="display:flex; gap:6px; align-items:center;">
-        <button class="batch-btn-pill" onclick="selectAll()">全选本页</button>
-        <button class="batch-btn-pill" onclick="deselectAll()">清空选择</button>
-        <span style="font-size:12px; font-weight:700; color:var(--primary); margin-left:4px;" id="batchCountBadge">已选 0 项</span>
-      </div>
-      <button class="batch-btn-del" onclick="deleteSelected()">🗑️ 批量删除</button>
-    </div>
-    
-    <div class="batch-panel-row" style="border-top:1px dashed #F3F4F6; padding-top:6px;">
-      <span style="font-size:12px; color:var(--sub); font-weight:600;">划入分类：</span>
-      <div style="display:flex; gap:6px; flex:1; justify-content:flex-end;">
-        <select id="batchTargetCatSelect" style="flex:1; max-width:180px; padding:6px 8px; border-radius:8px; border:1px solid #D1D5DB; font-size:12px; outline:none; background:#F9FAFB;"></select>
-        <button class="batch-btn-apply" onclick="applyBatchCategory()">确认修改分类</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 底部常驻导航栏 -->
-  <nav class="bottom-tabbar">
-    <div class="tab-item active" id="navInventory" onclick="switchNavTab('inventory')">
-      <div class="tab-icon">📦</div>
-      <span>清单</span>
-    </div>
-
-    <div class="tab-item" id="navCalendar" onclick="switchNavTab('calendar')">
-      <div class="tab-icon">📅</div>
-      <span>日历</span>
-    </div>
-
-    <div class="tab-cat-center" onclick="openAISync()" title="点击极速导入数据">
-      <div class="cat-avatar-btn">🐱</div>
-      <div class="cat-btn-label">导入</div>
-    </div>
-
-    <div class="tab-item" onclick="openModal()" title="手动添加新物品">
-      <div class="tab-icon" style="font-size:22px;font-weight:bold;color:var(--primary);">➕</div>
-      <span>添加</span>
-    </div>
-
-    <div class="tab-item" id="navMenu" onclick="openMenuSheet()">
-      <div class="tab-icon">☰</div>
-      <span>菜单</span>
-    </div>
-  </nav>
-
-  <!-- Gemini 导入 Modal -->
-  <div class="modal-overlay" id="aiModal" onclick="closeAISync()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <h2>✨ Gemini 极速导入</h2>
-      <p style="font-size:12px;color:var(--sub);margin:4px 0 12px;">粘贴 Gemini 生成的 JSON 数据代码，一键入库：</p>
-      <div class="form-group"><textarea id="aiInput" rows="6" placeholder="在此粘贴数据代码..."></textarea></div>
-      <div class="btn-row">
-        <button type="button" class="btn-s" onclick="pasteClip()">粘贴剪贴板</button>
-        <button type="button" class="btn-ai-c" onclick="applyAI()">确认导入</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 手动添加/编辑 Modal -->
-  <div class="modal-overlay" id="manualModal" onclick="closeModal()">
-    <div class="modal-sheet" onclick="event.stopPropagation()">
-      <h2 id="modalTitle">添加物品</h2>
-      <form id="itemForm" onsubmit="saveItem(event)">
-        <input type="hidden" id="itemId">
-        <input type="hidden" id="itemCreatedAt">
-        <div class="form-group"><label>品名/规格 *</label><input type="text" id="itemName" placeholder="如：3CE云雾唇泥 #HIPAMINE" required></div>
-        <div class="form-group"><label>分类</label><select id="itemCat"></select></div>
-        <div class="form-group"><label>到期日期 *</label><input type="date" id="itemExpiry" required></div>
-        <div class="form-group"><label>状态与备注（如：已开封 PAO 12M / 梳妆台收纳盒）</label><input type="text" id="itemNotes"></div>
-        <div class="form-group"><label>图标 Emoji</label><input type="text" id="itemIcon" value="🐱" maxlength="2" style="width:60px;text-align:center;"></div>
-        <div class="form-group"><label>商品图片数据 (可选)</label><input type="text" id="itemImage" placeholder="图片 URL 或 Base64"></div>
-        <div class="btn-row">
-          <button type="button" class="btn-d" id="btnDel" style="display:none;" onclick="delItem()">删除</button>
-          <button type="button" class="btn-s" onclick="closeModal()">取消</button>
-          <button type="submit" class="btn-p">保存</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    const K = "cosmetics_inventory_data";
-    const CAT_KEY = "cosmetics_categories_list";
-    const LAYOUT_KEY = "cosmetics_display_layout";
-    const SORT_KEY = "cosmetics_display_sort";
-    const TOKEN_KEY = "cosmetics_github_token";
-    const REPO_OWNER = "kikuroko-rgb";
-    const REPO_NAME = "cosmetics";
-    const FILE_PATH = "data.json";
-
-    const defaultCategories = ["唇部", "面霜/乳液", "面部精华", "眼霜", "彩妆", "身体护理", "药品", "香氛其他"];
-    function getCategories() {
-      const s = localStorage.getItem(CAT_KEY);
-      return s ? JSON.parse(s) : defaultCategories;
-    }
-    function saveCategories(c) {
-      localStorage.setItem(CAT_KEY, JSON.stringify(c));
-      updateCategorySelects();
-    }
-
-    function updateCategorySelects() {
-      const cats = getCategories();
-      const dropdown = document.getElementById("categorySelect");
-      const itemCat = document.getElementById("itemCat");
-      const batchTarget = document.getElementById("batchTargetCatSelect");
-
-      const curVal = dropdown.value;
-      const curItemVal = itemCat.value;
-
-      dropdown.innerHTML = `<option value="全部">全部分类</option>`;
-      itemCat.innerHTML = "";
-      batchTarget.innerHTML = "";
-
-      cats.forEach(c => {
-        dropdown.innerHTML += `<option value="${c}">${c}</option>`;
-        itemCat.innerHTML += `<option value="${c}">${c}</option>`;
-        batchTarget.innerHTML += `<option value="${c}">${c}</option>`;
-      });
-
-      if (cats.includes(curVal)) dropdown.value = curVal;
-      if (cats.includes(curItemVal)) itemCat.value = curItemVal;
-    }
-
-    let curCat = "全部";
-    let isBatchMode = false;
-    let selectedIds = new Set();
-    let currentLayout = localStorage.getItem(LAYOUT_KEY) || "list";
-    let currentSort = localStorage.getItem(SORT_KEY) || "added_desc";
-
-    let filterExpiryStatus = "全部";
-    let filterOpenStatus = "全部";
-
-    let calViewDate = new Date();
-    let calSelectedDateStr = new Date().toISOString().slice(0, 10);
-    let currentFileSha = "";
-
-    function getItems(){ const s=localStorage.getItem(K); return s?JSON.parse(s):[]; }
-    function calcDays(e){ const t=new Date(); t.setHours(0,0,0,0); const x=new Date(e); x.setHours(0,0,0,0); return Math.ceil((x-t)/86400000); }
-
-    function getItemTimestamp(item) {
-      if (item.createdAt) {
-        const t = new Date(item.createdAt).getTime();
-        if (!isNaN(t)) return t;
-      }
-      if (item.id) {
-        const num = parseFloat(item.id);
-        if (!isNaN(num) && num > 1500000000000) return num;
-      }
-      return 0;
-    }
-
-    function formatAddedDate(item) {
-      const ts = getItemTimestamp(item);
-      if (!ts) return "";
-      const d = new Date(ts);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day} 添加`;
-    }
-
-    function updateSyncBadge(online) {
-      const badge = document.getElementById("syncStatusBadge");
-      if (online) {
-        badge.innerText = "☁️ 仓库已连接";
-        badge.className = "sync-badge online";
-      } else {
-        badge.innerText = "本地模式";
-        badge.className = "sync-badge";
-      }
-    }
-
-    async function pullFromRepo() {
-      const token = localStorage.getItem(TOKEN_KEY);
-      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-      const headers = { "Accept": "application/vnd.github.v3+json" };
-      if (token) headers["Authorization"] = `token ${token}`;
-
-      try {
-        const res = await fetch(url, { headers });
-        if (res.ok) {
-          const data = await res.json();
-          currentFileSha = data.sha;
-          const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
-          const cloudItems = JSON.parse(content);
-          if (Array.isArray(cloudItems) && cloudItems.length > 0) {
-            const sanitized = cloudItems.map(it => {
-              if (!it.createdAt) {
-                const ts = getItemTimestamp(it);
-                it.createdAt = ts ? new Date(ts).toISOString() : new Date().toISOString();
-              }
-              return it;
-            });
-            localStorage.setItem(K, JSON.stringify(sanitized));
-            renderCards();
-            renderCalendar();
-          } else {
-            const local = getItems();
-            if (local.length > 0 && token) pushToRepo(local);
-          }
-          if (token) updateSyncBadge(true);
-        } else {
-          updateSyncBadge(false);
-        }
-      } catch (err) {
-        console.error("拉取仓库数据失败:", err);
-        updateSyncBadge(false);
-      }
-    }
-
-    async function pushToRepo(items) {
-      const token = localStorage.getItem(TOKEN_KEY);
-      if (!token) return;
-
-      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-      const jsonStr = JSON.stringify(items, null, 2);
-      const b64Content = btoa(unescape(encodeURIComponent(jsonStr)));
-
-      try {
-        const bodyData = { message: "update cosmetics data", content: b64Content };
-        if (currentFileSha) bodyData.sha = currentFileSha;
-
-        const res = await fetch(url, {
-          method: "PUT",
-          headers: {
-            "Authorization": `token ${token}`,
-            "Accept": "application/vnd.github.v3+json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(bodyData)
-        });
-
-        if (res.ok) {
-          const resData = await res.json();
-          currentFileSha = resData.content.sha;
-          updateSyncBadge(true);
-        }
-      } catch (err) { console.error("推送仓库数据失败:", err); }
-    }
-
-    function saveItems(d){ 
-      localStorage.setItem(K, JSON.stringify(d)); 
-      pushToRepo(d);
-    }
-
-    function openRepoConfigModal() {
-      closeMenuSheet();
-      document.getElementById("repoTokenInput").value = localStorage.getItem(TOKEN_KEY) || "";
-      document.getElementById("repoModal").style.display = "flex";
-    }
-    function closeRepoConfigModal() { document.getElementById("repoModal").style.display = "none"; }
-    function saveRepoConfig() {
-      const token = document.getElementById("repoTokenInput").value.trim();
-      if (!token) return alert("请粘贴 Token");
-      localStorage.setItem(TOKEN_KEY, token);
-      closeRepoConfigModal();
-      pullFromRepo();
-      alert("Token 保存成功，正在连接仓库！");
-    }
-
-    function triggerManualSync() {
-      closeMenuSheet();
-      pullFromRepo();
-      alert("正在同步仓库最新数据...");
-    }
-
-    function changeCategory(val) {
-      curCat = val;
-      renderCards();
-    }
-
-    function openCatManageSheet() {
-      closeMenuSheet();
-      renderCatManageList();
-      document.getElementById("catManageModal").style.display = "flex";
-    }
-    function closeCatManageSheet() { document.getElementById("catManageModal").style.display = "none"; }
-
-    function renderCatManageList() {
-      const cats = getCategories();
-      const container = document.getElementById("catManageListContainer");
-      container.innerHTML = "";
-      cats.forEach((c, idx) => {
-        container.innerHTML += `
-          <div class="cat-manage-item">
-            <span>${c}</span>
-            <div class="cat-manage-actions">
-              <button class="btn-cat-act" onclick="moveCategory(${idx}, -1)">⬆️</button>
-              <button class="btn-cat-act" onclick="moveCategory(${idx}, 1)">⬇️</button>
-              <button class="btn-cat-act" style="color:var(--danger);" onclick="deleteCategory('${c}')">删除</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function addNewCategory() {
-      const input = document.getElementById("newCatNameInput");
-      const name = input.value.trim();
-      if (!name) return;
-      let cats = getCategories();
-      if (cats.includes(name)) return alert("分类已存在！");
-      cats.push(name);
-      saveCategories(cats);
-      input.value = "";
-      renderCatManageList();
-    }
-
-    function moveCategory(idx, dir) {
-      let cats = getCategories();
-      const targetIdx = idx + dir;
-      if (targetIdx < 0 || targetIdx >= cats.length) return;
-      const temp = cats[idx];
-      cats[idx] = cats[targetIdx];
-      cats[targetIdx] = temp;
-      saveCategories(cats);
-      renderCatManageList();
-    }
-
-    function deleteCategory(name) {
-      let cats = getCategories();
-      if (cats.length <= 1) return alert("至少保留一个分类！");
-      if (confirm(`确定删除分类【${name}】吗？`)) {
-        cats = cats.filter(c => c !== name);
-        saveCategories(cats);
-        renderCatManageList();
-      }
-    }
-
-    function openMenuSheet() { document.getElementById("menuModal").style.display = "flex"; }
-    function closeMenuSheet() { document.getElementById("menuModal").style.display = "none"; }
-    function triggerMenuAction(action) {
-      closeMenuSheet();
-      if (action === 'backup') exportData();
-      else if (action === 'restore') document.getElementById('importFile').click();
-      else if (action === 'clear') {
-        if (confirm("确定要清空全部物品数据吗？此操作不可逆！")) {
-          saveItems([]);
-          renderCards();
-          renderCalendar();
-          alert("数据已清空！");
-        }
-      }
-    }
-
-    function openSortSheet() {
-      document.querySelectorAll("#sortOptionsGroup .sort-opt-item").forEach(row => {
-        const isMatch = row.getAttribute("data-sort") === currentSort;
-        row.classList.toggle("active", isMatch);
-        row.querySelector(".sort-check").innerText = isMatch ? "✓" : "";
-      });
-      document.getElementById("sortModal").style.display = "flex";
-    }
-    function closeSortSheet() { document.getElementById("sortModal").style.display = "none"; }
-    
-    function selectSortOption(sortKey) {
-      currentSort = sortKey;
-      localStorage.setItem(SORT_KEY, sortKey);
-      closeSortSheet();
-      renderCards();
-    }
-
-    function openFilterSheet() { document.getElementById("filterModal").style.display = "flex"; }
-    function closeFilterSheet() { document.getElementById("filterModal").style.display = "none"; }
-    
-    function setFilterOpt(type, val, btn) {
-      if (type === "expiryStatus") {
-        filterExpiryStatus = val;
-        document.querySelectorAll("#filterExpiryGroup .filter-opt-btn").forEach(b => b.classList.toggle("active", b === btn));
-      } else if (type === "openStatus") {
-        filterOpenStatus = val;
-        document.querySelectorAll("#filterOpenGroup .filter-opt-btn").forEach(b => b.classList.toggle("active", b === btn));
-      }
-    }
-
-    function resetAdvancedFilter() {
-      filterExpiryStatus = "全部";
-      filterOpenStatus = "全部";
-      document.querySelectorAll("#filterExpiryGroup .filter-opt-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-val") === "全部"));
-      document.querySelectorAll("#filterOpenGroup .filter-opt-btn").forEach(b => b.classList.toggle("active", b.getAttribute("data-val") === "全部"));
-      updateFilterBtnState();
-      closeFilterSheet();
-      renderCards();
-    }
-
-    function applyAdvancedFilter() {
-      updateFilterBtnState();
-      closeFilterSheet();
-      renderCards();
-    }
-
-    function updateFilterBtnState() {
-      const btn = document.getElementById("btnOpenFilter");
-      const isFiltered = filterExpiryStatus !== "全部" || filterOpenStatus !== "全部";
-      btn.classList.toggle("active-tool", isFiltered);
-    }
-
-    function switchNavTab(tab) {
-      document.getElementById("navInventory").classList.toggle("active", tab === "inventory");
-      document.getElementById("navCalendar").classList.toggle("active", tab === "calendar");
-      document.getElementById("tabInventory").classList.toggle("active", tab === "inventory");
-      document.getElementById("tabCalendar").classList.toggle("active", tab === "calendar");
-
-      const isInv = tab === "inventory";
-      document.getElementById("controlsRow").style.display = isInv ? "flex" : "none";
-      document.getElementById("pageTitle").innerText = isInv ? "临期管家" : "临期日历";
-
-      if (tab === "calendar") renderCalendar();
-      else renderCards();
-    }
-
-    function toggleLayout() {
-      currentLayout = currentLayout === "list" ? "grid" : "list";
-      localStorage.setItem(LAYOUT_KEY, currentLayout);
-      updateLayoutButton();
-      renderCards();
-    }
-
-    function updateLayoutButton() {
-      const btnText = document.getElementById("layoutText");
-      const container = document.getElementById("cardsContainer");
-      if (currentLayout === "list") {
-        btnText.innerText = "📋 列表";
-        container.className = "list-mode";
-      } else {
-        btnText.innerText = "🔲 画廊";
-        container.className = "grid-mode";
-      }
-    }
-
-    function toggleBatchMode() {
-      isBatchMode = !isBatchMode;
-      selectedIds.clear();
-      const btn = document.getElementById("btnBatchToggle");
-      const panel = document.getElementById("batchPanel");
-      const container = document.getElementById("cardsContainer");
-      if (isBatchMode) {
-        btn.innerText = "完成"; btn.classList.add("active");
-        panel.classList.add("show"); container.classList.add("batch-mode");
-      } else {
-        btn.innerText = "批量管理"; btn.classList.remove("active");
-        panel.classList.remove("show"); container.classList.remove("batch-mode");
-      }
-      updateSelectCount();
-      renderCards();
-    }
-
-    function toggleSelect(id) {
-      if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
-      updateSelectCount(); renderCards();
-    }
-    function selectAll() { getFilteredItems().forEach(i => selectedIds.add(i.id)); updateSelectCount(); renderCards(); }
-    function deselectAll() { selectedIds.clear(); updateSelectCount(); renderCards(); }
-    
-    function updateSelectCount() {
-      const badge = document.getElementById("batchCountBadge");
-      if (badge) badge.innerText = "已选 " + selectedIds.size + " 项";
-    }
-
-    function deleteSelected() {
-      if (selectedIds.size === 0) return alert("请先勾选需要删除的物品");
-      if (confirm(`确定要彻底删除已选中的 ${selectedIds.size} 件物品吗？此操作不可逆！`)) {
-        saveItems(getItems().filter(i => !selectedIds.has(i.id)));
-        selectedIds.clear(); 
-        updateSelectCount(); 
-        renderCards(); 
-        renderCalendar();
-      }
-    }
-
-    function applyBatchCategory() {
-      if (selectedIds.size === 0) return alert("请先勾选需要更改分类的物品");
-      const targetCat = document.getElementById("batchTargetCatSelect").value;
-      let items = getItems();
-      items = items.map(i => selectedIds.has(i.id) ? {...i, category: targetCat} : i);
-      saveItems(items);
-      selectedIds.clear();
-      toggleBatchMode();
-      renderCards();
-      alert("批量修改分类成功！");
-    }
-
-    function getFilteredItems() {
-      let items = getItems();
-      const s = document.getElementById("searchInput").value.trim().toLowerCase();
-
-      // 多维排序逻辑：增加首字母拼音正倒序
-      items.sort((a, b) => {
-        if (currentSort === "expiry_asc") {
-          return new Date(a.expiry) - new Date(b.expiry);
-        } else if (currentSort === "expiry_desc") {
-          return new Date(b.expiry) - new Date(a.expiry);
-        } else if (currentSort === "added_desc") {
-          return getItemTimestamp(b) - getItemTimestamp(a);
-        } else if (currentSort === "added_asc") {
-          return getItemTimestamp(a) - getItemTimestamp(b);
-        } else if (currentSort === "name_asc") {
-          return (a.name || "").localeCompare(b.name || "", "zh-Hans-CN", { sensitivity: "base" });
-        } else if (currentSort === "name_desc") {
-          return (b.name || "").localeCompare(a.name || "", "zh-Hans-CN", { sensitivity: "base" });
-        }
-        return 0;
-      });
-
-      return items.filter(i => {
-        const d = calcDays(i.expiry);
-        let matchCat = (curCat === "全部" || i.category === curCat);
-        if (curCat === "唇部" && (i.category === "唇部" || i.name.includes("唇"))) matchCat = true;
-
-        const matchSearch = matchCat &&
-                            (i.name.toLowerCase().includes(s) || (i.notes && i.notes.toLowerCase().includes(s)));
-        if (!matchSearch) return false;
-
-        if (filterExpiryStatus === "正常" && d <= 30) return false;
-        if (filterExpiryStatus === "临期" && (d < 0 || d > 30)) return false;
-        if (filterExpiryStatus === "过期" && d >= 0) return false;
-
-        const isOpened = i.notes && (i.notes.includes("开封") || i.notes.includes("已开"));
-        if (filterOpenStatus === "已开封" && !isOpened) return false;
-        if (filterOpenStatus === "未开封" && isOpened) return false;
-
-        return true;
-      });
-    }
-
-    function createCardElement(i, isGrid = false) {
-      const d = calcDays(i.expiry);
-      let colorClass = "state-good", bgClass = "bg-good", statusText = "正常使用";
-      if (d < 0) { colorClass = "state-danger"; bgClass = "bg-danger"; statusText = "已过期"; }
-      else if (d <= 30) { colorClass = "state-warning"; bgClass = "bg-warning"; statusText = "即将临期"; }
-
-      const isSel = selectedIds.has(i.id);
-      const card = document.createElement("div");
-      card.className = "item-card " + (isSel ? "selected" : "");
-      card.onclick = () => isBatchMode ? toggleSelect(i.id) : openModal(i);
-
-      const isOpened = i.notes && (i.notes.includes("开封") || i.notes.includes("已开"));
-      const openTag = isOpened 
-        ? `<span class="tag-pill tag-opened">已开封</span>` 
-        : `<span class="tag-pill tag-unopened">未开封</span>`;
-      
-      const addedLabel = formatAddedDate(i);
-
-      if (!isGrid) {
-        card.innerHTML = `
-          <div class="select-checkbox">✓</div>
-          <div class="card-thumb" data-img-id="${i.id}"></div>
-          <div class="card-main">
-            <div class="title-row"><span class="item-name">${i.name}</span></div>
-            <div class="badge-row">
-              <span class="tag-pill tag-category">${i.category}</span>
-              ${openTag}
-              ${addedLabel ? `<span class="tag-pill tag-date">${addedLabel}</span>` : ""}
-            </div>
-            <div class="expiry-sub">到期: ${i.expiry} ${i.notes ? "· " + i.notes : ""}</div>
-          </div>
-          <div class="card-right">
-            <div class="countdown-days ${colorClass}">${d < 0 ? Math.abs(d) : d}<span style="font-size:12px;font-weight:600;">天</span></div>
-            <div class="status-desc ${colorClass}">${statusText}</div>
-          </div>
-        `;
-      } else {
-        card.innerHTML = `
-          <div class="select-checkbox">✓</div>
-          <div class="card-thumb" data-img-id="${i.id}"></div>
-          <div class="card-main">
-            <div class="item-name">${i.name}</div>
-            <div class="expiry-sub">${i.category} · 到期:${i.expiry}</div>
-            <div class="expiry-sub" style="color:#6B7280;">${addedLabel}</div>
-            <div class="card-right ${bgClass}">${d < 0 ? "过期 " + Math.abs(d) + " 天" : "剩余 " + d + " 天"}</div>
-          </div>
-        `;
-      }
-      return card;
-    }
-
-    function hydrateImages(items) {
-      document.querySelectorAll("[data-img-id]").forEach(el => {
-        const id = el.getAttribute("data-img-id");
-        const item = items.find(x => x.id === id);
-        if (item && item.image && item.image.trim()) {
-          const img = document.createElement("img");
-          img.src = item.image;
-          el.innerHTML = "";
-          el.appendChild(img);
-        } else if (item) {
-          el.innerHTML = `<span class="fallback-icon">${item.icon || "🐱"}</span>`;
-        }
-      });
-    }
-
-    function renderCards() {
-      updateLayoutButton();
-      const sortBtn = document.getElementById("btnOpenSort");
-      sortBtn.classList.toggle("active-tool", currentSort !== "expiry_asc");
-
-      const container = document.getElementById("cardsContainer");
-      container.innerHTML = "";
-      const filtered = getFilteredItems();
-
-      document.getElementById("emptyState").style.display = filtered.length === 0 ? "block" : "none";
-      filtered.forEach(i => {
-        container.appendChild(createCardElement(i, currentLayout === "grid"));
-      });
-      hydrateImages(filtered);
-    }
-
-    function prevMonth() { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); }
-    function nextMonth() { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); }
-
-    function renderCalendar() {
-      const year = calViewDate.getFullYear();
-      const month = calViewDate.getMonth();
-      document.getElementById("calMonthTitle").innerText = `${year}年 ${month + 1}月`;
-
-      const daysGrid = document.getElementById("calDaysGrid");
-      daysGrid.innerHTML = "";
-
-      const firstDayOfMonth = new Date(year, month, 1);
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      
-      let startDay = firstDayOfMonth.getDay() - 1;
-      if (startDay === -1) startDay = 6;
-
-      const items = getItems();
-      const dateMap = {};
-      items.forEach(item => {
-        if (!dateMap[item.expiry]) dateMap[item.expiry] = [];
-        dateMap[item.expiry].push(item);
-      });
-
-      const prevMonthDays = new Date(year, month, 0).getDate();
-      for (let i = startDay - 1; i >= 0; i--) {
-        const dCell = document.createElement("div");
-        dCell.className = "cal-day-cell other-month";
-        dCell.innerText = prevMonthDays - i;
-        daysGrid.appendChild(dCell);
-      }
-
-      const todayStr = new Date().toISOString().slice(0, 10);
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dCell = document.createElement("div");
-        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        
-        let cellClass = "cal-day-cell";
-        if (dateStr === todayStr) cellClass += " today";
-        if (dateStr === calSelectedDateStr) cellClass += " selected";
-        dCell.className = cellClass;
-        
-        let dotsHtml = "";
-        if (dateMap[dateStr]) {
-          const dayItems = dateMap[dateStr];
-          dotsHtml = `<div class="cal-dot-box">`;
-          if (dayItems.some(x => calcDays(x.expiry) < 0)) dotsHtml += `<span class="cal-dot dot-danger"></span>`;
-          if (dayItems.some(x => calcDays(x.expiry) >= 0 && calcDays(x.expiry) <= 30)) dotsHtml += `<span class="cal-dot dot-warning"></span>`;
-          if (dayItems.some(x => calcDays(x.expiry) > 30)) dotsHtml += `<span class="cal-dot dot-good"></span>`;
-          dotsHtml += `</div>`;
-        }
-
-        dCell.innerHTML = `<span>${day}</span>${dotsHtml}`;
-        dCell.onclick = () => { calSelectedDateStr = dateStr; renderCalendar(); };
-        daysGrid.appendChild(dCell);
-      }
-
-      renderCalendarDayEvents(dateMap[calSelectedDateStr] || []);
-    }
-
-    function renderCalendarDayEvents(dayItems) {
-      const listEl = document.getElementById("calDayEventList");
-      document.getElementById("calSelectedDateText").innerText = `${calSelectedDateStr} 到期清单 (${dayItems.length}件)`;
-      listEl.innerHTML = "";
-
-      if (dayItems.length === 0) {
-        listEl.innerHTML = `
-          <div class="empty-state" style="padding:30px 10px;">
-            <div style="font-size:30px;margin-bottom:6px;">☕</div>
-            <p style="font-size:13px;">当天没有任何到期物品</p>
-          </div>
-        `;
-        return;
-      }
-      dayItems.forEach(i => { listEl.appendChild(createCardElement(i, false)); });
-      hydrateImages(dayItems);
-    }
-
-    function openAISync(){ document.getElementById("aiModal").style.display="flex"; document.getElementById("aiInput").value=""; }
-    function closeAISync(){ document.getElementById("aiModal").style.display="none"; }
-    async function pasteClip(){ try{ document.getElementById("aiInput").value=await navigator.clipboard.readText(); }catch(e){ alert("请长按粘贴"); } }
-    
-    function applyAI(){
-      const r=document.getElementById("aiInput").value.trim(); if(!r)return;
-      try{
-        const m=r.match(/\[[\s\S]*\]|\{[\s\S]*\}/); const p=JSON.parse(m?m[0]:r);
-        const list=Array.isArray(p)?p:[p]; let items=getItems();
-        const nowIso = new Date().toISOString();
-        list.forEach((x, idx)=>{ 
-          if(x.name&&x.expiry) {
-            items.push({ 
-              id: (Date.now() + idx).toString(), 
-              createdAt: x.createdAt || nowIso,
-              name: x.name, 
-              category: x.category||"面霜/乳液", 
-              expiry: x.expiry, 
-              notes: x.notes||"未开封", 
-              icon: x.icon||"🐱", 
-              image: x.image||"" 
-            }); 
-          }
-        });
-        saveItems(items); closeAISync(); renderCards(); renderCalendar(); alert("成功导入 "+list.length+" 件！");
-      }catch(e){ alert("解析失败，请确保复制完整数据"); }
-    }
-
-    function openModal(i=null){
-      const m=document.getElementById("manualModal"); document.getElementById("itemForm").reset();
-      updateCategorySelects();
-      if(i){
-        document.getElementById("modalTitle").innerText="编辑物品"; 
-        document.getElementById("itemId").value=i.id;
-        document.getElementById("itemCreatedAt").value=i.createdAt || "";
-        document.getElementById("itemName").value=i.name; 
-        document.getElementById("itemCat").value=i.category;
-        document.getElementById("itemExpiry").value=i.expiry; 
-        document.getElementById("itemNotes").value=i.notes||"";
-        document.getElementById("itemIcon").value=i.icon||"🐱"; 
-        document.getElementById("itemImage").value=i.image||"";
-        document.getElementById("btnDel").style.display="block";
-      }else{
-        document.getElementById("modalTitle").innerText="添加物品"; 
-        document.getElementById("itemId").value="";
-        document.getElementById("itemCreatedAt").value="";
-        document.getElementById("itemIcon").value="🐱"; 
-        document.getElementById("itemImage").value="";
-        document.getElementById("btnDel").style.display="none";
-      }
-      m.style.display="flex";
-    }
-    function closeModal(){ document.getElementById("manualModal").style.display="none"; }
-
-    function saveItem(e){
-      e.preventDefault(); 
-      const id=document.getElementById("itemId").value;
-      const createdAtVal=document.getElementById("itemCreatedAt").value;
-      const name=document.getElementById("itemName").value.trim();
-      const category=document.getElementById("itemCat").value;
-      const expiry=document.getElementById("itemExpiry").value;
-      const notes=document.getElementById("itemNotes").value.trim();
-      const icon=document.getElementById("itemIcon").value.trim()||"🐱";
-      const image=document.getElementById("itemImage").value.trim()||"";
-      
-      let items=getItems();
-      if(id) {
-        items=items.map(x => x.id === id ? {
-          ...x, 
-          name, category, expiry, notes, icon, image, 
-          createdAt: createdAtVal || x.createdAt || new Date().toISOString()
-        } : x);
-      } else {
-        items.push({ 
-          id: Date.now().toString(), 
-          createdAt: new Date().toISOString(), 
-          name, category, expiry, notes, icon, image 
-        });
-      }
-      saveItems(items); 
-      closeModal(); 
-      renderCards(); 
-      renderCalendar();
-    }
-
-    function delItem(){ const id=document.getElementById("itemId").value; if(confirm("确定删除？")){ saveItems(getItems().filter(x=>x.id!==id)); closeModal(); renderCards(); renderCalendar(); } }
-    function exportData(){ const a=document.createElement("a"); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(getItems(),null,2)); a.download=`临期管家备份_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
-    function importData(e){
-      const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-      r.onload=evt=>{ try{ const d=JSON.parse(evt.target.result); if(Array.isArray(d)){ saveItems(d); renderCards(); alert("恢复成功！"); } }catch(err){ alert("解析失败"); } };
-      r.readAsText(f);
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      updateCategorySelects();
-      pullFromRepo();
-
-      const params = new URLSearchParams(window.location.search);
-      const dataParam = params.get("import");
-      if (dataParam) {
-        try {
-          const decoded = decodeURIComponent(dataParam);
-          const jsonMatch = decoded.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
-          const p = JSON.parse(jsonMatch ? jsonMatch[0] : decoded);
-          const list = Array.isArray(p) ? p : [p];
-          if (confirm("检测到来自链接的 " + list.length + " 件物品数据，是否立即入库？")) {
-            let items = getItems();
-            const nowIso = new Date().toISOString();
-            list.forEach((x, idx) => {
-              if (x.name && x.expiry) items.push({
-                id: (Date.now() + idx).toString(),
-                createdAt: x.createdAt || nowIso,
-                name: x.name,
-                category: x.category || "面霜/乳液",
-                expiry: x.expiry,
-                notes: x.notes || "未开封",
-                icon: x.icon || "🐱",
-                image: x.image || ""
-              });
-            });
-            saveItems(items);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            renderCards();
-            alert("成功从链接导入 " + list.length + " 件物品！");
-          }
-        } catch(e) { console.error("URL导入解析失败", e); }
       }
     });
 
