@@ -230,6 +230,9 @@
       color: var(--text-muted);
       cursor: pointer;
       transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .cat-pill.active {
@@ -237,6 +240,41 @@
       border-color: var(--border-subtle);
       color: var(--text-main);
       box-shadow: var(--shadow-sm);
+    }
+
+    .cat-pill-count {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 9999px;
+      background: rgba(100, 116, 139, 0.1);
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .cat-pill.active .cat-pill-count {
+      background: rgba(15, 23, 42, 0.08);
+      color: var(--text-main);
+    }
+
+    .cat-pill-warning {
+      color: #B45309;
+    }
+
+    .cat-pill-warning .cat-pill-count {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .cat-pill-warning.active {
+      background: #FFFBEB;
+      border-color: rgba(217, 119, 6, 0.2);
+      color: #92400E;
+    }
+
+    .cat-pill-warning.active .cat-pill-count {
+      background: var(--danger);
+      color: #FFF;
     }
 
     /* Main Container */
@@ -1463,6 +1501,7 @@
 
     function saveItems(d){ 
       localStorage.setItem(K, JSON.stringify(d)); 
+      renderCategoryPills();
       pushToRepo(d);
     }
 
@@ -1470,11 +1509,46 @@
     function renderCategoryPills() {
       const container = document.getElementById("catPillsContainer");
       const cats = getCategories();
+      const allItems = getItems();
+
+      // 计算各分类计数
+      const counts = { "全部": allItems.length, "临期": 0 };
+      cats.forEach(c => { if (c !== "全部") counts[c] = 0; });
+
+      allItems.forEach(it => {
+        const d = calcDays(it.expiry);
+        if (d <= 30) counts["临期"]++;
+
+        if (counts[it.category] !== undefined) {
+          counts[it.category]++;
+        } else if (it.name && it.name.includes("唇") && counts["唇部"] !== undefined) {
+          counts["唇部"]++;
+        }
+      });
+
       container.innerHTML = "";
+
+      // 1. 全部
+      const allBtn = document.createElement("button");
+      allBtn.className = "cat-pill" + (curCat === "全部" ? " active" : "");
+      allBtn.innerHTML = `<span>全部</span><span class="cat-pill-count">${counts["全部"]}</span>`;
+      allBtn.onclick = () => { curCat = "全部"; renderCategoryPills(); renderCards(); };
+      container.appendChild(allBtn);
+
+      // 2. 单独的常驻临期标签
+      const warningBtn = document.createElement("button");
+      warningBtn.className = "cat-pill cat-pill-warning" + (curCat === "临期" ? " active" : "");
+      warningBtn.innerHTML = `<span>⚠️ 临期</span><span class="cat-pill-count">${counts["临期"]}</span>`;
+      warningBtn.onclick = () => { curCat = "临期"; renderCategoryPills(); renderCards(); };
+      container.appendChild(warningBtn);
+
+      // 3. 其它用户自定义分类
       cats.forEach(c => {
+        if (c === "全部") return;
         const btn = document.createElement("button");
         btn.className = "cat-pill" + (c === curCat ? " active" : "");
-        btn.innerText = c;
+        const num = counts[c] || 0;
+        btn.innerHTML = `<span>${c}</span><span class="cat-pill-count">${num}</span>`;
         btn.onclick = () => {
           curCat = c;
           renderCategoryPills();
@@ -1651,8 +1725,16 @@
 
       return items.filter(i => {
         const d = calcDays(i.expiry);
-        let matchCat = (curCat === "全部" || i.category === curCat);
-        if (curCat === "唇部" && (i.category === "唇部" || i.name.includes("唇"))) matchCat = true;
+        
+        let matchCat = false;
+        if (curCat === "全部") {
+          matchCat = true;
+        } else if (curCat === "临期") {
+          matchCat = (d <= 30);
+        } else {
+          matchCat = (i.category === curCat);
+          if (curCat === "唇部" && (i.category === "唇部" || i.name.includes("唇"))) matchCat = true;
+        }
 
         const matchSearch = matchCat &&
                             (i.name.toLowerCase().includes(s) || (i.notes && i.notes.toLowerCase().includes(s)));
@@ -1745,6 +1827,7 @@
     }
 
     function renderCards() {
+      renderCategoryPills();
       updateLayoutButton();
       const container = document.getElementById("cardsContainer");
       container.innerHTML = "";
