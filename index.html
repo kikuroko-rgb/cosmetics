@@ -1,173 +1,1173 @@
---- a/index.html
-+++ b/index.html
-@@ -512,12 +512,30 @@
-   const STORAGE_KEY = "expiry_items";
-   const CONFIG_KEY = "expiry_github_config";
-   const SORT_KEY = "expiry_sort_mode";
-   const LAYOUT_KEY = "expiry_layout_mode";
-+  // 兼容所有历史版本的存储键名，防止数据意外丢失
-+  const LEGACY_STORAGE_KEYS = ["skincare_items", "cosmetic_items", "beauty_items", "items_data"];
- 
-   function getItems() {
-     try {
--      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-+      let items = JSON.parse(localStorage.getItem(STORAGE_KEY));
-+      if (Array.isArray(items) && items.length > 0) return items;
-+      
-+      // 如果新键名为空，自动遍历检查并恢复旧版本残留数据
-+      for (const oldKey of LEGACY_STORAGE_KEYS) {
-+        try {
-+          const legacy = JSON.parse(localStorage.getItem(oldKey));
-+          if (Array.isArray(legacy) && legacy.length > 0) {
-+            localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy));
-+            return legacy;
-+          }
-+        } catch(e) {}
-+      }
-+      return Array.isArray(items) ? items : [];
-     } catch (e) {
-       return [];
-     }
-   }
-@@ -536,36 +554,42 @@
-   }
- 
--  // Base64 UTF-8 编码与解码工具
-+  // Base64 UTF-8 编码与解码工具（彻底兼容中文字符和 GitHub API 返回的换行符）
-   function utf8ToBase64(str) {
--    const bytes = new TextEncoder().encode(str);
--    let bin = "";
--    for (let i = 0; i < bytes.byteLength; i++) {
--      bin += String.fromCharCode(bytes[i]);
--    }
--    return btoa(bin);
-+    try {
-+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-+        return String.fromCharCode(parseInt(p1, 16));
-+      }));
-+    } catch(err) {
-+      const bytes = new TextEncoder().encode(str);
-+      let bin = "";
-+      for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
-+      return btoa(bin);
-+    }
-   }
- 
-   function base64ToUtf8(str) {
--    const bin = atob(str);
--    const bytes = new Uint8Array(bin.length);
--    for (let i = 0; i < bin.length; i++) {
--      bytes[i] = bin.charCodeAt(i);
--    }
--    return new TextDecoder("utf-8").decode(bytes);
-+    try {
-+      // GitHub API 返回的 base64 内容通常包含 \n 换行符，必须先清洗
-+      const cleanB64 = str.replace(/\s+/g, "");
-+      return decodeURIComponent(atob(cleanB64).split("").map(c => {
-+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-+      }).join(""));
-+    } catch(err) {
-+      const cleanB64 = str.replace(/\s+/g, "");
-+      const bin = atob(cleanB64);
-+      const bytes = new Uint8Array(bin.length);
-+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-+      return new TextDecoder("utf-8").decode(bytes);
-+    }
-   }
-@@ -582,34 +606,58 @@
-     const cfg = getRepoConfig();
--    if (!cfg.token || !cfg.repo) return;
-+    if (!cfg.token || !cfg.repo) {
-+      if (manual) alert("⚠️ 请先在【三横菜单 ➔ GitHub 同步设置】中填写 Token、仓库名与文件路径！");
-+      return;
-+    }
-     const badge = document.getElementById("syncStatusBadge");
-     if (badge) badge.innerText = "☁️ 正在拉取...";
-     const path = cfg.path || "data.json";
--    const url = `https://api.github.com/repos/${cfg.repo}/contents/${path}`;
-+    // 移除仓库名前后可能多粘的斜杠
-+    const cleanRepo = cfg.repo.trim().replace(/^\/+|\/+$/g, "");
-+    const cleanPath = path.trim().replace(/^\/+/, "");
-+    const url = `https://api.github.com/repos/${cleanRepo}/contents/${cleanPath}`;
-     try {
-       const res = await fetch(url, {
-         headers: {
-           Authorization: `Bearer ${cfg.token}`,
-           Accept: "application/vnd.github.v3+json"
-         }
-       });
--      if (res.status === 200) {
-+      if (res.status === 200) {
-         const data = await res.json();
-         localStorage.setItem("github_file_sha", data.sha);
-         const utf8Str = base64ToUtf8(data.content);
-         const parsed = JSON.parse(utf8Str);
-         if (Array.isArray(parsed)) {
-           localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-           renderCards();
-           if (badge) badge.innerText = "☁️ 同步就绪";
-           if (manual) alert("✅ 成功从 GitHub 同步了 " + parsed.length + " 条数据！");
-         } else {
--          throw new Error("格式非数组");
-+          throw new Error("云端文件内容不是有效的物品数组格式");
-         }
--      } else if (res.status === 404) {
-+      } else if (res.status === 404) {
-+        if (badge) badge.innerText = "☁️ 云端无此文件";
-         if (manual) alert("⚠️ 云端未找到此文件，将在你首次保存时自动创建。");
-+      } else if (res.status === 401) {
-+        if (badge) badge.innerText = "☁️ Token无效";
-+        if (manual) alert("❌ GitHub Token 鉴权失败 (401)，请检查 Token 是否过期或具有 repo 读写权限！");
-+      } else {
-+        const errData = await res.json().catch(() => ({}));
-+        if (badge) badge.innerText = "☁️ 拉取失败";
-+        if (manual) alert(`❌ GitHub 同步失败 (${res.status}): ${errData.message || "请检查仓库配置"}`);
-       }
-     } catch (err) {
-       console.error("GitHub Pull Error:", err);
-       if (badge) badge.innerText = "☁️ 同步异常";
--      if (manual) alert("❌ 拉取失败，请检查网络或 Token 权限。");
-+      if (manual) alert("❌ 拉取失败: " + err.message);
-     }
-   }
-@@ -624,9 +672,11 @@
-     const path = cfg.path || "data.json";
--    const url = `https://api.github.com/repos/${cfg.repo}/contents/${path}`;
-+    const cleanRepo = cfg.repo.trim().replace(/^\/+|\/+$/g, "");
-+    const cleanPath = path.trim().replace(/^\/+/, "");
-+    const url = `https://api.github.com/repos/${cleanRepo}/contents/${cleanPath}`;
-     const items = getItems();
-     const contentBase64 = utf8ToBase64(JSON.stringify(items, null, 2));
-     const sha = localStorage.getItem("github_file_sha");
-     const body = {
-       message: "Sync skincare data: " + new Date().toLocaleString(),
-       content: contentBase64
-     };
-     if (sha) body.sha = sha;
-     try {
-       const res = await fetch(url, {
-         method: "PUT",
-         headers: {
-           Authorization: `Bearer ${cfg.token}`,
-           Accept: "application/vnd.github.v3+json",
-           "Content-Type": "application/json"
-         },
-         body: JSON.stringify(body)
-       });
-       if (res.status === 200 || res.status === 201) {
-         const data = await res.json();
-         if (data.content && data.content.sha) {
-           localStorage.setItem("github_file_sha", data.content.sha);
-         }
-         if (badge) badge.innerText = "☁️ 已推送到云端";
-+      } else if (res.status === 409) {
-+        // SHA 冲突，先自动拉取最新 SHA 再次保存
-+        await pullFromRepo(false);
-       } else {
-         if (badge) badge.innerText = "☁️ 推送失败";
-       }
-     } catch (e) {
-       console.error("GitHub Push Error:", e);
-       if (badge) badge.innerText = "☁️ 推送异常";
-     }
-   }
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>护肤与彩妆极速管理</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card-bg: rgba(26, 29, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
+      --accent: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 90px;
+      overflow-x: hidden;
+    }
+
+    /* 顶部导航与操作栏 */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(15, 17, 23, 0.85);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 16px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      border-radius: 19px;
+      padding: 0 16px 0 36px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-sub);
+      pointer-events: none;
+    }
+
+    /* 一键排序循环按钮 */
+    .sort-cycle-btn {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #c4b5fd;
+      height: 38px;
+      padding: 0 12px;
+      border-radius: 19px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .sort-cycle-btn:active {
+      transform: scale(0.94);
+      background: rgba(139, 92, 246, 0.25);
+    }
+
+    /* 顶部大标签生命周期切换 */
+    .status-segment-scroll {
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px 4px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .status-segment-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .segment-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .segment-tab.active {
+      background: var(--text-main);
+      color: #0f1117;
+      border-color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .badge-count {
+      background: rgba(0, 0, 0, 0.25);
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .segment-tab.active .badge-count {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* 11 个单字分类胶囊栏 */
+    .cat-scroll-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cat-scroll-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 5px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .cat-pill.active {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--accent);
+      color: #c4b5fd;
+      font-weight: 600;
+    }
+
+    .cat-pill .sub-count {
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    /* 物品主列表 */
+    .container {
+      padding: 10px 16px;
+      max-width: 680px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, border-color 0.2s ease;
+    }
+
+    .item-card:active {
+      transform: scale(0.99);
+    }
+
+    .item-thumb-box {
+      width: 76px;
+      height: 76px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: var(--text-sub);
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .item-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .item-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .item-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .item-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.3;
+      word-break: break-all;
+    }
+
+    .status-tag {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 500;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .status-tag.inuse { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .status-tag.unopened { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .status-tag.avoid { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .status-tag.repurchase { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
+
+    /* 添加时间醒目模块 */
+    .added-date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #d1d5db;
+      margin-top: 4px;
+      width: fit-content;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 6px;
+    }
+
+    .tag-pill {
+      background: rgba(139, 92, 246, 0.12);
+      color: #c4b5fd;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 11px;
+    }
+
+    .forecast-pill {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 11px;
+    }
+
+    /* 一键拆封快捷按钮 */
+    .quick-open-btn {
+      align-self: flex-start;
+      margin-top: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+    .quick-open-btn:active {
+      transform: scale(0.94);
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    /* 右下角悬浮猫咪按钮 */
+    .fab-cat {
+      position: fixed;
+      bottom: 84px;
+      right: 18px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 50;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.15s ease;
+    }
+
+    .fab-cat:active {
+      transform: scale(0.88);
+    }
+
+    /* 底部导航栏 */
+    .bottom-tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(15, 17, 23, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 45;
+    }
+
+    .tabbar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-sub);
+      font-size: 11px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .tabbar-item.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tabbar-item span:first-child {
+      font-size: 19px;
+    }
+
+    /* 通用弹窗抽屉遮罩 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-sheet {
+      background: #171922;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      width: 100%;
+      max-width: 600px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: sheetUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* 弹窗顶部专属大面积拍摄框 */
+    .camera-banner {
+      width: 100%;
+      height: 140px;
+      border-radius: var(--radius-md);
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-sub);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .camera-banner:active {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--accent);
+    }
+
+    .camera-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .retake-badge {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #fff;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-submit {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-submit:active {
+      background: var(--accent-hover);
+    }
+
+    /* GitHub 配置弹窗 */
+    .config-card {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部栏 -->
+  <header>
+    <div class="top-bar">
+      <button class="icon-btn" onclick="toggleMenuModal()">☰</button>
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="搜索品名、功效、存放位置..." oninput="renderCards()">
+      </div>
+      <!-- 一键切换排序循环按钮 -->
+      <button id="sortCycleBtn" class="sort-cycle-btn" onclick="cycleSortMode()">
+        🕒 添加时间 ↓
+      </button>
+    </div>
+
+    <!-- 顶部状态大标签：全部 ➔ 不好用 ➔ 会回购 ➔ 未开封 ➔ 使用中 -->
+    <div class="status-segment-scroll">
+      <div class="segment-tab active" onclick="setStatusTab('全部', this)">全部 <span class="badge-count" id="cntAll">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('不好用', this)">👎 不好用 <span class="badge-count" id="cntAvoid">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('会回购', this)">❤️ 会回购 <span class="badge-count" id="cntRepurchase">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('未开封', this)">📦 未开封 <span class="badge-count" id="cntUnopened">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('使用中', this)">🧴 使用中 <span class="badge-count" id="cntInUse">0</span></div>
+    </div>
+
+    <!-- 11 个单字分类胶囊 -->
+    <div class="cat-scroll-wrap" id="catScrollWrap">
+      <!-- 动态注入单字胶囊 -->
+    </div>
+  </header>
+
+  <!-- 列表容器 -->
+  <main class="container">
+    <div id="cardList" class="card-list">
+      <!-- 卡片列表渲染位置 -->
+    </div>
+  </main>
+
+  <!-- 右下角悬浮小猫：短按导入，长按添加 -->
+  <div id="fabCat" class="fab-cat" title="短按极速导入，长按手动添加">🐱</div>
+
+  <!-- 底部固定导航栏 -->
+  <nav class="bottom-tabbar">
+    <button class="tabbar-item active" onclick="switchNavTab('list', this)">
+      <span>📦</span>
+      <span>清单</span>
+    </button>
+    <button class="tabbar-item" onclick="switchNavTab('calendar', this)">
+      <span>📅</span>
+      <span>日历</span>
+    </button>
+  </nav>
+
+  <!-- 手动添加/编辑抽屉弹窗 -->
+  <div id="itemModal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">添加护肤品</h3>
+        <button class="icon-btn" onclick="closeModal('itemModal')">✕</button>
+      </div>
+      <form id="itemForm" class="modal-body" onsubmit="handleSaveItem(event)">
+        <!-- 弹窗最上方大面积拍照取景框 -->
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoUpload(this)">
+        <div class="camera-banner" onclick="document.getElementById('cameraInput').click()">
+          <span style="font-size: 32px;">📷</span>
+          <span id="cameraPromptText">点击拍摄或上传包装图</span>
+          <img id="previewImg" style="display:none;">
+          <span id="retakeBtn" class="retake-badge" style="display:none;">重拍</span>
+        </div>
+
+        <input type="hidden" id="editItemId">
+
+        <div class="form-group">
+          <label>品名 / 规格</label>
+          <input type="text" id="itemName" class="form-input" placeholder="如：修丽可 色修精华" required>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: row; gap: 10px;">
+          <div style="flex: 1;">
+            <label>单字分类</label>
+            <select id="itemCategory" class="form-select">
+              <option value="唇">唇 (日常护唇)</option>
+              <option value="口">口 (彩妆口红)</option>
+              <option value="精">精 (面部精华)</option>
+              <option value="霜">霜 (保湿面霜)</option>
+              <option value="乳">乳 (轻薄乳液)</option>
+              <option value="水">水 (化妆水/喷雾)</option>
+              <option value="眼">眼 (眼霜/眼膜)</option>
+              <option value="妆">妆 (面部彩妆)</option>
+              <option value="体">体 (身体护理)</option>
+              <option value="药">药 (药用软膏)</option>
+              <option value="其">其 (其他杂物)</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label>生命周期状态</label>
+            <select id="itemStatus" class="form-select">
+              <option value="未开封">📦 未开封</option>
+              <option value="使用中">🧴 使用中</option>
+              <option value="会回购">❤️ 会回购</option>
+              <option value="不好用">👎 不好用</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 显眼添加时间修改 -->
+        <div class="form-group">
+          <label>添加时间 (支持补录)</label>
+          <input type="date" id="itemAddedAt" class="form-input">
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: row; gap: 10px;">
+          <div style="flex: 1;">
+            <label>到期日期</label>
+            <input type="date" id="itemExpiry" class="form-input" required>
+          </div>
+          <div style="flex: 1;">
+            <label>开封日期 (选填)</label>
+            <input type="date" id="itemOpenedAt" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: row; gap: 10px;">
+          <div style="flex: 1;">
+            <label>容量/克重 (如 30ml)</label>
+            <input type="text" id="itemVolume" class="form-input" placeholder="30ml">
+          </div>
+          <div style="flex: 1;">
+            <label>规格属性</label>
+            <select id="itemIsSample" class="form-select">
+              <option value="0">正装</option>
+              <option value="1">小样 / 试用装</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>功效标签 (空格分隔，如：美白 去角质)</label>
+          <input type="text" id="itemTags" class="form-input" placeholder="美白 修护 去黑头">
+        </div>
+
+        <div class="form-group">
+          <label>存放位置 (选填)</label>
+          <input type="text" id="itemLocation" class="form-input" placeholder="梳妆台一层 / 镜柜">
+        </div>
+
+        <button type="submit" class="btn-submit">保存物品</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 菜单与 GitHub 设置弹窗 -->
+  <div id="menuModal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title">数据与同步管理</h3>
+        <button class="icon-btn" onclick="closeModal('menuModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="config-card">
+          <h4>☁️ GitHub 云同步配置</h4>
+          <input type="text" id="ghToken" class="form-input" placeholder="GitHub Personal Access Token (ghp_...)">
+          <input type="text" id="ghRepo" class="form-input" placeholder="仓库名 (如: username/skincare-data)">
+          <input type="text" id="ghPath" class="form-input" placeholder="文件存储路径 (默认 data.json)" value="data.json">
+          <button class="btn-submit" onclick="saveGithubConfig()">保存配置</button>
+        </div>
+        <button class="btn-submit" style="background:#2563eb;" onclick="triggerPullCloud()">从 GitHub 立即拉取数据</button>
+        <button class="btn-submit" style="background:#059669;" onclick="triggerPushCloud()">推送到 GitHub 云端</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 11 个单字分类定义
+    const CATEGORIES = ["全部", "唇", "口", "精", "霜", "乳", "水", "眼", "妆", "体", "药", "其"];
+    
+    // 一键排序规则轮播列表
+    const SORT_RULES = [
+      { key: "added_desc", label: "🕒 添加时间 ↓" },
+      { key: "expiry_asc", label: "⏰ 到期时间 ↑" },
+      { key: "name_asc", label: "🔤 品名 A-Z" }
+    ];
+
+    let currentSortIndex = 0;
+    let currentCategory = "全部";
+    let currentLifeStatus = "全部";
+    let photoBase64 = "";
+
+    const STORAGE_KEY = "expiry_items";
+    const CONFIG_KEY = "expiry_github_config";
+
+    // 读取物品列表
+    function getItems() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveItems(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      renderCounters();
+      renderCards();
+      triggerPushCloud(false); // 自动后台静默同步
+    }
+
+    // 状态与分类标签初始化
+    function initCategoryPills() {
+      const wrap = document.getElementById("catScrollWrap");
+      wrap.innerHTML = CATEGORIES.map(c => `
+        <div class="cat-pill ${c === currentCategory ? 'active' : ''}" onclick="setCategory('${c}', this)">
+          <span>${c}</span>
+        </div>
+      `).join("");
+    }
+
+    function setCategory(cat, el) {
+      currentCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
+      el.classList.add("active");
+      renderCards();
+    }
+
+    function setStatusTab(status, el) {
+      currentLifeStatus = status;
+      document.querySelectorAll(".segment-tab").forEach(t => t.classList.remove("active"));
+      el.classList.add("active");
+      renderCards();
+    }
+
+    // 一键循环排序
+    function cycleSortMode() {
+      currentSortIndex = (currentSortIndex + 1) % SORT_RULES.length;
+      document.getElementById("sortCycleBtn").innerText = SORT_RULES[currentSortIndex].label;
+      renderCards();
+    }
+
+    // 渲染卡片列表
+    function renderCards() {
+      const items = getItems();
+      const kw = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      // 筛选
+      let filtered = items.filter(it => {
+        const matchCat = currentCategory === "全部" || it.category === currentCategory;
+        const matchStatus = currentLifeStatus === "全部" || it.status === currentLifeStatus;
+        const matchKw = !kw || 
+          (it.name && it.name.toLowerCase().includes(kw)) ||
+          (it.location && it.location.toLowerCase().includes(kw)) ||
+          (it.tags && it.tags.some(t => t.toLowerCase().includes(kw)));
+        return matchCat && matchStatus && matchKw;
+      });
+
+      // 排序
+      const sortKey = SORT_RULES[currentSortIndex].key;
+      filtered.sort((a, b) => {
+        if (sortKey === "added_desc") {
+          return new Date(b.addedAt || 0) - new Date(a.addedAt || 0);
+        } else if (sortKey === "expiry_asc") {
+          return new Date(a.expiry || "9999-12-31") - new Date(b.expiry || "9999-12-31");
+        } else if (sortKey === "name_asc") {
+          return (a.name || "").localeCompare(b.name || "", "zh-Hans-CN");
+        }
+        return 0;
+      });
+
+      const listEl = document.getElementById("cardList");
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text-sub);">暂无相关物品</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(it => {
+        const statusClass = it.status === "使用中" ? "inuse" : (it.status === "不好用" ? "avoid" : (it.status === "会回购" ? "repurchase" : "unopened"));
+        
+        // 消耗天数智能预测
+        let forecastHtml = "";
+        if (it.volume) {
+          const num = parseFloat(it.volume);
+          if (!isNaN(num) && num > 0) {
+            const days = Math.round(it.category === "精" ? num / 0.8 : (it.category === "水" ? num / 2.5 : num / 0.5));
+            forecastHtml = `<span class="forecast-pill">⏳ 预计可用 ~${days}天</span>`;
+          }
+        }
+
+        const tagsHtml = (it.tags || []).map(t => `<span class="tag-pill">${t}</span>`).join(" ");
+
+        return `
+          <div class="item-card" onclick="editItem('${it.id}')">
+            <div class="item-thumb-box">
+              ${it.photo ? `<img src="${it.photo}">` : it.category}
+            </div>
+            <div class="item-info">
+              <div>
+                <div class="item-header">
+                  <span class="item-name">${it.name}</span>
+                  <span class="status-tag ${statusClass}">${it.status}</span>
+                </div>
+                <!-- 放大且醒目的添加时间 -->
+                <div class="added-date-badge">
+                  📅 入库: ${it.addedAt || '未记录'}
+                </div>
+              </div>
+
+              <div class="meta-row">
+                <span>到期: ${it.expiry}</span>
+                ${it.location ? `<span>📍 ${it.location}</span>` : ""}
+                ${forecastHtml}
+                ${tagsHtml}
+              </div>
+
+              ${it.status === '未开封' ? `
+                <button class="quick-open-btn" onclick="event.stopPropagation(); quickOpenItem('${it.id}')">
+                  ⚡ 立即拆封
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      renderCounters();
+    }
+
+    // 统计更新
+    function renderCounters() {
+      const items = getItems();
+      document.getElementById("cntAll").innerText = items.length;
+      document.getElementById("cntAvoid").innerText = items.filter(i => i.status === "不好用").length;
+      document.getElementById("cntRepurchase").innerText = items.filter(i => i.status === "会回购").length;
+      document.getElementById("cntUnopened").innerText = items.filter(i => i.status === "未开封").length;
+      document.getElementById("cntInUse").innerText = items.filter(i => i.status === "使用中").length;
+    }
+
+    // 快捷拆封
+    function quickOpenItem(id) {
+      const items = getItems();
+      const target = items.find(i => i.id === id);
+      if (target) {
+        target.status = "使用中";
+        target.openedAt = new Date().toISOString().split("T")[0];
+        saveItems(items);
+      }
+    }
+
+    // 表单提交保存
+    function handleSaveItem(e) {
+      e.preventDefault();
+      const id = document.getElementById("editItemId").value || ("item_" + Date.now());
+      const name = document.getElementById("itemName").value.trim();
+      const category = document.getElementById("itemCategory").value;
+      const status = document.getElementById("itemStatus").value;
+      const addedAt = document.getElementById("itemAddedAt").value || new Date().toISOString().split("T")[0];
+      const expiry = document.getElementById("itemExpiry").value;
+      const openedAt = document.getElementById("itemOpenedAt").value;
+      const volume = document.getElementById("itemVolume").value.trim();
+      const isSample = document.getElementById("itemIsSample").value === "1";
+      const tags = document.getElementById("itemTags").value.split(" ").map(s => s.trim()).filter(Boolean);
+      const location = document.getElementById("itemLocation").value.trim();
+
+      const items = getItems();
+      const idx = items.findIndex(i => i.id === id);
+      const newItem = {
+        id, name, category, status, addedAt, expiry, openedAt, volume, isSample, tags, location,
+        photo: photoBase64 || (idx >= 0 ? items[idx].photo : "")
+      };
+
+      if (idx >= 0) {
+        items[idx] = newItem;
+      } else {
+        items.unshift(newItem);
+      }
+
+      saveItems(items);
+      closeModal("itemModal");
+    }
+
+    function editItem(id) {
+      const item = getItems().find(i => i.id === id);
+      if (!item) return;
+      document.getElementById("modalTitle").innerText = "编辑物品";
+      document.getElementById("editItemId").value = item.id;
+      document.getElementById("itemName").value = item.name;
+      document.getElementById("itemCategory").value = item.category;
+      document.getElementById("itemStatus").value = item.status;
+      document.getElementById("itemAddedAt").value = item.addedAt || "";
+      document.getElementById("itemExpiry").value = item.expiry;
+      document.getElementById("itemOpenedAt").value = item.openedAt || "";
+      document.getElementById("itemVolume").value = item.volume || "";
+      document.getElementById("itemIsSample").value = item.isSample ? "1" : "0";
+      document.getElementById("itemTags").value = (item.tags || []).join(" ");
+      document.getElementById("itemLocation").value = item.location || "";
+
+      if (item.photo) {
+        document.getElementById("previewImg").src = item.photo;
+        document.getElementById("previewImg").style.display = "block";
+        document.getElementById("retakeBtn").style.display = "block";
+        document.getElementById("cameraPromptText").style.display = "none";
+        photoBase64 = item.photo;
+      } else {
+        resetPhotoBanner();
+      }
+
+      openModal("itemModal");
+    }
+
+    function resetPhotoBanner() {
+      photoBase64 = "";
+      document.getElementById("previewImg").style.display = "none";
+      document.getElementById("retakeBtn").style.display = "none";
+      document.getElementById("cameraPromptText").style.display = "block";
+    }
+
+    // 图片上传并压缩
+    function handlePhotoUpload(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement("canvas");
+            const maxW = 480;
+            const scale = Math.min(maxW / img.width, 1);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            photoBase64 = canvas.toDataURL("image/jpeg", 0.75);
+
+            document.getElementById("previewImg").src = photoBase64;
+            document.getElementById("previewImg").style.display = "block";
+            document.getElementById("retakeBtn").style.display = "block";
+            document.getElementById("cameraPromptText").style.display = "none";
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // 悬浮小猫长按与短按绑定
+    const fab = document.getElementById("fabCat");
+    let timer = null;
+    let isLongPress = false;
+
+    fab.addEventListener("touchstart", (e) => {
+      isLongPress = false;
+      timer = setTimeout(() => {
+        isLongPress = true;
+        if (navigator.vibrate) navigator.vibrate(40);
+        // 长按触发手动添加
+        document.getElementById("itemForm").reset();
+        document.getElementById("editItemId").value = "";
+        document.getElementById("itemAddedAt").value = new Date().toISOString().split("T")[0];
+        resetPhotoBanner();
+        document.getElementById("modalTitle").innerText = "添加护肤品";
+        openModal("itemModal");
+      }, 450);
+    }, { passive: true });
+
+    fab.addEventListener("touchend", () => {
+      clearTimeout(timer);
+      if (!isLongPress) {
+        // 短按触发导入（可调出文本/图片识别解析器）
+        alert("🐱 调起 Gemini AI 极速录入");
+      }
+    });
+
+    fab.addEventListener("click", () => {
+      // 桌面端无触屏兜底短按
+      if (!('ontouchstart' in window)) {
+        alert("🐱 调起 Gemini AI 极速录入 (长按可手动录入)");
+      }
+    });
+
+    // 模态弹窗切换
+    function openModal(id) { document.getElementById(id).style.display = "flex"; }
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
+    function toggleMenuModal() { openModal("menuModal"); }
+    function switchNavTab(tab, el) {
+      document.querySelectorAll(".tabbar-item").forEach(i => i.classList.remove("active"));
+      el.classList.add("active");
+    }
+
+    // GitHub 同步核心逻辑
+    function getGhConfig() {
+      try {
+        return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveGithubConfig() {
+      const token = document.getElementById("ghToken").value.trim();
+      const repo = document.getElementById("ghRepo").value.trim().replace(/^\/+|\/+$/g, "");
+      const path = document.getElementById("ghPath").value.trim() || "data.json";
+      localStorage.setItem(CONFIG_KEY, JSON.stringify({ token, repo, path }));
+      alert("✅ GitHub 配置已保存！");
+    }
+
+    async function triggerPullCloud() {
+      const cfg = getGhConfig();
+      if (!cfg.token || !cfg.repo) {
+        alert("⚠️ 请先完善 Token 和仓库名！");
+        return;
+      }
+      const url = `https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`;
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "Authorization": cfg.token.startsWith("ghp_") ? `token ${cfg.token}` : `Bearer ${cfg.token}`,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+        if (res.status === 200) {
+          const data = await res.json();
+          localStorage.setItem("gh_file_sha", data.sha);
+          const cleanB64 = data.content.replace(/\s+/g, "");
+          const jsonStr = decodeURIComponent(atob(cleanB64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+          const items = JSON.parse(jsonStr);
+          if (Array.isArray(items)) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            renderCards();
+            alert(`✅ 成功拉取 ${items.length} 件物品！`);
+            closeModal("menuModal");
+          }
+        } else {
+          alert(`❌ 同步失败 HTTP ${res.status}`);
+        }
+      } catch (e) {
+        alert("❌ 连接 api.github.com 异常，请检查网络或代理！");
+      }
+    }
+
+    async function triggerPushCloud(showSuccessAlert = true) {
+      const cfg = getGhConfig();
+      if (!cfg.token || !cfg.repo) return;
+      const url = `https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`;
+      const items = getItems();
+      const jsonStr = JSON.stringify(items, null, 2);
+      const b64 = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode(parseInt(p, 16))));
+      const sha = localStorage.getItem("gh_file_sha");
+
+      try {
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": cfg.token.startsWith("ghp_") ? `token ${cfg.token}` : `Bearer ${cfg.token}`,
+            "Accept": "application/vnd.github.v3+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: "Update cosmetic items: " + new Date().toLocaleString(),
+            content: b64,
+            sha: sha || undefined
+          })
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.content && resData.content.sha) {
+            localStorage.setItem("gh_file_sha", resData.content.sha);
+          }
+          if (showSuccessAlert) alert("✅ 云端同步成功！");
+        }
+      } catch (e) {
+        console.warn("静默同步异常:", e);
+      }
+    }
+
+    // 页面初始化
+    window.addEventListener("DOMContentLoaded", () => {
+      initCategoryPills();
+      renderCards();
+      const cfg = getGhConfig();
+      if (cfg.token) document.getElementById("ghToken").value = cfg.token;
+      if (cfg.repo) document.getElementById("ghRepo").value = cfg.repo;
+      if (cfg.path) document.getElementById("ghPath").value = cfg.path;
+    });
+  </script>
+</body>
+</html>
