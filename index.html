@@ -2,514 +2,877 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>护肤与彩妆极速管理</title>
+  <title>化妆品与药品临期管家</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1117;
-      --card-bg: rgba(26, 29, 38, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --text-main: #f3f4f6;
-      --text-sub: #9ca3af;
-      --accent: #8b5cf6;
-      --accent-hover: #7c3aed;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --success: #10b981;
+      --bg: #F4F4F6;
+      --surface: #FFFFFF;
+      --surface-subtle: #F9FAFB;
+      --border-subtle: rgba(0, 0, 0, 0.06);
+      --border-strong: rgba(0, 0, 0, 0.12);
+
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-tertiary: #94A3B8;
+
+      --accent: #E11D48;
+      --accent-soft: rgba(225, 29, 72, 0.08);
+      --ai-accent: #6366F1;
+      --ai-soft: rgba(99, 102, 241, 0.09);
+
+      --danger: #DC2626;
+      --danger-bg: #FEF2F2;
+      --warning: #D97706;
+      --warning-bg: #FFFBEB;
+      --success: #059669;
+      --success-bg: #ECFDF5;
+
       --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+      --shadow-sheet: 0 -8px 24px rgba(15, 23, 42, 0.12);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     }
 
     body {
       background-color: var(--bg);
       color: var(--text-main);
+      padding-bottom: calc(100px + env(safe-area-inset-bottom));
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: 90px;
-      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* 顶部导航与操作栏 */
+    /* iOS Native Header */
     header {
       position: sticky;
       top: 0;
       z-index: 40;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      background: rgba(15, 17, 23, 0.85);
-      border-bottom: 1px solid var(--card-border);
-      padding: 12px 16px;
+      background: rgba(244, 244, 246, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: max(env(safe-area-inset-top), 10px) 16px 8px;
     }
 
     .top-bar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 12px;
-    }
-
-    .icon-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
-    }
-
-    .icon-btn:active {
-      transform: scale(0.92);
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .search-input-wrap {
-      flex: 1;
+      margin-bottom: 8px;
       position: relative;
     }
 
-    .search-input {
-      width: 100%;
-      height: 38px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      border-radius: 19px;
-      padding: 0 16px 0 36px;
-      color: var(--text-main);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
+    .app-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .search-input:focus {
-      border-color: var(--accent);
+    .title-menu-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-main);
+      padding: 2px 4px;
+      border-radius: var(--radius-sm);
+    }
+
+    .title-menu-trigger h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .badge-sync {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background: rgba(100, 116, 139, 0.12);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .badge-sync.online {
+      background: var(--success-bg);
+      color: var(--success);
+      box-shadow: inset 0 0 0 1px rgba(5, 150, 105, 0.2);
+    }
+
+    /* Title Dropdown Menu */
+    .title-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 6px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      padding: 6px;
+      min-width: 220px;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      animation: menuPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .title-dropdown-menu.show {
+      display: flex;
+    }
+
+    @keyframes menuPop {
+      from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.12s ease;
+    }
+
+    .dropdown-item:active, .dropdown-item:hover {
+      background: var(--surface-subtle);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 6px;
+    }
+
+    /* Search & Compact Filter Row */
+    .search-filter-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-wrapper input {
+      width: 100%;
+      height: 38px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 34px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-wrapper input:focus {
+      border-color: var(--text-main);
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05);
     }
 
     .search-icon {
       position: absolute;
-      left: 12px;
+      left: 11px;
       top: 50%;
       transform: translateY(-50%);
       font-size: 14px;
-      color: var(--text-sub);
+      color: var(--text-tertiary);
       pointer-events: none;
     }
 
-    /* 一键排序循环按钮 */
-    .sort-cycle-btn {
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      color: #c4b5fd;
+    .btn-action-tool {
       height: 38px;
-      padding: 0 12px;
-      border-radius: 19px;
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
+      padding: 0 10px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: inline-flex;
       align-items: center;
       gap: 4px;
       cursor: pointer;
+      box-shadow: var(--shadow-sm);
       white-space: nowrap;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
-    .sort-cycle-btn:active {
-      transform: scale(0.94);
-      background: rgba(139, 92, 246, 0.25);
+    .btn-action-tool:active {
+      transform: scale(0.97);
     }
 
-    /* 顶部大标签生命周期切换 */
+    /* Lifecycle Segmented Scroll */
     .status-segment-scroll {
       display: flex;
       gap: 6px;
-      padding: 10px 16px 4px 16px;
+      padding: 8px 0 4px;
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .status-segment-scroll::-webkit-scrollbar {
-      display: none;
-    }
+    .status-segment-scroll::-webkit-scrollbar { display: none; }
 
     .segment-tab {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 6px 12px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-sub);
-      font-size: 13px;
-      font-weight: 500;
+      gap: 4px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
-      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
     }
 
     .segment-tab.active {
       background: var(--text-main);
-      color: #0f1117;
+      color: #FFF;
       border-color: var(--text-main);
-      font-weight: 600;
     }
 
     .badge-count {
-      background: rgba(0, 0, 0, 0.25);
-      font-size: 11px;
-      padding: 1px 6px;
-      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.08);
+      font-size: 10.5px;
+      padding: 1px 5px;
+      border-radius: 9999px;
+      font-family: var(--font-mono);
     }
     .segment-tab.active .badge-count {
-      background: rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFF;
     }
 
-    /* 11 个单字分类胶囊栏 */
-    .cat-scroll-wrap {
+    /* Horizontal Category Scroller */
+    .cat-scroller-wrap {
       display: flex;
-      align-items: center;
       gap: 6px;
-      padding: 8px 16px;
       overflow-x: auto;
+      padding: 4px 0 2px;
       scrollbar-width: none;
     }
-    .cat-scroll-wrap::-webkit-scrollbar {
-      display: none;
-    }
+    .cat-scroller-wrap::-webkit-scrollbar { display: none; }
 
     .cat-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 5px 10px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      color: var(--text-sub);
-      font-size: 13px;
+      flex: 0 0 auto;
+      padding: 4px 10px;
+      background: transparent;
+      border-radius: 9999px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
 
     .cat-pill.active {
-      background: rgba(139, 92, 246, 0.2);
-      border-color: var(--accent);
-      color: #c4b5fd;
-      font-weight: 600;
+      background: var(--surface);
+      border-color: var(--border-subtle);
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
     }
 
-    .cat-pill .sub-count {
-      font-size: 10px;
-      opacity: 0.7;
-    }
-
-    /* 物品主列表 */
+    /* Main Container */
     .container {
-      padding: 10px 16px;
-      max-width: 680px;
+      max-width: 840px;
       margin: 0 auto;
-      width: 100%;
+      padding: 12px 16px;
     }
 
-    .card-list {
+    .tab-page {
+      display: none;
+    }
+    .tab-page.active {
+      display: block;
+    }
+
+    /* List Layout */
+    .list-mode {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .item-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
       padding: 12px;
       display: flex;
+      align-items: center;
       gap: 12px;
       position: relative;
-      overflow: hidden;
-      transition: transform 0.15s ease, border-color 0.2s ease;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
     .item-card:active {
       transform: scale(0.99);
     }
 
-    .item-thumb-box {
-      width: 76px;
-      height: 76px;
-      border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+    .item-card.selected {
+      border-color: var(--accent);
+      background: #FFFBFB;
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .card-thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: var(--radius-md);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
-      color: var(--text-sub);
-      flex-shrink: 0;
       position: relative;
-      overflow: hidden;
     }
 
-    .item-thumb-box img {
+    .card-thumb img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .item-info {
+    .card-thumb .fallback-icon {
+      font-size: 24px;
+    }
+
+    .card-main {
       flex: 1;
       min-width: 0;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      gap: 3px;
     }
 
-    .item-header {
+    .title-row {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 6px;
     }
 
     .item-name {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       color: var(--text-main);
-      line-height: 1.3;
-      word-break: break-all;
-    }
-
-    .status-tag {
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 6px;
-      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
-      flex-shrink: 0;
     }
-    .status-tag.inuse { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-    .status-tag.unopened { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-    .status-tag.avoid { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .status-tag.repurchase { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
 
-    /* 添加时间醒目模块 */
-    .added-date-badge {
-      display: inline-flex;
+    .tags-container {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .tag-meta {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 6px;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .tag-cat { background: rgba(15, 23, 42, 0.05); color: #334155; }
+    .tag-opened { background: #F0F9FF; color: #0284C7; }
+    .tag-unopened { background: #F8FAFC; color: #64748B; border: 1px solid rgba(0,0,0,0.04); }
+    .tag-sample { background: #FDF2F8; color: #BE185D; border: 1px solid #FCE7F3; }
+    .tag-price { background: #ECFDF5; color: #059669; font-family: var(--font-mono); }
+    .tag-qty { background: #FEF2F2; color: #DC2626; font-family: var(--font-mono); font-weight: 700; }
+    .tag-custom { background: #EEF2FF; color: #4F46E5; }
+
+    .expiry-line {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
       align-items: center;
       gap: 4px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      padding: 2px 7px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #d1d5db;
-      margin-top: 4px;
-      width: fit-content;
-    }
-
-    .meta-row {
-      display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-sub);
-      margin-top: 6px;
     }
 
-    .tag-pill {
-      background: rgba(139, 92, 246, 0.12);
-      color: #c4b5fd;
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-size: 11px;
+    .card-aside {
+      text-align: right;
+      flex-shrink: 0;
+      min-width: 76px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
     }
+
+    .countdown-num {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .countdown-unit {
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 1px;
+    }
+
+    .status-good { color: var(--text-main); }
+    .status-warning { color: var(--warning); }
+    .status-danger { color: var(--danger); }
+
+    .countdown-label {
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 3px;
+      padding: 2px 6px;
+      border-radius: 9999px;
+    }
+
+    .pill-warning { background: var(--warning-bg); color: var(--warning); }
+    .pill-danger { background: var(--danger-bg); color: var(--danger); }
 
     .forecast-pill {
-      background: rgba(245, 158, 11, 0.12);
-      color: #fcd34d;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
       border-radius: 4px;
-      padding: 1px 5px;
-      font-size: 11px;
-    }
-
-    /* 一键拆封快捷按钮 */
-    .quick-open-btn {
-      align-self: flex-start;
-      margin-top: 6px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #6ee7b7;
-      font-size: 12px;
-      padding: 3px 10px;
-      border-radius: 8px;
-      cursor: pointer;
+      background: rgba(0,0,0,0.04);
+      color: var(--text-muted);
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-weight: 500;
-    }
-    .quick-open-btn:active {
-      transform: scale(0.94);
-      background: rgba(16, 185, 129, 0.25);
+      gap: 2px;
+      margin-top: 2px;
     }
 
-    /* 右下角悬浮猫咪按钮 */
-    .fab-cat {
-      position: fixed;
-      bottom: 84px;
-      right: 18px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #a855f7, #6366f1);
-      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    .forecast-pill.alert {
+      background: var(--danger-bg);
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .quick-unseal-btn {
+      background: #F1F5F9;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-size: 11px;
+      padding: 2px 6px;
+      cursor: pointer;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      margin-top: 4px;
+    }
+
+    /* Grid/Gallery Mode */
+    .grid-mode {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .grid-mode .item-card {
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+      align-items: stretch;
+    }
+
+    .grid-mode .card-thumb {
+      width: 100%;
+      height: 130px;
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .grid-mode .card-main {
+      padding: 10px;
+      gap: 6px;
+    }
+
+    .grid-mode .item-name {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .grid-mode .grid-bottom-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    /* Batch Selection Checkbox */
+    .select-check-dot {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      background: #FFF;
+      display: none;
+      align-items: center;
       justify-content: center;
-      font-size: 24px;
+      z-index: 10;
+      font-size: 12px;
+      color: transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .batch-mode .select-check-dot {
+      display: flex;
+    }
+
+    .item-card.selected .select-check-dot {
+      background: var(--text-main);
+      border-color: var(--text-main);
+      color: #FFF;
+    }
+
+    /* Floating Batch Panel */
+    .batch-floating-panel {
+      position: fixed;
+      bottom: calc(76px + env(safe-area-inset-bottom));
+      left: 16px;
+      right: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      padding: 12px 16px;
+      color: #FFF;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+      z-index: 70;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: floatUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .batch-floating-panel.show {
+      display: flex;
+    }
+
+    .batch-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .batch-action-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .batch-action-tabs::-webkit-scrollbar { display: none; }
+
+    .batch-sub-tab {
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      color: #E2E8F0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 9999px;
       cursor: pointer;
-      z-index: 50;
-      user-select: none;
-      -webkit-user-select: none;
-      transition: transform 0.15s ease;
+      white-space: nowrap;
+    }
+    .batch-sub-tab.active {
+      background: #FFF;
+      color: #0F172A;
     }
 
-    .fab-cat:active {
-      transform: scale(0.88);
+    .batch-action-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
-    /* 底部导航栏 */
-    .bottom-tabbar {
+    .batch-select, .batch-input {
+      flex: 1;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-sm);
+      color: #FFF;
+      padding: 0 10px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .batch-select option {
+      background: #1E293B;
+      color: #FFF;
+    }
+
+    .batch-apply-btn {
+      background: #FFF;
+      color: #0F172A;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0 14px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .batch-del-btn {
+      background: var(--danger);
+      color: #FFF;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+
+    /* Native Bottom Tabbar */
+    .native-tabbar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 64px;
-      background: rgba(15, 17, 23, 0.94);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid var(--card-border);
+      height: calc(64px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid var(--border-subtle);
       display: flex;
-      justify-content: space-around;
       align-items: center;
-      z-index: 45;
+      justify-content: space-around;
+      z-index: 60;
     }
 
-    .tabbar-item {
+    .tab-btn {
+      flex: 1;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 3px;
-      color: var(--text-sub);
-      font-size: 11px;
+      color: var(--text-tertiary);
       cursor: pointer;
-      background: none;
       border: none;
+      background: transparent;
+      transition: color 0.15s ease;
     }
 
-    .tabbar-item.active {
-      color: var(--accent);
-      font-weight: 600;
+    .tab-btn.active {
+      color: var(--text-main);
     }
 
-    .tabbar-item span:first-child {
+    .tab-btn .tab-icon {
       font-size: 19px;
+      line-height: 1;
     }
 
-    /* 通用弹窗抽屉遮罩 */
-    .modal-overlay {
+    .tab-btn .tab-title {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    /* Floating Cat Button */
+    .fab-cat {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      bottom: calc(76px + env(safe-area-inset-bottom));
+      right: 18px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1E293B, #0F172A);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: pointer;
+      z-index: 55;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.15s ease;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+    }
+    .fab-cat:active {
+      transform: scale(0.92);
+    }
+
+    /* Modals & Bottom Sheets */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       z-index: 100;
       display: none;
       align-items: flex-end;
       justify-content: center;
     }
 
-    .modal-sheet {
-      background: #171922;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    .sheet-card {
+      background: var(--surface);
       width: 100%;
-      max-width: 600px;
+      max-width: 540px;
+      border-radius: 26px 26px 0 0;
+      padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
       max-height: 88vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: sheetUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+      box-shadow: var(--shadow-sheet);
+      animation: sheetIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @keyframes sheetUp {
+    @keyframes sheetIn {
       from { transform: translateY(100%); }
       to { transform: translateY(0); }
     }
 
-    .modal-header {
-      padding: 16px;
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 9999px;
+      background: #CBD5E1;
+      margin: 0 auto 14px;
+    }
+
+    .sheet-header-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .sheet-header-title h2 {
+      font-size: 17.5px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .sheet-close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 13px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--card-border);
+      justify-content: center;
+      cursor: pointer;
     }
 
-    .modal-title {
-      font-size: 16px;
-      font-weight: 600;
+    /* Centered Modal Overlay */
+    .sheet-backdrop.modal-centered {
+      align-items: center;
+      padding: 20px;
+    }
+    .sheet-backdrop.modal-centered .sheet-card {
+      border-radius: var(--radius-xl);
+      animation: popCenter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 85vh;
+    }
+    .sheet-backdrop.modal-centered .sheet-handle {
+      display: none;
     }
 
-    .modal-body {
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    @keyframes popCenter {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
-    /* 弹窗顶部专属大面积拍摄框 */
+    /* Camera Viewfinder Box */
     .camera-banner {
       width: 100%;
-      height: 140px;
+      height: 120px;
       border-radius: var(--radius-md);
-      border: 2px dashed rgba(255, 255, 255, 0.15);
-      background: rgba(255, 255, 255, 0.02);
+      border: 2px dashed rgba(15, 23, 42, 0.15);
+      background: var(--surface-subtle);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      color: var(--text-sub);
+      gap: 6px;
+      color: var(--text-muted);
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: all 0.2s;
-    }
-
-    .camera-banner:active {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--accent);
+      margin-bottom: 14px;
     }
 
     .camera-banner img {
@@ -523,261 +886,681 @@
 
     .retake-badge {
       position: absolute;
-      right: 10px;
-      bottom: 10px;
+      right: 8px;
+      bottom: 8px;
       background: rgba(0, 0, 0, 0.75);
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
       color: #fff;
     }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    /* Form Fields */
+    .form-cell {
+      margin-bottom: 12px;
     }
 
-    .form-group label {
-      font-size: 13px;
-      color: var(--text-sub);
+    .form-cell label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
     }
 
-    .form-input, .form-select, .form-textarea {
+    .form-cell input, .form-cell select, .form-cell textarea {
       width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
+      padding: 9px 12px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-cell input:focus, .form-cell select:focus, .form-cell textarea:focus {
+      border-color: var(--text-main);
+      background: #FFF;
+    }
+
+    .btn-submit-main {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--text-main);
+      color: #FFF;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      background: var(--surface-subtle);
       color: var(--text-main);
       font-size: 14px;
-      outline: none;
-    }
-
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      border-color: var(--accent);
-    }
-
-    .btn-submit {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 12px;
-      font-size: 15px;
       font-weight: 600;
+      border: 1px solid var(--border-subtle);
       cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
     }
 
-    .btn-submit:active {
-      background: var(--accent-hover);
+    /* Calendar Grid */
+    .calendar-container {
+      background: var(--surface);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
     }
 
-    /* GitHub 配置弹窗 */
-    .config-card {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 12px;
-      border-radius: var(--radius-sm);
+    .cal-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .cal-title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .cal-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+
+    .cal-grid-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+
+    .cal-day-item {
+      height: 48px;
+      border-radius: var(--radius-md);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: all 0.12s ease;
+    }
+
+    .cal-day-item.other-month {
+      color: #CBD5E1;
+    }
+
+    .cal-day-item.selected {
+      background: var(--text-main) !important;
+      color: #FFF !important;
+    }
+
+    .cal-day-item.today:not(.selected) {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .cal-dots-group {
+      display: flex;
+      gap: 2px;
+      margin-top: 3px;
+      height: 5px;
+    }
+
+    .cal-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    /* Filter Dashboard */
+    .filter-dashboard-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+    }
+
+    .filter-section-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tag-cloud-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .tag-cloud-pill {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.12s ease;
+    }
+    .tag-cloud-pill.active {
+      background: var(--text-main);
+      color: #FFF;
+      border-color: var(--text-main);
+    }
+
+    .empty-prompt {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
 
-  <!-- 顶部栏 -->
-  <header>
+  <!-- Top Native Header -->
+  <header id="mainHeader">
     <div class="top-bar">
-      <button class="icon-btn" onclick="toggleMenuModal()">☰</button>
-      <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" class="search-input" placeholder="搜索品名、功效、存放位置..." oninput="renderCards()">
+      <div class="app-title-group">
+        <button class="title-menu-trigger" onclick="toggleTitleMenu(event)">
+          <span style="font-size:18px;">☰</span>
+          <h1>临期管家</h1>
+          <span style="font-size:11px; opacity:0.6;">▼</span>
+        </button>
+        <span class="badge-sync" id="syncStatusBadge">● 本地</span>
       </div>
-      <!-- 一键切换排序循环按钮 -->
-      <button id="sortCycleBtn" class="sort-cycle-btn" onclick="cycleSortMode()">
-        🕒 添加时间 ↓
+
+      <!-- Dropdown Menu for Settings -->
+      <div class="title-dropdown-menu" id="titleDropdownMenu" onclick="event.stopPropagation()">
+        <button class="dropdown-item" onclick="openRepoConfigModal()">
+          <span>🔑</span> GitHub Token 云端直连
+        </button>
+        <button class="dropdown-item" onclick="triggerManualSync()">
+          <span>🔄</span> 立即从 GitHub 同步数据
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" onclick="exportDataJson()">
+          <span>💾</span> 备份数据到本地 JSON
+        </button>
+        <button class="dropdown-item" onclick="document.getElementById('importFileInput').click(); closeTitleMenu();">
+          <span>📂</span> 从本地 JSON 还原数据
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" style="color:var(--danger);" onclick="clearAllItemsPrompt()">
+          <span>🗑️</span> 清空所有物品数据
+        </button>
+      </div>
+
+      <!-- Right Top: List/Gallery Mode Switcher -->
+      <button class="btn-action-tool" id="btnLayoutToggle" onclick="toggleLayout()" title="切换列表/画廊">
+        <span id="layoutText">📋 列表</span>
       </button>
     </div>
 
-    <!-- 顶部状态大标签：全部 ➔ 不好用 ➔ 会回购 ➔ 未开封 ➔ 使用中 -->
-    <div class="status-segment-scroll">
-      <div class="segment-tab active" onclick="setStatusTab('全部', this)">全部 <span class="badge-count" id="cntAll">0</span></div>
-      <div class="segment-tab" onclick="setStatusTab('不好用', this)">👎 不好用 <span class="badge-count" id="cntAvoid">0</span></div>
-      <div class="segment-tab" onclick="setStatusTab('会回购', this)">❤️ 会回购 <span class="badge-count" id="cntRepurchase">0</span></div>
-      <div class="segment-tab" onclick="setStatusTab('未开封', this)">📦 未开封 <span class="badge-count" id="cntUnopened">0</span></div>
-      <div class="segment-tab" onclick="setStatusTab('使用中', this)">🧴 使用中 <span class="badge-count" id="cntInUse">0</span></div>
+    <!-- Integrated Search & Cycle Sort Row -->
+    <div class="search-filter-row" id="searchFilterRow">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="searchInput" placeholder="搜索品名、标签或备注..." oninput="renderCards()">
+      </div>
+      <button class="btn-action-tool" id="btnSortCycle" onclick="cycleSort()" title="单点循环切换排序">
+        <span id="sortCycleText">🕒 添加时间 ↓</span>
+      </button>
     </div>
 
-    <!-- 11 个单字分类胶囊 -->
-    <div class="cat-scroll-wrap" id="catScrollWrap">
-      <!-- 动态注入单字胶囊 -->
+    <!-- Lifecycle Segmented Bar -->
+    <div class="status-segment-scroll" id="lifecycleSegmentBar">
+      <div class="segment-tab active" onclick="setStatusTab('全部', this)">全部 <span class="badge-count" id="cntAll">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('空瓶', this)">🧴 空瓶 <span class="badge-count" id="cntEmpty">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('未开封', this)">📦 未开封 <span class="badge-count" id="cntUnopened">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('已开封', this)">✨ 已开封 <span class="badge-count" id="cntOpened">0</span></div>
+      <div class="segment-tab" onclick="setStatusTab('使用中', this)">💧 使用中 <span class="badge-count" id="cntInUse">0</span></div>
     </div>
+
+    <!-- 2-Character Categories (Sorted Dynamically by Count Descending) -->
+    <div class="cat-scroller-wrap" id="catPillsContainer"></div>
   </header>
 
-  <!-- 列表容器 -->
+  <!-- Main Container -->
   <main class="container">
-    <div id="cardList" class="card-list">
-      <!-- 卡片列表渲染位置 -->
+    <!-- View 1: Inventory List -->
+    <div id="tabInventory" class="tab-page active">
+      <div id="cardsContainer" class="list-mode"></div>
+      <div class="empty-prompt" id="emptyState" style="display:none;">
+        <div style="font-size:36px; margin-bottom:8px;">📦</div>
+        <p style="font-weight:700; font-size:14px; color:var(--text-main);">未找到任何匹配物品</p>
+        <p style="font-size:12px; margin-top:4px; color:var(--text-tertiary);">轻按右下角 🐱 极速导入，或长按手动添加</p>
+      </div>
+    </div>
+
+    <!-- View 2: Dedicated Filter & Health Matrix -->
+    <div id="tabFilter" class="tab-page">
+      <div class="filter-dashboard-card">
+        <div class="filter-section-title">
+          <span>🏷️ 热门标签聚合</span>
+          <button class="btn-action-tool" style="height:26px; padding:0 8px; font-size:11px;" onclick="resetDashboardFilters()">重置所有</button>
+        </div>
+        <div class="tag-cloud-wrap" id="tagCloudContainer"></div>
+
+        <div class="filter-section-title" style="margin-top:10px;">
+          <span>⏰ 临期健康度矩阵</span>
+        </div>
+        <div class="tag-cloud-wrap" id="expiryHealthFilterGroup">
+          <button class="tag-cloud-pill active" data-val="全部" onclick="setDashboardFilter('expiry', '全部', this)">全部</button>
+          <button class="tag-cloud-pill" data-val="临期" onclick="setDashboardFilter('expiry', '临期', this)">⚠️ 30天内临期</button>
+          <button class="tag-cloud-pill" data-val="过期" onclick="setDashboardFilter('expiry', '过期', this)">🚨 已过期</button>
+          <button class="tag-cloud-pill" data-val="充足" onclick="setDashboardFilter('expiry', '充足', this)">🟢 充足安全期</button>
+        </div>
+
+        <div class="filter-section-title" style="margin-top:10px;">
+          <span>🧪 规格规格类型</span>
+        </div>
+        <div class="tag-cloud-wrap" id="sampleFilterGroup">
+          <button class="tag-cloud-pill active" data-val="全部" onclick="setDashboardFilter('spec', '全部', this)">全部</button>
+          <button class="tag-cloud-pill" data-val="小样" onclick="setDashboardFilter('spec', '小样', this)">✨ 小样 / 中样</button>
+          <button class="tag-cloud-pill" data-val="正装" onclick="setDashboardFilter('spec', '正装', this)">📦 正装大容量</button>
+        </div>
+      </div>
+
+      <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:10px;" id="dashboardResultCountText">筛选结果清单</div>
+      <div id="filterResultCardsContainer" class="list-mode"></div>
+    </div>
+
+    <!-- View 3: Calendar Timeline (新增、开封、到期) -->
+    <div id="tabCalendar" class="tab-page">
+      <div class="calendar-container">
+        <div class="cal-header-bar">
+          <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
+          <div class="cal-title" id="calMonthTitle">2026年 10月</div>
+          <button class="cal-nav-btn" onclick="nextMonth()">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="cal-grid-body" id="calDaysGrid"></div>
+
+        <div style="display:flex; justify-content:center; gap:14px; margin-top:14px; font-size:11px; color:var(--text-muted); border-top:1px solid var(--border-subtle); padding-top:10px;">
+          <span><span style="color:#2563EB;">●</span> 蓝色: 新增入库</span>
+          <span><span style="color:#9333EA;">●</span> 紫色: 首次开封</span>
+          <span><span style="color:#DC2626;">●</span> 红色: 保质到期</span>
+        </div>
+      </div>
+
+      <div class="calendar-events-wrap">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h3 id="calSelectedDateText" style="font-size:13.5px; font-weight:700; color:var(--text-muted);">当天时间线清单</h3>
+          <div style="display:flex; gap:4px;">
+            <button class="batch-sub-tab active" id="calFilterAll" onclick="setCalEventTypeFilter('全部')">全部</button>
+            <button class="batch-sub-tab" id="calFilterAdded" onclick="setCalEventTypeFilter('新增')">➕ 新增</button>
+            <button class="batch-sub-tab" id="calFilterOpened" onclick="setCalEventTypeFilter('开封')">✂️ 开封</button>
+            <button class="batch-sub-tab" id="calFilterExpiry" onclick="setCalEventTypeFilter('到期')">⏰ 到期</button>
+          </div>
+        </div>
+        <div id="calDayEventList" class="list-mode"></div>
+      </div>
     </div>
   </main>
 
-  <!-- 右下角悬浮小猫：短按导入，长按添加 -->
+  <!-- Floating Batch Action Panel -->
+  <div class="batch-floating-panel" id="batchPanel">
+    <div class="batch-header-row">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="font-size:12px; font-weight:700;" id="batchCountBadge">已选 0 项</span>
+        <button class="batch-sub-tab" onclick="selectAll()">全选</button>
+        <button class="batch-sub-tab" onclick="deselectAll()">清空</button>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="batch-del-btn" onclick="deleteSelected()">🗑️ 删除</button>
+        <button class="batch-sub-tab" onclick="toggleBatchMode()">退出</button>
+      </div>
+    </div>
+
+    <!-- Batch Sub-action Selector Tabs -->
+    <div class="batch-action-tabs">
+      <button class="batch-sub-tab active" id="tabBatchActionStatus" onclick="switchBatchAction('status')">💧 改状态</button>
+      <button class="batch-sub-tab" id="tabBatchActionCat" onclick="switchBatchAction('category')">💄 改分类</button>
+      <button class="batch-sub-tab" id="tabBatchActionTag" onclick="switchBatchAction('tag')">🏷️ 加标签</button>
+      <button class="batch-sub-tab" id="tabBatchActionQty" onclick="switchBatchAction('quantity')">🔢 改数量</button>
+    </div>
+
+    <!-- Sub Action Bar (Status) -->
+    <div class="batch-action-bar" id="batchActionStatusWrap">
+      <select id="batchTargetStatusSelect" class="batch-select">
+        <option value="未开封">📦 设为 未开封</option>
+        <option value="使用中">💧 设为 使用中 (补全开封日)</option>
+        <option value="已开封">✨ 设为 已开封</option>
+        <option value="空瓶">🧴 设为 空瓶</option>
+      </select>
+      <button class="batch-apply-btn" onclick="applyBatchStatus()">应用状态</button>
+    </div>
+
+    <!-- Sub Action Bar (Category) -->
+    <div class="batch-action-bar" id="batchActionCatWrap" style="display:none;">
+      <select id="batchTargetCatSelect" class="batch-select"></select>
+      <button class="batch-apply-btn" onclick="applyBatchCategory()">修改分类</button>
+    </div>
+
+    <!-- Sub Action Bar (Tags) -->
+    <div class="batch-action-bar" id="batchActionTagWrap" style="display:none;">
+      <input type="text" id="batchTargetTagInput" class="batch-input" placeholder="输入标签，空格隔开 (如: 小样 极速)">
+      <button class="batch-apply-btn" onclick="applyBatchTags()">追加标签</button>
+    </div>
+
+    <!-- Sub Action Bar (Quantity) -->
+    <div class="batch-action-bar" id="batchActionQtyWrap" style="display:none;">
+      <input type="number" id="batchTargetQtyInput" class="batch-input" placeholder="目标数量 (如: 1, 2, 5)" min="1" value="1">
+      <button class="batch-apply-btn" onclick="applyBatchQuantity()">更新数量</button>
+    </div>
+  </div>
+
+  <!-- Floating Cat (🐱) Action Button -->
   <div id="fabCat" class="fab-cat" title="短按极速导入，长按手动添加">🐱</div>
 
-  <!-- 底部固定导航栏 -->
-  <nav class="bottom-tabbar">
-    <button class="tabbar-item active" onclick="switchNavTab('list', this)">
-      <span>📦</span>
-      <span>清单</span>
+  <!-- Bottom Navigation Tabbar -->
+  <nav class="native-tabbar">
+    <button class="tab-btn active" id="navInventory" onclick="switchNavTab('inventory')">
+      <span class="tab-icon">📦</span>
+      <span class="tab-title">清单</span>
     </button>
-    <button class="tabbar-item" onclick="switchNavTab('calendar', this)">
-      <span>📅</span>
-      <span>日历</span>
+    <button class="tab-btn" id="navFilter" onclick="switchNavTab('filter')">
+      <span class="tab-icon">🔍</span>
+      <span class="tab-title">筛选</span>
+    </button>
+    <button class="tab-btn" id="navCalendar" onclick="switchNavTab('calendar')">
+      <span class="tab-icon">📅</span>
+      <span class="tab-title">日历</span>
     </button>
   </nav>
 
-  <!-- 手动添加/编辑抽屉弹窗 -->
-  <div id="itemModal" class="modal-overlay">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3 id="modalTitle" class="modal-title">添加护肤品</h3>
-        <button class="icon-btn" onclick="closeModal('itemModal')">✕</button>
+  <!-- Sheet: Manual Add / Edit Modal (Camera First) -->
+  <div class="sheet-backdrop" id="manualModal" onclick="closeModal('manualModal')">
+    <div class="sheet-card" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header-title">
+        <h2 id="modalTitle">添加物品</h2>
+        <button class="sheet-close-btn" onclick="closeModal('manualModal')">✕</button>
       </div>
-      <form id="itemForm" class="modal-body" onsubmit="handleSaveItem(event)">
-        <!-- 弹窗最上方大面积拍照取景框 -->
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoUpload(this)">
-        <div class="camera-banner" onclick="document.getElementById('cameraInput').click()">
-          <span style="font-size: 32px;">📷</span>
-          <span id="cameraPromptText">点击拍摄或上传包装图</span>
-          <img id="previewImg" style="display:none;">
-          <span id="retakeBtn" class="retake-badge" style="display:none;">重拍</span>
+
+      <form id="itemForm" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="itemId">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelected(event)">
+
+        <!-- Prominent Top Camera Viewfinder Box -->
+        <div class="camera-banner" id="cameraBanner" onclick="document.getElementById('cameraInput').click()">
+          <span style="font-size: 26px;">📷</span>
+          <span style="font-size: 13px; font-weight: 600;">拍照或选取包装图</span>
         </div>
 
-        <input type="hidden" id="editItemId">
-
-        <div class="form-group">
-          <label>品名 / 规格</label>
-          <input type="text" id="itemName" class="form-input" placeholder="如：修丽可 色修精华" required>
+        <div class="form-cell">
+          <label>品名 / 型号 *</label>
+          <input type="text" id="itemName" placeholder="例如：雅诗兰黛DW粉底液 30ml" required>
         </div>
 
-        <div class="form-group" style="display: flex; flex-direction: row; gap: 10px;">
-          <div style="flex: 1;">
-            <label>单字分类</label>
-            <select id="itemCategory" class="form-select">
-              <option value="唇">唇 (日常护唇)</option>
-              <option value="口">口 (彩妆口红)</option>
-              <option value="精">精 (面部精华)</option>
-              <option value="霜">霜 (保湿面霜)</option>
-              <option value="乳">乳 (轻薄乳液)</option>
-              <option value="水">水 (化妆水/喷雾)</option>
-              <option value="眼">眼 (眼霜/眼膜)</option>
-              <option value="妆">妆 (面部彩妆)</option>
-              <option value="体">体 (身体护理)</option>
-              <option value="药">药 (药用软膏)</option>
-              <option value="其">其 (其他杂物)</option>
-            </select>
+        <div style="display:flex; gap:10px;">
+          <div class="form-cell" style="flex:1;">
+            <label>所属分类</label>
+            <select id="itemCat"></select>
           </div>
-          <div style="flex: 1;">
+          <div class="form-cell" style="flex:1;">
             <label>生命周期状态</label>
-            <select id="itemStatus" class="form-select">
+            <select id="itemStatus">
               <option value="未开封">📦 未开封</option>
-              <option value="使用中">🧴 使用中</option>
-              <option value="会回购">❤️ 会回购</option>
-              <option value="不好用">👎 不好用</option>
+              <option value="使用中">💧 使用中</option>
+              <option value="已开封">✨ 已开封</option>
+              <option value="空瓶">🧴 空瓶</option>
             </select>
           </div>
         </div>
 
-        <!-- 显眼添加时间修改 -->
-        <div class="form-group">
-          <label>添加时间 (支持补录)</label>
-          <input type="date" id="itemAddedAt" class="form-input">
-        </div>
-
-        <div class="form-group" style="display: flex; flex-direction: row; gap: 10px;">
-          <div style="flex: 1;">
-            <label>到期日期</label>
-            <input type="date" id="itemExpiry" class="form-input" required>
+        <div style="display:flex; gap:10px;">
+          <div class="form-cell" style="flex:1;">
+            <label>规格容量 (如 30ml / 50g)</label>
+            <input type="text" id="itemCapacity" placeholder="30ml">
           </div>
-          <div style="flex: 1;">
-            <label>开封日期 (选填)</label>
-            <input type="date" id="itemOpenedAt" class="form-input">
+          <div class="form-cell" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+            <label>小样 / 试用装</label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; cursor:pointer; margin-top:6px;">
+              <input type="checkbox" id="itemIsSample" style="width:18px; height:18px;"> 属于小样/中样
+            </label>
           </div>
         </div>
 
-        <div class="form-group" style="display: flex; flex-direction: row; gap: 10px;">
-          <div style="flex: 1;">
-            <label>容量/克重 (如 30ml)</label>
-            <input type="text" id="itemVolume" class="form-input" placeholder="30ml">
+        <div style="display:flex; gap:10px;">
+          <div class="form-cell" style="flex:1;">
+            <label>库存数量</label>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button type="button" class="btn-secondary" style="padding:8px 12px;" onclick="adjustModalQty(-1)">-</button>
+              <input type="number" id="itemQuantity" min="1" value="1" required style="text-align:center; font-family:var(--font-mono); font-weight:700;">
+              <button type="button" class="btn-secondary" style="padding:8px 12px;" onclick="adjustModalQty(1)">+</button>
+            </div>
           </div>
-          <div style="flex: 1;">
-            <label>规格属性</label>
-            <select id="itemIsSample" class="form-select">
-              <option value="0">正装</option>
-              <option value="1">小样 / 试用装</option>
-            </select>
+          <div class="form-cell" style="flex:1;">
+            <label>买入价格 (元)</label>
+            <input type="number" step="0.01" id="itemPrice" placeholder="例如: 299">
           </div>
         </div>
 
-        <div class="form-group">
-          <label>功效标签 (空格分隔，如：美白 去角质)</label>
-          <input type="text" id="itemTags" class="form-input" placeholder="美白 修护 去黑头">
+        <div style="display:flex; gap:10px;">
+          <div class="form-cell" style="flex:1;">
+            <label>入库添加日期 *</label>
+            <input type="date" id="itemCreatedAt" required>
+          </div>
+          <div class="form-cell" style="flex:1;">
+            <label>首次开封日期</label>
+            <input type="date" id="itemOpenedAt">
+          </div>
         </div>
 
-        <div class="form-group">
-          <label>存放位置 (选填)</label>
-          <input type="text" id="itemLocation" class="form-input" placeholder="梳妆台一层 / 镜柜">
+        <div class="form-cell">
+          <label>保质到期日期 *</label>
+          <input type="date" id="itemExpiry" required>
         </div>
 
-        <button type="submit" class="btn-submit">保存物品</button>
+        <div class="form-cell">
+          <label>自定义标签 (空格隔开，如: 梳妆台 早C晚A 控油)</label>
+          <input type="text" id="itemTags" placeholder="梳妆台 早C晚A 控油">
+        </div>
+
+        <div class="form-cell">
+          <label>存放位置与备注</label>
+          <input type="text" id="itemNotes" placeholder="梳妆台抽屉 / 批号 / PAO 12M">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button type="button" class="btn-secondary" style="color:var(--danger);" id="btnDelInModal" onclick="deleteCurrentModalItem()">删除物品</button>
+          <button type="button" class="btn-secondary" onclick="closeModal('manualModal')">取消</button>
+          <button type="submit" class="btn-submit-main">保存入库</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- 菜单与 GitHub 设置弹窗 -->
-  <div id="menuModal" class="modal-overlay">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <h3 class="modal-title">数据与同步管理</h3>
-        <button class="icon-btn" onclick="closeModal('menuModal')">✕</button>
+  <!-- Sheet: Centered Gemini Quick Import -->
+  <div class="sheet-backdrop modal-centered" id="aiModal" onclick="closeModal('aiModal')">
+    <div class="sheet-card" onclick="event.stopPropagation()">
+      <div class="sheet-header-title">
+        <h2>✨ Gemini 极速导入</h2>
+        <button class="sheet-close-btn" onclick="closeModal('aiModal')">✕</button>
       </div>
-      <div class="modal-body">
-        <div class="config-card">
-          <h4>☁️ GitHub 云同步配置</h4>
-          <input type="text" id="ghToken" class="form-input" placeholder="GitHub Personal Access Token (ghp_...)">
-          <input type="text" id="ghRepo" class="form-input" placeholder="仓库名 (如: username/skincare-data)">
-          <input type="text" id="ghPath" class="form-input" placeholder="文件存储路径 (默认 data.json)" value="data.json">
-          <button class="btn-submit" onclick="saveGithubConfig()">保存配置</button>
-        </div>
-        <button class="btn-submit" style="background:#2563eb;" onclick="triggerPullCloud()">从 GitHub 立即拉取数据</button>
-        <button class="btn-submit" style="background:#059669;" onclick="triggerPushCloud()">推送到 GitHub 云端</button>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">直接粘贴订单、小票或文本列表，自动识别品名、容量、保质期及价格：</p>
+      <div class="form-cell">
+        <textarea id="aiInput" rows="6" placeholder="长按此处选择“粘贴”&#10;支持自由文本或结构化 JSON：&#10;1. 雅诗兰黛小棕瓶精华 50ml 2027-08-15 ¥580&#10;2. 海蓝之谜面霜 3.5ml小样 2026-11-20 *2"></textarea>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn-secondary" style="flex:0 0 76px;" onclick="document.getElementById('aiInput').value=''; document.getElementById('aiInput').focus();">清空</button>
+        <button type="button" class="btn-submit-main" onclick="applyAI()">确认解析导入</button>
       </div>
     </div>
   </div>
 
+  <!-- Sheet: Duplicate Resolution Modal (查重冲突解决) -->
+  <div class="sheet-backdrop modal-centered" id="dupModal" style="z-index: 120;" onclick="event.stopPropagation()">
+    <div class="sheet-card" onclick="event.stopPropagation()">
+      <div class="sheet-header-title">
+        <h2 style="color:var(--warning); display:flex; align-items:center; gap:6px;">⚠️ 发现重复物品 (<span id="dupCurrentIndex">1</span>/<span id="dupTotalCount">1</span>)</h2>
+        <button class="sheet-close-btn" onclick="cancelDuplicateResolution()">✕</button>
+      </div>
+      <div style="background:var(--surface-subtle); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+        <div style="font-size:14px; font-weight:800; color:var(--text-main);" id="dupItemName">品名</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;" id="dupItemExpiry">保质期至: 2026-10-28</div>
+        <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; font-weight:600; color:var(--text-main); background:rgba(0,0,0,0.03); padding:6px 8px; border-radius:6px;">
+          <span>已有库存: <span style="color:var(--accent); font-weight:700;" id="dupExistingQty">1</span> 瓶/件</span>
+          <span>本次导入: <span style="color:var(--accent); font-weight:700;" id="dupIncomingQty">+1</span> 瓶/件</span>
+        </div>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">该物品品名与保质期完全一致，请选择处理方式：</p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="btn-submit-main" onclick="resolveDupAction('add')">➕ 叠加数量 (累加到已有库存)</button>
+        <button type="button" class="btn-secondary" style="font-weight:700;" onclick="resolveDupAction('skip')">🚫 忽略跳过 (不导入此项)</button>
+        <button type="button" class="btn-secondary" style="font-size:12px; opacity:0.8;" onclick="resolveDupAction('new')">📄 作为独立新条目导入</button>
+        <div style="display:flex; gap:8px; margin-top:6px; border-top:1px solid var(--border-subtle); padding-top:8px;">
+          <button type="button" class="btn-secondary" style="flex:1; font-size:11px;" onclick="resolveDupAction('addAll')">全部自动叠加</button>
+          <button type="button" class="btn-secondary" style="flex:1; font-size:11px;" onclick="resolveDupAction('skipAll')">全部自动忽略</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sheet: GitHub Cloud Sync Settings -->
+  <div class="sheet-backdrop" id="repoModal" onclick="closeModal('repoModal')">
+    <div class="sheet-card" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header-title">
+        <h2>GitHub 仓库直连配置</h2>
+        <button class="sheet-close-btn" onclick="closeModal('repoModal')">✕</button>
+      </div>
+      <div class="form-cell">
+        <label>仓库路径 (Owner/Repo)</label>
+        <input type="text" id="cfgRepo" placeholder="kikuroko-rgb/cosmetics">
+      </div>
+      <div class="form-cell">
+        <label>Personal Access Token (ghp_...)</label>
+        <input type="password" id="cfgToken" placeholder="粘贴拥有 repo 权限的 GitHub Token">
+      </div>
+      <div class="form-cell">
+        <label>云端数据文件路径</label>
+        <input type="text" id="cfgFilename" value="data.json">
+      </div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" class="btn-secondary" onclick="closeModal('repoModal')">取消</button>
+        <button type="button" class="btn-submit-main" onclick="saveRepoConfig()">保存并立即连接</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="importDataJson(event)">
+
   <script>
-    // 11 个单字分类定义
-    const CATEGORIES = ["全部", "唇", "口", "精", "霜", "乳", "水", "眼", "妆", "体", "药", "其"];
-    
-    // 一键排序规则轮播列表
-    const SORT_RULES = [
-      { key: "added_desc", label: "🕒 添加时间 ↓" },
-      { key: "expiry_asc", label: "⏰ 到期时间 ↑" },
-      { key: "name_asc", label: "🔤 品名 A-Z" }
+    /* Two-Character Category Benchmark */
+    const TWO_CHAR_CATS = ["洁面", "精华", "面霜", "乳液", "爽肤", "眼霜", "唇膏", "口红", "彩妆", "身体", "药品", "其他"];
+    const CAT_ICONS = {
+      "洁面": "🧼", "精华": "✨", "面霜": "🧴", "乳液": "🥛",
+      "爽肤": "💧", "眼霜": "👁️", "唇膏": "💄", "口红": "💋",
+      "彩妆": "🎨", "身体": "🛁", "药品": "💊", "其他": "📦"
+    };
+
+    /* Standard Daily Dose & Usage Benchmark */
+    const CONSUMPTION_BENCHMARK = {
+      "洁面": { defaultCapacity: 120, dailyDose: 1.5, unit: "ml", defaultDays: 80 },
+      "精华": { defaultCapacity: 30, dailyDose: 0.6, unit: "ml", defaultDays: 50 },
+      "面霜": { defaultCapacity: 50, dailyDose: 0.8, unit: "g", defaultDays: 60 },
+      "乳液": { defaultCapacity: 100, dailyDose: 1.2, unit: "ml", defaultDays: 80 },
+      "爽肤": { defaultCapacity: 150, dailyDose: 2.2, unit: "ml", defaultDays: 70 },
+      "眼霜": { defaultCapacity: 15, dailyDose: 0.15, unit: "ml", defaultDays: 100 },
+      "唇膏": { defaultCapacity: 3.5, dailyDose: 0.02, unit: "g", defaultDays: 150 },
+      "口红": { defaultCapacity: 3.5, dailyDose: 0.015, unit: "g", defaultDays: 200 },
+      "彩妆": { defaultCapacity: 30, dailyDose: 0.45, unit: "ml", defaultDays: 65 },
+      "身体": { defaultCapacity: 250, dailyDose: 4.0, unit: "ml", defaultDays: 60 },
+      "药品": { defaultCapacity: 20, dailyDose: 1.0, unit: "g", defaultDays: 20 },
+      "其他": { defaultCapacity: 50, dailyDose: 1.0, unit: "ml", defaultDays: 50 }
+    };
+
+    const STORAGE_KEY = "cosmetics_inventory_data";
+    const GITHUB_CFG_KEY = "cosmetics_gh_config";
+    const LAYOUT_KEY = "cosmetics_display_layout";
+
+    let currentStatusTab = "全部";
+    let currentCat = "全部";
+    let currentLayout = localStorage.getItem(LAYOUT_KEY) || "list";
+    let sortModeIndex = 0;
+    const sortModes = [
+      { text: "🕒 添加时间 ↓", fn: (a, b) => (b.createdAt || "").localeCompare(a.createdAt || "") },
+      { text: "⏰ 到期时间 ↑", fn: (a, b) => (a.expiry || "").localeCompare(b.expiry || "") },
+      { text: "🔤 品名 A-Z", fn: (a, b) => (a.name || "").localeCompare(b.name || "", "zh-Hans-CN") },
+      { text: "💰 价格最高 ↓", fn: (a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0) }
     ];
 
-    let currentSortIndex = 0;
-    let currentCategory = "全部";
-    let currentLifeStatus = "全部";
-    let photoBase64 = "";
+    let currentImageData = null;
+    let isBatchMode = false;
+    let selectedIds = new Set();
+    let currentBatchAction = "status";
 
-    const STORAGE_KEY = "expiry_items";
-    const CONFIG_KEY = "expiry_github_config";
+    /* Calendar State */
+    let calViewDate = new Date();
+    let calSelectedDateStr = new Date().toISOString().slice(0, 10);
+    let calEventTypeFilter = "全部";
 
-    // 读取物品列表
+    /* Dedicated Filter State */
+    let dashboardFilterExpiry = "全部";
+    let dashboardFilterSpec = "全部";
+    let dashboardSelectedTags = new Set();
+
+    /* Duplicate Resolution Workflow State */
+    let pendingIncomingItems = [];
+    let pendingDuplicatesQueue = [];
+    let curDuplicateConflict = null;
+
+    /* Touch & Long Press */
+    let pressTimer = null;
+    let touchMoved = false;
+    let fabPressTimer = null;
+    let fabIsLongPress = false;
+
+    /* HTTP Header Sanitizer */
+    function cleanHeaderValue(str) {
+      if (!str) return "";
+      return String(str).replace(/[^\x00-\x7F]/g, "").trim();
+    }
+
     function getItems() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -789,384 +1572,1375 @@
 
     function saveItems(items) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      renderCounters();
+      updateCounts();
+      renderCategoryPills();
       renderCards();
-      triggerPushCloud(false); // 自动后台静默同步
+      renderCalendar();
+      renderDashboardView();
+      pushToRepo(items);
     }
 
-    // 状态与分类标签初始化
-    function initCategoryPills() {
-      const wrap = document.getElementById("catScrollWrap");
-      wrap.innerHTML = CATEGORIES.map(c => `
-        <div class="cat-pill ${c === currentCategory ? 'active' : ''}" onclick="setCategory('${c}', this)">
-          <span>${c}</span>
-        </div>
-      `).join("");
+    function normalizeCat(cat) {
+      if (!cat) return "其他";
+      for (let c of TWO_CHAR_CATS) {
+        if (cat.includes(c) || (c === "洁面" && cat.includes("洁"))) return c;
+      }
+      return "其他";
+    }
+
+    function parseItemTags(tags) {
+      if (!tags) return [];
+      if (Array.isArray(tags)) {
+        return tags.map(t => String(t).trim()).filter(Boolean);
+      }
+      return String(tags).split(/[\s,，#]+/).map(t => t.trim()).filter(Boolean);
+    }
+
+    /* Compute Estimated Consumption Time */
+    function calculateConsumption(item) {
+      const cat = normalizeCat(item.category || item.cat);
+      const benchmark = CONSUMPTION_BENCHMARK[cat] || CONSUMPTION_BENCHMARK["其他"];
+
+      let capacityNum = null;
+      if (item.capacity) {
+        const m = String(item.capacity).match(/(\d+(\.\d+)?)/);
+        if (m) capacityNum = parseFloat(m[1]);
+      }
+      if (!capacityNum && item.name) {
+        const m = String(item.name).match(/(\d+(\.\d+)?)\s*(ml|g|毫升|克)/i);
+        if (m) capacityNum = parseFloat(m[1]);
+      }
+
+      const isSample = Boolean(item.isSample || /小样|中样|试用装/i.test(item.name || "") || /小样|中样/i.test(item.tags || ""));
+      const qty = parseInt(item.quantity, 10) || 1;
+
+      let estDays = benchmark.defaultDays;
+      if (isSample) {
+        estDays = capacityNum ? Math.max(3, Math.round(capacityNum / (benchmark.dailyDose || 1))) : Math.max(7, Math.round(benchmark.defaultDays * 0.15));
+      } else if (capacityNum) {
+        estDays = Math.max(5, Math.round(capacityNum / (benchmark.dailyDose || 1)));
+      }
+
+      estDays = estDays * qty;
+
+      let remainDays = 0;
+      if (item.expiry) {
+        const diff = new Date(item.expiry) - new Date();
+        remainDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      }
+
+      const isUrgentMismatch = remainDays > 0 && remainDays < estDays && (item.status !== "空瓶");
+
+      return {
+        estDays,
+        isSample,
+        capacityText: capacityNum ? `${capacityNum}${benchmark.unit}` : (isSample ? "小样" : "正装"),
+        isUrgentMismatch,
+        remainDays
+      };
+    }
+
+    function calcDueDays(dueDate) {
+      if (!dueDate) return { days: 0, text: "无日期", cls: "status-good", pillCls: "" };
+      const diff = new Date(dueDate) - new Date();
+      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      if (days < 0) return { days, text: `已超 ${Math.abs(days)}天`, cls: "status-danger", pillCls: "pill-danger" };
+      if (days <= 30) return { days, text: `剩 ${days}天 (临期)`, cls: "status-warning", pillCls: "pill-warning" };
+      return { days, text: `剩 ${days}天`, cls: "status-good", pillCls: "" };
+    }
+
+    /* Dynamic Category Pill Rendering */
+    function renderCategoryPills() {
+      const container = document.getElementById("catPillsContainer");
+      if (!container) return;
+      const items = getItems();
+
+      const counts = {};
+      TWO_CHAR_CATS.forEach(c => counts[c] = 0);
+      items.forEach(i => {
+        const c = normalizeCat(i.category || i.cat);
+        counts[c] = (counts[c] || 0) + 1;
+      });
+
+      const sortedCats = [...TWO_CHAR_CATS].sort((a, b) => counts[b] - counts[a]);
+
+      let html = `<button class="cat-pill ${currentCat === '全部' ? 'active' : ''}" onclick="setCategory('全部', this)">全部</button>`;
+      sortedCats.forEach(c => {
+        html += `<button class="cat-pill ${currentCat === c ? 'active' : ''}" onclick="setCategory('${c}', this)">${c} ${counts[c] > 0 ? `<span style="font-size:10px; opacity:0.7;">${counts[c]}</span>` : ''}</button>`;
+      });
+      container.innerHTML = html;
+
+      // Update form & batch selects
+      const itemCatSelect = document.getElementById("itemCat");
+      const batchCatSelect = document.getElementById("batchTargetCatSelect");
+      if (itemCatSelect) {
+        itemCatSelect.innerHTML = TWO_CHAR_CATS.map(c => `<option value="${c}">${CAT_ICONS[c]} ${c}</option>`).join('');
+      }
+      if (batchCatSelect) {
+        batchCatSelect.innerHTML = TWO_CHAR_CATS.map(c => `<option value="${c}">${CAT_ICONS[c]} ${c}</option>`).join('');
+      }
     }
 
     function setCategory(cat, el) {
-      currentCategory = cat;
+      currentCat = cat;
       document.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
-      el.classList.add("active");
+      if (el) el.classList.add("active");
       renderCards();
     }
 
-    function setStatusTab(status, el) {
-      currentLifeStatus = status;
+    function setStatusTab(st, el) {
+      currentStatusTab = st;
       document.querySelectorAll(".segment-tab").forEach(t => t.classList.remove("active"));
-      el.classList.add("active");
+      if (el) el.classList.add("active");
       renderCards();
     }
 
-    // 一键循环排序
-    function cycleSortMode() {
-      currentSortIndex = (currentSortIndex + 1) % SORT_RULES.length;
-      document.getElementById("sortCycleBtn").innerText = SORT_RULES[currentSortIndex].label;
+    function cycleSort() {
+      sortModeIndex = (sortModeIndex + 1) % sortModes.length;
+      document.getElementById("sortCycleText").innerText = sortModes[sortModeIndex].text;
       renderCards();
     }
 
-    // 渲染卡片列表
-    function renderCards() {
-      const items = getItems();
-      const kw = document.getElementById("searchInput").value.trim().toLowerCase();
-
-      // 筛选
-      let filtered = items.filter(it => {
-        const matchCat = currentCategory === "全部" || it.category === currentCategory;
-        const matchStatus = currentLifeStatus === "全部" || it.status === currentLifeStatus;
-        const matchKw = !kw || 
-          (it.name && it.name.toLowerCase().includes(kw)) ||
-          (it.location && it.location.toLowerCase().includes(kw)) ||
-          (it.tags && it.tags.some(t => t.toLowerCase().includes(kw)));
-        return matchCat && matchStatus && matchKw;
-      });
-
-      // 排序
-      const sortKey = SORT_RULES[currentSortIndex].key;
-      filtered.sort((a, b) => {
-        if (sortKey === "added_desc") {
-          return new Date(b.addedAt || 0) - new Date(a.addedAt || 0);
-        } else if (sortKey === "expiry_asc") {
-          return new Date(a.expiry || "9999-12-31") - new Date(b.expiry || "9999-12-31");
-        } else if (sortKey === "name_asc") {
-          return (a.name || "").localeCompare(b.name || "", "zh-Hans-CN");
-        }
-        return 0;
-      });
-
-      const listEl = document.getElementById("cardList");
-      if (filtered.length === 0) {
-        listEl.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text-sub);">暂无相关物品</div>`;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map(it => {
-        const statusClass = it.status === "使用中" ? "inuse" : (it.status === "不好用" ? "avoid" : (it.status === "会回购" ? "repurchase" : "unopened"));
-        
-        // 消耗天数智能预测
-        let forecastHtml = "";
-        if (it.volume) {
-          const num = parseFloat(it.volume);
-          if (!isNaN(num) && num > 0) {
-            const days = Math.round(it.category === "精" ? num / 0.8 : (it.category === "水" ? num / 2.5 : num / 0.5));
-            forecastHtml = `<span class="forecast-pill">⏳ 预计可用 ~${days}天</span>`;
-          }
-        }
-
-        const tagsHtml = (it.tags || []).map(t => `<span class="tag-pill">${t}</span>`).join(" ");
-
-        return `
-          <div class="item-card" onclick="editItem('${it.id}')">
-            <div class="item-thumb-box">
-              ${it.photo ? `<img src="${it.photo}">` : it.category}
-            </div>
-            <div class="item-info">
-              <div>
-                <div class="item-header">
-                  <span class="item-name">${it.name}</span>
-                  <span class="status-tag ${statusClass}">${it.status}</span>
-                </div>
-                <!-- 放大且醒目的添加时间 -->
-                <div class="added-date-badge">
-                  📅 入库: ${it.addedAt || '未记录'}
-                </div>
-              </div>
-
-              <div class="meta-row">
-                <span>到期: ${it.expiry}</span>
-                ${it.location ? `<span>📍 ${it.location}</span>` : ""}
-                ${forecastHtml}
-                ${tagsHtml}
-              </div>
-
-              ${it.status === '未开封' ? `
-                <button class="quick-open-btn" onclick="event.stopPropagation(); quickOpenItem('${it.id}')">
-                  ⚡ 立即拆封
-                </button>
-              ` : ''}
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      renderCounters();
+    function toggleLayout() {
+      currentLayout = currentLayout === "list" ? "grid" : "list";
+      localStorage.setItem(LAYOUT_KEY, currentLayout);
+      updateLayoutButton();
+      renderCards();
     }
 
-    // 统计更新
-    function renderCounters() {
+    function updateLayoutButton() {
+      const btn = document.getElementById("layoutText");
+      if (btn) btn.innerText = currentLayout === "list" ? "📋 列表" : "🔲 画廊";
+      const cardsBox = document.getElementById("cardsContainer");
+      if (cardsBox) cardsBox.className = currentLayout === "list" ? "list-mode" : "grid-mode";
+    }
+
+    function updateCounts() {
       const items = getItems();
       document.getElementById("cntAll").innerText = items.length;
-      document.getElementById("cntAvoid").innerText = items.filter(i => i.status === "不好用").length;
-      document.getElementById("cntRepurchase").innerText = items.filter(i => i.status === "会回购").length;
-      document.getElementById("cntUnopened").innerText = items.filter(i => i.status === "未开封").length;
+      document.getElementById("cntEmpty").innerText = items.filter(i => i.status === "空瓶").length;
+      document.getElementById("cntUnopened").innerText = items.filter(i => (i.status || "未开封") === "未开封").length;
+      document.getElementById("cntOpened").innerText = items.filter(i => i.status === "已开封").length;
       document.getElementById("cntInUse").innerText = items.filter(i => i.status === "使用中").length;
     }
 
-    // 快捷拆封
-    function quickOpenItem(id) {
+    /* Long-Press for Batch Mode */
+    function attachCardLongPress(cardEl, itemId) {
+      cardEl.addEventListener("touchstart", (e) => {
+        touchMoved = false;
+        pressTimer = setTimeout(() => {
+          if (!touchMoved) {
+            if (navigator.vibrate) navigator.vibrate(50);
+            if (!isBatchMode) toggleBatchMode();
+            toggleSelectCard(itemId);
+          }
+        }, 500);
+      }, { passive: true });
+
+      cardEl.addEventListener("touchmove", () => {
+        touchMoved = true;
+        clearTimeout(pressTimer);
+      }, { passive: true });
+
+      cardEl.addEventListener("touchend", () => {
+        clearTimeout(pressTimer);
+      });
+
+      cardEl.addEventListener("mousedown", () => {
+        pressTimer = setTimeout(() => {
+          if (!isBatchMode) toggleBatchMode();
+          toggleSelectCard(itemId);
+        }, 500);
+      });
+      cardEl.addEventListener("mouseup", () => clearTimeout(pressTimer));
+      cardEl.addEventListener("mouseleave", () => clearTimeout(pressTimer));
+    }
+
+    function toggleBatchMode() {
+      isBatchMode = !isBatchMode;
+      selectedIds.clear();
+      const panel = document.getElementById("batchPanel");
+      const container = document.getElementById("cardsContainer");
+
+      if (isBatchMode) {
+        panel.classList.add("show");
+        if (container) container.classList.add("batch-mode");
+      } else {
+        panel.classList.remove("show");
+        if (container) container.classList.remove("batch-mode");
+      }
+      updateBatchBadge();
+      renderCards();
+    }
+
+    function toggleSelectCard(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateBatchBadge();
+      renderCards();
+    }
+
+    function selectAll() {
+      getFilteredItems().forEach(i => selectedIds.add(i.id));
+      updateBatchBadge();
+      renderCards();
+    }
+
+    function deselectAll() {
+      selectedIds.clear();
+      updateBatchBadge();
+      renderCards();
+    }
+
+    function updateBatchBadge() {
+      const badge = document.getElementById("batchCountBadge");
+      if (badge) badge.innerText = `已选 ${selectedIds.size} 项`;
+    }
+
+    function switchBatchAction(action) {
+      currentBatchAction = action;
+      ["Status", "Cat", "Tag", "Qty"].forEach(a => {
+        const wrap = document.getElementById(`batchAction${a}Wrap`);
+        if (wrap) wrap.style.display = "none";
+      });
+      document.querySelectorAll(".batch-action-tabs .batch-sub-tab").forEach(b => b.classList.remove("active"));
+
+      if (action === "status") {
+        document.getElementById("batchActionStatusWrap").style.display = "flex";
+        document.getElementById("tabBatchActionStatus").classList.add("active");
+      } else if (action === "category") {
+        document.getElementById("batchActionCatWrap").style.display = "flex";
+        document.getElementById("tabBatchActionCat").classList.add("active");
+      } else if (action === "tag") {
+        document.getElementById("batchActionTagWrap").style.display = "flex";
+        document.getElementById("tabBatchActionTag").classList.add("active");
+      } else if (action === "quantity") {
+        document.getElementById("batchActionQtyWrap").style.display = "flex";
+        document.getElementById("tabBatchActionQty").classList.add("active");
+      }
+    }
+
+    function applyBatchStatus() {
+      if (selectedIds.size === 0) return alert("请先长按勾选需要修改的物品");
+      const targetSt = document.getElementById("batchTargetStatusSelect").value;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      let items = getItems();
+
+      items = items.map(it => {
+        if (selectedIds.has(it.id)) {
+          it.status = targetSt;
+          if (targetSt === "使用中" && !it.openedAt) it.openedAt = todayStr;
+        }
+        return it;
+      });
+
+      saveItems(items);
+      selectedIds.clear();
+      toggleBatchMode();
+      alert("批量状态修改完成！");
+    }
+
+    function applyBatchCategory() {
+      if (selectedIds.size === 0) return alert("请先长按勾选需要修改的物品");
+      const targetCat = document.getElementById("batchTargetCatSelect").value;
+      let items = getItems();
+      items = items.map(it => {
+        if (selectedIds.has(it.id)) {
+          it.category = targetCat;
+          it.cat = targetCat;
+        }
+        return it;
+      });
+      saveItems(items);
+      selectedIds.clear();
+      toggleBatchMode();
+      alert("批量分类修改完成！");
+    }
+
+    function applyBatchTags() {
+      if (selectedIds.size === 0) return alert("请先长按勾选需要修改的物品");
+      const inputVal = document.getElementById("batchTargetTagInput").value.trim();
+      if (!inputVal) return alert("请输入要追加的标签");
+      const newTags = inputVal.split(/[\s,，]+/).filter(Boolean);
+
+      let items = getItems();
+      items = items.map(it => {
+        if (selectedIds.has(it.id)) {
+          const currentList = parseItemTags(it.tags);
+          newTags.forEach(t => {
+            if (!currentList.includes(t)) currentList.push(t);
+          });
+          it.tags = currentList.join(" ");
+        }
+        return it;
+      });
+
+      saveItems(items);
+      document.getElementById("batchTargetTagInput").value = "";
+      selectedIds.clear();
+      toggleBatchMode();
+      alert("批量追加标签完成！");
+    }
+
+    function applyBatchQuantity() {
+      if (selectedIds.size === 0) return alert("请先长按勾选需要修改的物品");
+      const targetQty = parseInt(document.getElementById("batchTargetQtyInput").value, 10);
+      if (isNaN(targetQty) || targetQty < 1) return alert("请输入有效的数量数值 (>= 1)");
+
+      let items = getItems();
+      items = items.map(it => {
+        if (selectedIds.has(it.id)) {
+          it.quantity = targetQty;
+        }
+        return it;
+      });
+
+      saveItems(items);
+      selectedIds.clear();
+      toggleBatchMode();
+      alert(`已批量将选中物品的数量设为 ${targetQty}！`);
+    }
+
+    function deleteSelected() {
+      if (selectedIds.size === 0) return alert("请先长按勾选需要删除的物品");
+      if (confirm(`确定要彻底删除已选中的 ${selectedIds.size} 件物品吗？此操作无法撤销。`)) {
+        let items = getItems().filter(i => !selectedIds.has(i.id));
+        saveItems(items);
+        selectedIds.clear();
+        toggleBatchMode();
+      }
+    }
+
+    /* Filter & Search Helper */
+    function getFilteredItems() {
+      let items = getItems();
+      const query = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+
+      // Lifecycle status filter
+      if (currentStatusTab !== "全部") {
+        items = items.filter(i => (i.status || "未开封") === currentStatusTab);
+      }
+
+      // Two-character category filter
+      if (currentCat !== "全部") {
+        items = items.filter(i => normalizeCat(i.category || i.cat) === currentCat);
+      }
+
+      // Keyword query
+      if (query) {
+        items = items.filter(i => {
+          const nameMatch = (i.name || "").toLowerCase().includes(query);
+          const notesMatch = (i.notes || "").toLowerCase().includes(query);
+          const tagsMatch = parseItemTags(i.tags).some(t => t.toLowerCase().includes(query));
+          return nameMatch || notesMatch || tagsMatch;
+        });
+      }
+
+      // Sort
+      items.sort(sortModes[sortModeIndex].fn);
+      return items;
+    }
+
+    function renderCards() {
+      updateLayoutButton();
+      const listEl = document.getElementById("cardsContainer");
+      if (!listEl) return;
+      const items = getFilteredItems();
+
+      const emptyEl = document.getElementById("emptyState");
+      if (emptyEl) emptyEl.style.display = items.length === 0 ? "block" : "none";
+
+      listEl.innerHTML = "";
+      items.forEach(item => {
+        listEl.appendChild(createItemCard(item, currentLayout === "grid"));
+      });
+    }
+
+    function createItemCard(item, isGrid = false) {
+      const cat = normalizeCat(item.category || item.cat);
+      const icon = CAT_ICONS[cat] || "📦";
+      const due = calcDueDays(item.expiry);
+      const consumption = calculateConsumption(item);
+      const tagsList = parseItemTags(item.tags);
+      const isSel = selectedIds.has(item.id);
+      const st = item.status || "未开封";
+      const qty = parseInt(item.quantity, 10) || 1;
+
+      const card = document.createElement("div");
+      card.className = `item-card ${isSel ? 'selected' : ''}`;
+
+      card.onclick = (e) => {
+        if (isBatchMode) {
+          toggleSelectCard(item.id);
+        } else {
+          openEditModal(item.id);
+        }
+      };
+
+      attachCardLongPress(card, item.id);
+
+      const statusTagHtml = st === "未开封"
+        ? `<span class="tag-meta tag-unopened">未开封</span>`
+        : `<span class="tag-meta tag-opened">${st}</span>`;
+
+      const sampleBadgeHtml = consumption.isSample
+        ? `<span class="tag-meta tag-sample">小样</span>`
+        : "";
+
+      const priceBadgeHtml = (item.price !== undefined && item.price !== null && item.price !== "")
+        ? `<span class="tag-meta tag-price">¥${item.price}</span>`
+        : "";
+
+      const qtyBadgeHtml = qty > 1
+        ? `<span class="tag-meta tag-qty">×${qty}</span>`
+        : "";
+
+      const customTagsHtml = tagsList.slice(0, 3).map(t => `<span class="tag-meta tag-custom">#${t}</span>`).join('');
+
+      let forecastWarningHtml = "";
+      if (consumption.isUrgentMismatch) {
+        forecastWarningHtml = `<span class="forecast-pill alert">🚨 需~${consumption.estDays}天 / 仅剩${consumption.remainDays}天</span>`;
+      } else if (st !== "空瓶") {
+        forecastWarningHtml = `<span class="forecast-pill">🧪 ${consumption.capacityText} · 预计~${consumption.estDays}天</span>`;
+      }
+
+      const quickUnsealHtml = (st === "未开封")
+        ? `<button class="quick-unseal-btn" onclick="quickUnsealItem('${item.id}', event)">✂️ 拆封</button>`
+        : "";
+
+      if (!isGrid) {
+        card.innerHTML = `
+          <div class="select-check-dot">✓</div>
+          <div class="card-thumb">
+            ${item.image ? `<img src="${item.image}" alt="">` : `<span class="fallback-icon">${icon}</span>`}
+          </div>
+          <div class="card-main">
+            <div class="title-row">
+              <span class="item-name">${item.name}</span>
+            </div>
+            <div class="tags-container">
+              <span class="tag-meta tag-cat">${cat}</span>
+              ${statusTagHtml}
+              ${sampleBadgeHtml}
+              ${qtyBadgeHtml}
+              ${priceBadgeHtml}
+              ${customTagsHtml}
+            </div>
+            <div class="expiry-line">
+              <span>到期: ${item.expiry || '-'}</span>
+              ${forecastWarningHtml}
+              ${quickUnsealHtml}
+            </div>
+          </div>
+          <div class="card-aside">
+            <div class="countdown-num ${due.cls}">${due.days < 0 ? Math.abs(due.days) : due.days}<span class="countdown-unit">天</span></div>
+            ${due.pillCls ? `<div class="countdown-label ${due.pillCls}">${due.days < 0 ? '已过期' : '临期'}</div>` : ''}
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="select-check-dot">✓</div>
+          <div class="card-thumb">
+            ${item.image ? `<img src="${item.image}" alt="">` : `<span class="fallback-icon">${icon}</span>`}
+          </div>
+          <div class="card-main">
+            <div class="item-name">${item.name}</div>
+            <div class="tags-container">
+              <span class="tag-meta tag-cat">${cat}</span>
+              ${qtyBadgeHtml}
+              ${priceBadgeHtml}
+              ${statusTagHtml}
+              ${sampleBadgeHtml}
+            </div>
+            <div class="grid-bottom-row">
+              <span style="font-size:11px; color:var(--text-tertiary);">${item.expiry || '-'}</span>
+              <span class="countdown-num ${due.cls}" style="font-size:14px;">${due.days < 0 ? '超' + Math.abs(due.days) : due.days}天</span>
+            </div>
+            ${forecastWarningHtml}
+          </div>
+        `;
+      }
+      return card;
+    }
+
+    function quickUnsealItem(id, event) {
+      if (event) event.stopPropagation();
       const items = getItems();
-      const target = items.find(i => i.id === id);
-      if (target) {
-        target.status = "使用中";
-        target.openedAt = new Date().toISOString().split("T")[0];
+      const it = items.find(x => x.id === id);
+      if (it) {
+        it.status = "使用中";
+        it.openedAt = new Date().toISOString().slice(0, 10);
         saveItems(items);
       }
     }
 
-    // 表单提交保存
-    function handleSaveItem(e) {
-      e.preventDefault();
-      const id = document.getElementById("editItemId").value || ("item_" + Date.now());
-      const name = document.getElementById("itemName").value.trim();
-      const category = document.getElementById("itemCategory").value;
-      const status = document.getElementById("itemStatus").value;
-      const addedAt = document.getElementById("itemAddedAt").value || new Date().toISOString().split("T")[0];
-      const expiry = document.getElementById("itemExpiry").value;
-      const openedAt = document.getElementById("itemOpenedAt").value;
-      const volume = document.getElementById("itemVolume").value.trim();
-      const isSample = document.getElementById("itemIsSample").value === "1";
-      const tags = document.getElementById("itemTags").value.split(" ").map(s => s.trim()).filter(Boolean);
-      const location = document.getElementById("itemLocation").value.trim();
+    /* Calendar Timeline Engine */
+    function prevMonth() { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); }
+    function nextMonth() { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); }
+
+    function setCalEventTypeFilter(filterType) {
+      calEventTypeFilter = filterType;
+      document.querySelectorAll(".calendar-events-wrap .batch-sub-tab").forEach(b => b.classList.remove("active"));
+      if (filterType === "全部") document.getElementById("calFilterAll").classList.add("active");
+      if (filterType === "新增") document.getElementById("calFilterAdded").classList.add("active");
+      if (filterType === "开封") document.getElementById("calFilterOpened").classList.add("active");
+      if (filterType === "到期") document.getElementById("calFilterExpiry").classList.add("active");
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = calViewDate.getFullYear();
+      const month = calViewDate.getMonth();
+      const monthTitle = document.getElementById("calMonthTitle");
+      if (monthTitle) monthTitle.innerText = `${year}年 ${month + 1}月`;
+
+      const daysGrid = document.getElementById("calDaysGrid");
+      if (!daysGrid) return;
+      daysGrid.innerHTML = "";
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let startDay = firstDayOfMonth.getDay() - 1;
+      if (startDay === -1) startDay = 6;
 
       const items = getItems();
-      const idx = items.findIndex(i => i.id === id);
-      const newItem = {
-        id, name, category, status, addedAt, expiry, openedAt, volume, isSample, tags, location,
-        photo: photoBase64 || (idx >= 0 ? items[idx].photo : "")
+      const dateMap = {};
+
+      items.forEach(it => {
+        // Expiry
+        if (it.expiry) {
+          if (!dateMap[it.expiry]) dateMap[it.expiry] = [];
+          dateMap[it.expiry].push({ type: "到期", item: it });
+        }
+        // Opened
+        if (it.openedAt) {
+          if (!dateMap[it.openedAt]) dateMap[it.openedAt] = [];
+          dateMap[it.openedAt].push({ type: "开封", item: it });
+        }
+        // Created / Added
+        const addDateStr = it.createdAt ? it.createdAt.slice(0, 10) : "";
+        if (addDateStr) {
+          if (!dateMap[addDateStr]) dateMap[addDateStr] = [];
+          dateMap[addDateStr].push({ type: "新增", item: it });
+        }
+      });
+
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      for (let i = startDay - 1; i >= 0; i--) {
+        const dCell = document.createElement("div");
+        dCell.className = "cal-day-item other-month";
+        dCell.innerText = prevMonthDays - i;
+        daysGrid.appendChild(dCell);
+      }
+
+      const todayStr = new Date().toISOString().slice(0, 10);
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dCell = document.createElement("div");
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+        let cellClass = "cal-day-item";
+        if (dateStr === todayStr) cellClass += " today";
+        if (dateStr === calSelectedDateStr) cellClass += " selected";
+        dCell.className = cellClass;
+
+        let dotsHtml = "";
+        if (dateMap[dateStr]) {
+          const dayEvents = dateMap[dateStr];
+          const hasAdded = dayEvents.some(e => e.type === "新增");
+          const hasOpened = dayEvents.some(e => e.type === "开封");
+          const hasExpiry = dayEvents.some(e => e.type === "到期");
+
+          dotsHtml = `<div class="cal-dots-group">`;
+          if (hasAdded) dotsHtml += `<span class="cal-dot" style="background:#2563EB;"></span>`;
+          if (hasOpened) dotsHtml += `<span class="cal-dot" style="background:#9333EA;"></span>`;
+          if (hasExpiry) dotsHtml += `<span class="cal-dot" style="background:#DC2626;"></span>`;
+          dotsHtml += `</div>`;
+        }
+
+        dCell.innerHTML = `<span>${day}</span>${dotsHtml}`;
+        dCell.onclick = () => {
+          calSelectedDateStr = dateStr;
+          renderCalendar();
+        };
+        daysGrid.appendChild(dCell);
+      }
+
+      renderCalendarEventsList(dateMap[calSelectedDateStr] || []);
+    }
+
+    function renderCalendarEventsList(events) {
+      const listEl = document.getElementById("calDayEventList");
+      const titleEl = document.getElementById("calSelectedDateText");
+      if (!listEl) return;
+
+      let filteredEvents = events;
+      if (calEventTypeFilter !== "全部") {
+        filteredEvents = events.filter(e => e.type === calEventTypeFilter);
+      }
+
+      if (titleEl) titleEl.innerText = `${calSelectedDateStr} 时间线清单 (${filteredEvents.length}条)`;
+      listEl.innerHTML = "";
+
+      if (filteredEvents.length === 0) {
+        listEl.innerHTML = `<div class="empty-prompt" style="padding:24px 0; font-size:13px;">当天暂无匹配的活动事件</div>`;
+        return;
+      }
+
+      filteredEvents.forEach(({ type, item }) => {
+        const row = document.createElement("div");
+        row.className = "item-card";
+        row.onclick = () => openEditModal(item.id);
+
+        let typeBadge = "";
+        if (type === "新增") typeBadge = `<span class="tag-meta" style="background:#DBEAFE; color:#1D4ED8;">➕ 新增入库</span>`;
+        if (type === "开封") typeBadge = `<span class="tag-meta" style="background:#F3E8FF; color:#7E22CE;">✂️ 首次开封</span>`;
+        if (type === "到期") typeBadge = `<span class="tag-meta" style="background:#FEE2E2; color:#B91C1C;">⏰ 保质到期</span>`;
+
+        row.innerHTML = `
+          <div class="card-thumb">
+            ${item.image ? `<img src="${item.image}">` : `<span class="fallback-icon">${CAT_ICONS[normalizeCat(item.category || item.cat)] || '📦'}</span>`}
+          </div>
+          <div class="card-main">
+            <div class="title-row">
+              <span class="item-name">${item.name}</span>
+              ${typeBadge}
+            </div>
+            <div class="tags-container">
+              <span class="tag-meta tag-cat">${normalizeCat(item.category || item.cat)}</span>
+              <span class="tag-meta tag-opened">${item.status || '未开封'}</span>
+              ${item.quantity > 1 ? `<span class="tag-meta tag-qty">×${item.quantity}</span>` : ''}
+              ${item.price ? `<span class="tag-meta tag-price">¥${item.price}</span>` : ''}
+            </div>
+            <div class="expiry-line">
+              <span>到期日: ${item.expiry || '-'}</span>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    /* Dedicated Filter Dashboard */
+    function renderDashboardView() {
+      const tagCloudWrap = document.getElementById("tagCloudContainer");
+      if (!tagCloudWrap) return;
+      const items = getItems();
+
+      // Aggregate tags and frequencies
+      const tagFreq = {};
+      items.forEach(i => {
+        parseItemTags(i.tags).forEach(t => {
+          tagFreq[t] = (tagFreq[t] || 0) + 1;
+        });
+      });
+
+      const sortedTags = Object.keys(tagFreq).sort((a, b) => tagFreq[b] - tagFreq[a]);
+      tagCloudWrap.innerHTML = "";
+
+      if (sortedTags.length === 0) {
+        tagCloudWrap.innerHTML = `<span style="font-size:12px; color:var(--text-tertiary);">暂无自定义标签，可在添加时录入</span>`;
+      } else {
+        sortedTags.forEach(t => {
+          const pill = document.createElement("button");
+          pill.className = `tag-cloud-pill ${dashboardSelectedTags.has(t) ? 'active' : ''}`;
+          pill.innerText = `#${t} (${tagFreq[t]})`;
+          pill.onclick = () => {
+            if (dashboardSelectedTags.has(t)) dashboardSelectedTags.delete(t);
+            else dashboardSelectedTags.add(t);
+            renderDashboardView();
+          };
+          tagCloudWrap.appendChild(pill);
+        });
+      }
+
+      // Filter matching items
+      let matched = items.filter(it => {
+        const d = calcDueDays(it.expiry).days;
+        if (dashboardFilterExpiry === "临期" && (d < 0 || d > 30)) return false;
+        if (dashboardFilterExpiry === "过期" && d >= 0) return false;
+        if (dashboardFilterExpiry === "充足" && d <= 30) return false;
+
+        const isSm = Boolean(it.isSample || /小样|中样/i.test(it.name || "") || /小样/i.test(it.tags || ""));
+        if (dashboardFilterSpec === "小样" && !isSm) return false;
+        if (dashboardFilterSpec === "正装" && isSm) return false;
+
+        if (dashboardSelectedTags.size > 0) {
+          const itTags = parseItemTags(it.tags);
+          const hasSelected = Array.from(dashboardSelectedTags).some(st => itTags.includes(st));
+          if (!hasSelected) return false;
+        }
+        return true;
+      });
+
+      const countText = document.getElementById("dashboardResultCountText");
+      if (countText) countText.innerText = `筛选结果清单 (${matched.length}件)`;
+
+      const container = document.getElementById("filterResultCardsContainer");
+      if (container) {
+        container.innerHTML = "";
+        matched.forEach(it => {
+          container.appendChild(createItemCard(it, false));
+        });
+      }
+    }
+
+    function setDashboardFilter(type, val, el) {
+      if (type === "expiry") {
+        dashboardFilterExpiry = val;
+        document.querySelectorAll("#expiryHealthFilterGroup button").forEach(b => b.classList.toggle("active", b === el));
+      } else if (type === "spec") {
+        dashboardFilterSpec = val;
+        document.querySelectorAll("#sampleFilterGroup button").forEach(b => b.classList.toggle("active", b === el));
+      }
+      renderDashboardView();
+    }
+
+    function resetDashboardFilters() {
+      dashboardFilterExpiry = "全部";
+      dashboardFilterSpec = "全部";
+      dashboardSelectedTags.clear();
+      document.querySelectorAll("#expiryHealthFilterGroup button").forEach(b => b.classList.toggle("active", b.getAttribute("data-val") === "全部"));
+      document.querySelectorAll("#sampleFilterGroup button").forEach(b => b.classList.toggle("active", b.getAttribute("data-val") === "全部"));
+      renderDashboardView();
+    }
+
+    /* Modal Controls */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "flex";
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    }
+
+    function openAddModal() {
+      document.getElementById("modalTitle").innerText = "添加物品";
+      document.getElementById("itemId").value = "";
+      document.getElementById("itemForm").reset();
+
+      const todayStr = new Date().toISOString().slice(0, 10);
+      document.getElementById("itemCreatedAt").value = todayStr;
+      document.getElementById("itemOpenedAt").value = "";
+      document.getElementById("itemQuantity").value = "1";
+      document.getElementById("itemPrice").value = "";
+      document.getElementById("btnDelInModal").style.display = "none";
+
+      currentImageData = null;
+      updateCameraBanner();
+      openModal("manualModal");
+    }
+
+    function openEditModal(id) {
+      const item = getItems().find(x => x.id === id);
+      if (!item) return;
+
+      document.getElementById("modalTitle").innerText = "编辑物品详情";
+      document.getElementById("itemId").value = item.id;
+      document.getElementById("itemName").value = item.name || "";
+      document.getElementById("itemCat").value = normalizeCat(item.category || item.cat);
+      document.getElementById("itemStatus").value = item.status || "未开封";
+      document.getElementById("itemCapacity").value = item.capacity || "";
+      document.getElementById("itemIsSample").checked = Boolean(item.isSample || /小样|中样/i.test(item.name || ""));
+      document.getElementById("itemQuantity").value = item.quantity || 1;
+      document.getElementById("itemPrice").value = item.price !== undefined ? item.price : "";
+
+      document.getElementById("itemCreatedAt").value = item.createdAt ? item.createdAt.slice(0, 10) : "";
+      document.getElementById("itemOpenedAt").value = item.openedAt || "";
+      document.getElementById("itemExpiry").value = item.expiry || "";
+      document.getElementById("itemTags").value = parseItemTags(item.tags).join(" ");
+      document.getElementById("itemNotes").value = item.notes || "";
+
+      document.getElementById("btnDelInModal").style.display = "inline-block";
+      currentImageData = item.image || null;
+      updateCameraBanner();
+      openModal("manualModal");
+    }
+
+    function adjustModalQty(delta) {
+      const input = document.getElementById("itemQuantity");
+      let val = parseInt(input.value, 10) || 1;
+      val = Math.max(1, val + delta);
+      input.value = val;
+    }
+
+    function deleteCurrentModalItem() {
+      const id = document.getElementById("itemId").value;
+      if (confirm("确定要删除这件物品吗？")) {
+        const items = getItems().filter(x => x.id !== id);
+        saveItems(items);
+        closeModal("manualModal");
+      }
+    }
+
+    function handleImageSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = ev => {
+        // Compress image via Canvas
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          currentImageData = canvas.toDataURL("image/jpeg", 0.75);
+          updateCameraBanner();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateCameraBanner() {
+      const banner = document.getElementById("cameraBanner");
+      if (!banner) return;
+      if (currentImageData) {
+        banner.innerHTML = `<img src="${currentImageData}"><span class="retake-badge">重拍 / 替换</span>`;
+      } else {
+        banner.innerHTML = `<span style="font-size:26px;">📷</span><span style="font-size:13px; font-weight:600;">拍照或选取包装图</span>`;
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("itemId").value;
+      const items = getItems();
+
+      const name = document.getElementById("itemName").value.trim();
+      const category = document.getElementById("itemCat").value;
+      const status = document.getElementById("itemStatus").value;
+      const capacity = document.getElementById("itemCapacity").value.trim();
+      const isSample = document.getElementById("itemIsSample").checked;
+      const quantity = Math.max(1, parseInt(document.getElementById("itemQuantity").value, 10) || 1);
+      const priceVal = document.getElementById("itemPrice").value.trim();
+      const price = priceVal !== "" ? parseFloat(priceVal) : "";
+
+      const createdAtStr = document.getElementById("itemCreatedAt").value;
+      const openedAt = document.getElementById("itemOpenedAt").value;
+      const expiry = document.getElementById("itemExpiry").value;
+      const tags = document.getElementById("itemTags").value.trim();
+      const notes = document.getElementById("itemNotes").value.trim();
+
+      const itemData = {
+        id: id || Date.now().toString(),
+        name,
+        category,
+        cat: category,
+        status,
+        capacity,
+        isSample,
+        quantity,
+        price,
+        createdAt: createdAtStr ? new Date(createdAtStr + "T12:00:00").toISOString() : new Date().toISOString(),
+        openedAt: openedAt || "",
+        expiry,
+        tags,
+        notes,
+        image: currentImageData || ""
       };
 
-      if (idx >= 0) {
-        items[idx] = newItem;
+      if (id) {
+        const idx = items.findIndex(x => x.id === id);
+        if (idx !== -1) items[idx] = itemData;
       } else {
-        items.unshift(newItem);
+        items.unshift(itemData);
       }
 
       saveItems(items);
-      closeModal("itemModal");
+      closeModal("manualModal");
     }
 
-    function editItem(id) {
-      const item = getItems().find(i => i.id === id);
-      if (!item) return;
-      document.getElementById("modalTitle").innerText = "编辑物品";
-      document.getElementById("editItemId").value = item.id;
-      document.getElementById("itemName").value = item.name;
-      document.getElementById("itemCategory").value = item.category;
-      document.getElementById("itemStatus").value = item.status;
-      document.getElementById("itemAddedAt").value = item.addedAt || "";
-      document.getElementById("itemExpiry").value = item.expiry;
-      document.getElementById("itemOpenedAt").value = item.openedAt || "";
-      document.getElementById("itemVolume").value = item.volume || "";
-      document.getElementById("itemIsSample").value = item.isSample ? "1" : "0";
-      document.getElementById("itemTags").value = (item.tags || []).join(" ");
-      document.getElementById("itemLocation").value = item.location || "";
-
-      if (item.photo) {
-        document.getElementById("previewImg").src = item.photo;
-        document.getElementById("previewImg").style.display = "block";
-        document.getElementById("retakeBtn").style.display = "block";
-        document.getElementById("cameraPromptText").style.display = "none";
-        photoBase64 = item.photo;
-      } else {
-        resetPhotoBanner();
-      }
-
-      openModal("itemModal");
+    /* Gemini Quick Import & Text Parser (with Price Detection) */
+    function openAISync() {
+      openModal("aiModal");
+      const inputEl = document.getElementById("aiInput");
+      inputEl.value = "";
+      setTimeout(() => {
+        inputEl.focus();
+      }, 100);
     }
 
-    function resetPhotoBanner() {
-      photoBase64 = "";
-      document.getElementById("previewImg").style.display = "none";
-      document.getElementById("retakeBtn").style.display = "none";
-      document.getElementById("cameraPromptText").style.display = "block";
-    }
-
-    // 图片上传并压缩
-    function handlePhotoUpload(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement("canvas");
-            const maxW = 480;
-            const scale = Math.min(maxW / img.width, 1);
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            photoBase64 = canvas.toDataURL("image/jpeg", 0.75);
-
-            document.getElementById("previewImg").src = photoBase64;
-            document.getElementById("previewImg").style.display = "block";
-            document.getElementById("retakeBtn").style.display = "block";
-            document.getElementById("cameraPromptText").style.display = "none";
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // 悬浮小猫长按与短按绑定
-    const fab = document.getElementById("fabCat");
-    let timer = null;
-    let isLongPress = false;
-
-    fab.addEventListener("touchstart", (e) => {
-      isLongPress = false;
-      timer = setTimeout(() => {
-        isLongPress = true;
-        if (navigator.vibrate) navigator.vibrate(40);
-        // 长按触发手动添加
-        document.getElementById("itemForm").reset();
-        document.getElementById("editItemId").value = "";
-        document.getElementById("itemAddedAt").value = new Date().toISOString().split("T")[0];
-        resetPhotoBanner();
-        document.getElementById("modalTitle").innerText = "添加护肤品";
-        openModal("itemModal");
-      }, 450);
-    }, { passive: true });
-
-    fab.addEventListener("touchend", () => {
-      clearTimeout(timer);
-      if (!isLongPress) {
-        // 短按触发导入（可调出文本/图片识别解析器）
-        alert("🐱 调起 Gemini AI 极速录入");
-      }
-    });
-
-    fab.addEventListener("click", () => {
-      // 桌面端无触屏兜底短按
-      if (!('ontouchstart' in window)) {
-        alert("🐱 调起 Gemini AI 极速录入 (长按可手动录入)");
-      }
-    });
-
-    // 模态弹窗切换
-    function openModal(id) { document.getElementById(id).style.display = "flex"; }
-    function closeModal(id) { document.getElementById(id).style.display = "none"; }
-    function toggleMenuModal() { openModal("menuModal"); }
-    function switchNavTab(tab, el) {
-      document.querySelectorAll(".tabbar-item").forEach(i => i.classList.remove("active"));
-      el.classList.add("active");
-    }
-
-    // GitHub 同步核心逻辑
-    function getGhConfig() {
-      try {
-        return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
-      } catch (e) {
-        return {};
-      }
-    }
-
-    function saveGithubConfig() {
-      const token = document.getElementById("ghToken").value.trim();
-      const repo = document.getElementById("ghRepo").value.trim().replace(/^\/+|\/+$/g, "");
-      const path = document.getElementById("ghPath").value.trim() || "data.json";
-      localStorage.setItem(CONFIG_KEY, JSON.stringify({ token, repo, path }));
-      alert("✅ GitHub 配置已保存！");
-    }
-
-    async function triggerPullCloud() {
-      const cfg = getGhConfig();
-      if (!cfg.token || !cfg.repo) {
-        alert("⚠️ 请先完善 Token 和仓库名！");
+    function processIncomingItemsWithDupCheck(incomingList) {
+      if (!incomingList || incomingList.length === 0) {
+        alert("未解析到任何有效物品数据");
         return;
       }
-      const url = `https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`;
+
+      const existingItems = getItems();
+      const nonDuplicates = [];
+      const duplicateConflicts = [];
+
+      incomingList.forEach(incoming => {
+        // Find match with exact same name and exact same expiry
+        const matchedExisting = existingItems.find(ex =>
+          (ex.name || "").trim().toLowerCase() === (incoming.name || "").trim().toLowerCase() &&
+          (ex.expiry || "").trim() === (incoming.expiry || "").trim()
+        );
+
+        if (matchedExisting) {
+          duplicateConflicts.push({
+            incoming,
+            existing: matchedExisting
+          });
+        } else {
+          nonDuplicates.push(incoming);
+        }
+      });
+
+      // If no duplicates, directly commit all
+      if (duplicateConflicts.length === 0) {
+        commitImportedItems(nonDuplicates, existingItems, 0);
+        closeModal("aiModal");
+        alert(`成功导入 ${nonDuplicates.length} 件物品！`);
+        return;
+      }
+
+      // If duplicates detected, setup resolution queue
+      pendingIncomingItems = nonDuplicates;
+      pendingDuplicatesQueue = duplicateConflicts;
+      closeModal("aiModal");
+      promptNextDuplicate();
+    }
+
+    function promptNextDuplicate() {
+      if (pendingDuplicatesQueue.length === 0) {
+        // All conflicts resolved, finalize and save
+        const existingItems = getItems();
+        commitImportedItems(pendingIncomingItems, existingItems);
+        closeModal("dupModal");
+        return;
+      }
+
+      curDuplicateConflict = pendingDuplicatesQueue[0];
+      const total = pendingDuplicatesQueue.length;
+      document.getElementById("dupCurrentIndex").innerText = "1";
+      document.getElementById("dupTotalCount").innerText = total;
+
+      document.getElementById("dupItemName").innerText = curDuplicateConflict.incoming.name;
+      document.getElementById("dupItemExpiry").innerText = "保质期至: " + (curDuplicateConflict.incoming.expiry || "-");
+      document.getElementById("dupExistingQty").innerText = curDuplicateConflict.existing.quantity || 1;
+      document.getElementById("dupIncomingQty").innerText = "+" + (curDuplicateConflict.incoming.quantity || 1);
+
+      openModal("dupModal");
+    }
+
+    function resolveDupAction(action) {
+      if (!curDuplicateConflict) return;
+      let existingItems = getItems();
+
+      if (action === "add") {
+        const itemToUpdate = existingItems.find(x => x.id === curDuplicateConflict.existing.id);
+        if (itemToUpdate) {
+          const addQty = parseInt(curDuplicateConflict.incoming.quantity, 10) || 1;
+          itemToUpdate.quantity = (parseInt(itemToUpdate.quantity, 10) || 1) + addQty;
+        }
+        pendingDuplicatesQueue.shift();
+        saveItems(existingItems);
+        promptNextDuplicate();
+      } else if (action === "skip") {
+        // Discard incoming duplicate
+        pendingDuplicatesQueue.shift();
+        promptNextDuplicate();
+      } else if (action === "new") {
+        // Import as separate entry
+        pendingIncomingItems.push(curDuplicateConflict.incoming);
+        pendingDuplicatesQueue.shift();
+        promptNextDuplicate();
+      } else if (action === "addAll") {
+        // Bulk add all remaining in queue
+        pendingDuplicatesQueue.forEach(conflict => {
+          const itemToUpdate = existingItems.find(x => x.id === conflict.existing.id);
+          if (itemToUpdate) {
+            const addQty = parseInt(conflict.incoming.quantity, 10) || 1;
+            itemToUpdate.quantity = (parseInt(itemToUpdate.quantity, 10) || 1) + addQty;
+          }
+        });
+        saveItems(existingItems);
+        pendingDuplicatesQueue = [];
+        promptNextDuplicate();
+      } else if (action === "skipAll") {
+        // Bulk skip all remaining in queue
+        pendingDuplicatesQueue = [];
+        promptNextDuplicate();
+      }
+    }
+
+    function cancelDuplicateResolution() {
+      // Discard remaining queue and finalize what has been processed
+      pendingDuplicatesQueue = [];
+      const existingItems = getItems();
+      commitImportedItems(pendingIncomingItems, existingItems);
+      closeModal("dupModal");
+    }
+
+    function commitImportedItems(newItems, currentVaultItems) {
+      if (newItems.length > 0) {
+        newItems.forEach(item => {
+          currentVaultItems.unshift(item);
+        });
+        saveItems(currentVaultItems);
+      }
+      renderCards();
+      renderCalendar();
+      alert(`导入完成！共新增/更新了 ${newItems.length} 件物品。`);
+    }
+
+    function applyAI() {
+      const text = document.getElementById("aiInput").value.trim();
+      if (!text) return alert("请先在文本框中粘贴需要导入的内容");
+      try {
+        const incomingCandidates = [];
+        const nowIso = new Date().toISOString();
+        const todayStr = nowIso.slice(0, 10);
+
+        // JSON test
+        const jsonMatch = text.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          const list = Array.isArray(parsed) ? parsed : [parsed];
+          list.forEach((x, idx) => {
+            if (x.name && (x.expiry || x.dueDate)) {
+              incomingCandidates.push({
+                id: (Date.now() + idx).toString(),
+                name: String(x.name).trim(),
+                category: normalizeCat(x.category || x.cat),
+                cat: normalizeCat(x.category || x.cat),
+                status: x.status || (x.openedAt ? "使用中" : "未开封"),
+                createdAt: x.createdAt || nowIso,
+                openedAt: x.openedAt || "",
+                expiry: x.expiry || x.dueDate,
+                price: x.price !== undefined ? parseFloat(x.price) : "",
+                capacity: x.capacity || "",
+                quantity: parseInt(x.quantity || x.count || x.qty, 10) || 1,
+                isSample: Boolean(x.isSample || /小样/i.test(x.name)),
+                tags: x.tags || "极速导入",
+                notes: x.notes || "",
+                image: x.image || ""
+              });
+            }
+          });
+
+          processIncomingItemsWithDupCheck(incomingCandidates);
+          return;
+        }
+
+        // Line-by-line free text parser
+        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+        lines.forEach((line, idx) => {
+          const dateMatch = line.match(/(\d{4}[-/年]\d{1,2}[-/月]\d{1,2}日?)|(\d{4}\.\d{1,2}\.\d{1,2})/);
+          if (!dateMatch) return;
+
+          let dateStr = dateMatch[0].replace(/年|月/g, "-").replace(/日|\./g, "-");
+          const parts = dateStr.split("-").filter(Boolean);
+          if (parts.length === 3) {
+            dateStr = `${parts[0]}-${String(parts[1]).padStart(2, "0")}-${String(parts[2]).padStart(2, "0")}`;
+          }
+
+          let cleanLine = line.replace(dateMatch[0], "");
+
+          // Price detection: ¥299, 299元, 299.00
+          let price = "";
+          const priceMatch = cleanLine.match(/[¥￥]\s*(\d+(\.\d{1,2})?)|(\d+(\.\d{1,2})?)\s*元/);
+          if (priceMatch) {
+            price = parseFloat(priceMatch[1] || priceMatch[3]);
+            cleanLine = cleanLine.replace(priceMatch[0], "");
+          }
+
+          // Quantity detection
+          let qty = 1;
+          const qtyMatch = cleanLine.match(/(?:[×*xX]\s*(\d+))|(\d+)\s*(?:瓶|支|盒|罐|袋|个|枚|片)/);
+          if (qtyMatch) {
+            qty = parseInt(qtyMatch[1] || qtyMatch[2], 10) || 1;
+            cleanLine = cleanLine.replace(qtyMatch[0], "");
+          }
+
+          const namePart = cleanLine.replace(/^[0-9]+[、. ]*/, "").trim();
+          const isSample = /小样|中样|试用装/i.test(line);
+
+          let detectedCat = "其他";
+          for (let c of TWO_CHAR_CATS) {
+            if (line.includes(c)) { detectedCat = c; break; }
+          }
+
+          incomingCandidates.push({
+            id: (Date.now() + idx).toString(),
+            name: namePart || "极速导入物品",
+            category: detectedCat,
+            cat: detectedCat,
+            status: /已开封|使用中/i.test(line) ? "使用中" : "未开封",
+            createdAt: nowIso,
+            openedAt: /已开封|使用中/i.test(line) ? todayStr : "",
+            expiry: dateStr,
+            price: price,
+            capacity: "",
+            quantity: qty,
+            isSample,
+            tags: isSample ? "小样 导入" : "导入",
+            notes: "",
+            image: ""
+          });
+        });
+
+        processIncomingItemsWithDupCheck(incomingCandidates);
+      } catch (err) {
+        alert("解析失败，请检查输入格式");
+      }
+    }
+
+    /* Title Dropdown & Modal Open/Close */
+    function toggleTitleMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("titleDropdownMenu");
+      menu.classList.toggle("show");
+    }
+
+    function closeTitleMenu() {
+      const menu = document.getElementById("titleDropdownMenu");
+      if (menu) menu.classList.remove("show");
+    }
+
+    document.addEventListener("click", () => {
+      closeTitleMenu();
+    });
+
+    function switchNavTab(tab) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-page").forEach(p => p.classList.remove("active"));
+
+      const searchRow = document.getElementById("searchFilterRow");
+      const segBar = document.getElementById("lifecycleSegmentBar");
+      const catWrap = document.getElementById("catPillsContainer");
+      const layoutBtn = document.getElementById("btnLayoutToggle");
+
+      if (tab === "inventory") {
+        document.getElementById("navInventory").classList.add("active");
+        document.getElementById("tabInventory").classList.add("active");
+        if (searchRow) searchRow.style.display = "flex";
+        if (segBar) segBar.style.display = "flex";
+        if (catWrap) catWrap.style.display = "flex";
+        if (layoutBtn) layoutBtn.style.display = "inline-flex";
+        renderCards();
+      } else if (tab === "filter") {
+        document.getElementById("navFilter").classList.add("active");
+        document.getElementById("tabFilter").classList.add("active");
+        if (searchRow) searchRow.style.display = "none";
+        if (segBar) segBar.style.display = "none";
+        if (catWrap) catWrap.style.display = "none";
+        if (layoutBtn) layoutBtn.style.display = "none";
+        renderDashboardView();
+      } else if (tab === "calendar") {
+        document.getElementById("navCalendar").classList.add("active");
+        document.getElementById("tabCalendar").classList.add("active");
+        if (searchRow) searchRow.style.display = "none";
+        if (segBar) segBar.style.display = "none";
+        if (catWrap) catWrap.style.display = "none";
+        if (layoutBtn) layoutBtn.style.display = "none";
+        renderCalendar();
+      }
+    }
+
+    /* Floating Cat (🐱) Tap & Long-Press */
+    const fabCat = document.getElementById("fabCat");
+    fabCat.addEventListener("mousedown", startFabPress);
+    fabCat.addEventListener("touchstart", startFabPress, { passive: true });
+    fabCat.addEventListener("mouseup", endFabPress);
+    fabCat.addEventListener("touchend", endFabPress);
+
+    function startFabPress() {
+      fabIsLongPress = false;
+      fabPressTimer = setTimeout(() => {
+        fabIsLongPress = true;
+        if (navigator.vibrate) navigator.vibrate(50);
+        openAddModal();
+      }, 450);
+    }
+
+    function endFabPress() {
+      clearTimeout(fabPressTimer);
+      if (!fabIsLongPress) {
+        openAISync();
+      }
+    }
+
+    /* GitHub Cloud Sync */
+    function getGhConfig() {
+      try {
+        const raw = localStorage.getItem(GITHUB_CFG_KEY);
+        return raw ? JSON.parse(raw) : { repo: "kikuroko-rgb/cosmetics", token: "", filename: "data.json" };
+      } catch (e) {
+        return { repo: "kikuroko-rgb/cosmetics", token: "", filename: "data.json" };
+      }
+    }
+
+    function saveRepoConfig() {
+      const repo = cleanHeaderValue(document.getElementById("cfgRepo").value);
+      const token = cleanHeaderValue(document.getElementById("cfgToken").value);
+      const filename = cleanHeaderValue(document.getElementById("cfgFilename").value) || "data.json";
+
+      if (!token) return alert("请粘贴合法的 GitHub Token");
+      localStorage.setItem(GITHUB_CFG_KEY, JSON.stringify({ repo, token, filename }));
+      closeModal("repoModal");
+      pullFromRepo();
+      alert("GitHub 配置保存成功，正在同步数据！");
+    }
+
+    function openRepoConfigModal() {
+      closeTitleMenu();
+      const cfg = getGhConfig();
+      document.getElementById("cfgRepo").value = cfg.repo || "kikuroko-rgb/cosmetics";
+      document.getElementById("cfgToken").value = cfg.token || "";
+      document.getElementById("cfgFilename").value = cfg.filename || "data.json";
+      openModal("repoModal");
+    }
+
+    let currentFileSha = "";
+
+    async function pullFromRepo() {
+      const cfg = getGhConfig();
+      const cleanToken = cleanHeaderValue(cfg.token);
+      const badge = document.getElementById("syncStatusBadge");
+
+      if (!cleanToken || !cfg.repo) {
+        badge.innerText = "● 本地";
+        badge.className = "badge-sync";
+        return;
+      }
+
+      const url = `https://api.github.com/repos/${cfg.repo}/contents/${cfg.filename || "data.json"}`;
       try {
         const res = await fetch(url, {
           headers: {
-            "Authorization": cfg.token.startsWith("ghp_") ? `token ${cfg.token}` : `Bearer ${cfg.token}`,
-            "Accept": "application/vnd.github.v3+json"
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": `token ${cleanToken}`
           }
         });
-        if (res.status === 200) {
+
+        if (res.ok) {
           const data = await res.json();
-          localStorage.setItem("gh_file_sha", data.sha);
-          const cleanB64 = data.content.replace(/\s+/g, "");
-          const jsonStr = decodeURIComponent(atob(cleanB64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
-          const items = JSON.parse(jsonStr);
-          if (Array.isArray(items)) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+          currentFileSha = data.sha;
+          const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+          const cloudItems = JSON.parse(content);
+
+          if (Array.isArray(cloudItems)) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudItems));
+            updateCounts();
+            renderCategoryPills();
             renderCards();
-            alert(`✅ 成功拉取 ${items.length} 件物品！`);
-            closeModal("menuModal");
+            renderCalendar();
+            renderDashboardView();
           }
+          badge.innerText = "● 已连云端";
+          badge.className = "badge-sync online";
         } else {
-          alert(`❌ 同步失败 HTTP ${res.status}`);
+          badge.innerText = "● 同步异常";
+          badge.className = "badge-sync";
         }
-      } catch (e) {
-        alert("❌ 连接 api.github.com 异常，请检查网络或代理！");
+      } catch (err) {
+        badge.innerText = "● 本地";
+        badge.className = "badge-sync";
       }
     }
 
-    async function triggerPushCloud(showSuccessAlert = true) {
+    async function pushToRepo(items) {
       const cfg = getGhConfig();
-      if (!cfg.token || !cfg.repo) return;
-      const url = `https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`;
-      const items = getItems();
+      const cleanToken = cleanHeaderValue(cfg.token);
+      if (!cleanToken || !cfg.repo) return;
+
+      const url = `https://api.github.com/repos/${cfg.repo}/contents/${cfg.filename || "data.json"}`;
       const jsonStr = JSON.stringify(items, null, 2);
-      const b64 = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode(parseInt(p, 16))));
-      const sha = localStorage.getItem("gh_file_sha");
+      const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
 
       try {
+        const bodyData = { message: "update cosmetics vault", content: b64 };
+        if (currentFileSha) bodyData.sha = currentFileSha;
+
         const res = await fetch(url, {
           method: "PUT",
           headers: {
-            "Authorization": cfg.token.startsWith("ghp_") ? `token ${cfg.token}` : `Bearer ${cfg.token}`,
             "Accept": "application/vnd.github.v3+json",
+            "Authorization": `token ${cleanToken}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            message: "Update cosmetic items: " + new Date().toLocaleString(),
-            content: b64,
-            sha: sha || undefined
-          })
+          body: JSON.stringify(bodyData)
         });
+
         if (res.ok) {
-          const resData = await res.json();
-          if (resData.content && resData.content.sha) {
-            localStorage.setItem("gh_file_sha", resData.content.sha);
-          }
-          if (showSuccessAlert) alert("✅ 云端同步成功！");
+          const data = await res.json();
+          currentFileSha = data.content.sha;
+          const badge = document.getElementById("syncStatusBadge");
+          badge.innerText = "● 已连云端";
+          badge.className = "badge-sync online";
         }
       } catch (e) {
-        console.warn("静默同步异常:", e);
+        console.error("云端推送失败", e);
       }
     }
 
-    // 页面初始化
+    function triggerManualSync() {
+      closeTitleMenu();
+      pullFromRepo();
+      alert("正在从 GitHub 仓库拉取最新数据...");
+    }
+
+    function exportDataJson() {
+      closeTitleMenu();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getItems(), null, 2));
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = `临期管家备份_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    }
+
+    function importDataJson(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (Array.isArray(parsed)) {
+            saveItems(parsed);
+            alert(`成功还原 ${parsed.length} 件物品！`);
+          } else {
+            alert("JSON 格式不正确");
+          }
+        } catch (err) {
+          alert("文件解析失败");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllItemsPrompt() {
+      closeTitleMenu();
+      if (confirm("确定要彻底清空本地所有物品数据吗？此操作无法撤销！")) {
+        saveItems([]);
+        alert("已清空所有物品数据！");
+      }
+    }
+
+    /* Initialize on DOM Ready */
     window.addEventListener("DOMContentLoaded", () => {
-      initCategoryPills();
+      renderCategoryPills();
+      updateCounts();
+      updateLayoutButton();
       renderCards();
-      const cfg = getGhConfig();
-      if (cfg.token) document.getElementById("ghToken").value = cfg.token;
-      if (cfg.repo) document.getElementById("ghRepo").value = cfg.repo;
-      if (cfg.path) document.getElementById("ghPath").value = cfg.path;
+      pullFromRepo();
     });
   </script>
 </body>
