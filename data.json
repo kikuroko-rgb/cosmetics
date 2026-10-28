@@ -6,7 +6,8 @@
     "expiry": "2027-10-31",
     "notes": "底部批号 2814 推算",
     "icon": "🧴",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='35' width='16' height='4' fill='%230284C7' rx='1'/><text x='50' y='58' font-size='7' fill='%230284C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Curél</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='35' width='16' height='4' fill='%230284C7' rx='1'/><text x='50' y='58' font-size='7' fill='%230284C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Curél</text></svg>",
+    "createdAt": "2026-10-28T11:21:11.595Z"
   },
   {
     "id": "179318647159590ql",
@@ -15,7 +16,8 @@
     "expiry": "2028-01-31",
     "notes": "管尾钢印 EXP 01/2028",
     "icon": "🩹",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><path d='M36 22 L64 22 L58 75 L42 75 Z' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='75' width='16' height='10' rx='2' fill='%230284C7'/><text x='50' y='42' font-size='6' fill='%231E3A8A' font-family='sans-serif' text-anchor='middle' font-weight='bold'>URIAGE</text><text x='50' y='52' font-size='7' fill='%230284C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>CICA</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><path d='M36 22 L64 22 L58 75 L42 75 Z' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='75' width='16' height='10' rx='2' fill='%230284C7'/><text x='50' y='42' font-size='6' fill='%231E3A8A' font-family='sans-serif' text-anchor='middle' font-weight='bold'>URIAGE</text><text x='50' y='52' font-size='7' fill='%230284C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>CICA</text></svg>",
+    "createdAt": "7652-05-19T07:19:19.590Z"
   },
   {
     "id": "1793186471595kl0t",
@@ -24,7 +26,8 @@
     "expiry": "2028-06-30",
     "notes": "底部钢印 062628 推算",
     "icon": "🌿",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23047857'/><rect x='40' y='24' width='20' height='35' rx='2' fill='%23065F46'/><text x='50' y='45' font-size='6' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Blistex</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23047857'/><rect x='40' y='24' width='20' height='35' rx='2' fill='%23065F46'/><text x='50' y='45' font-size='6' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Blistex</text></svg>",
+    "createdAt": "2026-10-28T11:21:11.595Z"
   },
   {
     "id": "17931864715950xi3",
@@ -33,7 +36,8 @@
     "expiry": "2028-12-21",
     "notes": "底部标签 20281221 까지",
     "icon": "💄",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='4' fill='%23831843'/><rect x='40' y='18' width='20' height='28' rx='3' fill='%239D174D'/><text x='50' y='62' font-size='7' fill='%23FCE7F3' font-family='sans-serif' text-anchor='middle' font-weight='bold'>3CE</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='4' fill='%23831843'/><rect x='40' y='18' width='20' height='28' rx='3' fill='%239D174D'/><text x='50' y='62' font-size='7' fill='%23FCE7F3' font-family='sans-serif' text-anchor='middle' font-weight='bold'>3CE</text></svg>",
+    "createdAt": "2538-03-28T17:31:55.950Z"
   },
   {
     "id": "17931864715950i2h",
@@ -42,7 +46,8 @@
     "expiry": "2028-12-31",
     "notes": "顶部喷码 EXP 12/28",
     "icon": "💧",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='38' y='55' width='24' height='12' fill='%230284C7'/><text x='50' y='42' font-size='6' fill='%231E3A8A' font-family='sans-serif' text-anchor='middle' font-weight='bold'>URIAGE</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='38' y='55' width='24' height='12' fill='%230284C7'/><text x='50' y='42' font-size='6' fill='%231E3A8A' font-family='sans-serif' text-anchor='middle' font-weight='bold'>URIAGE</text></svg>",
+    "createdAt": "2538-03-28T17:31:55.950Z"
   },
   {
     "id": "17931864715958lhk",
@@ -51,7 +56,8 @@
     "expiry": "2029-02-06",
     "notes": "管身喷码 EXP 20290206",
     "icon": "💄",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='5' fill='%23991B1B'/><rect x='40' y='18' width='20' height='26' rx='4' fill='%237F1D1D'/><text x='50' y='60' font-size='6' fill='%23FEF2F2' font-family='sans-serif' text-anchor='middle' font-weight='bold'>JOOCYEE</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='5' fill='%23991B1B'/><rect x='40' y='18' width='20' height='26' rx='4' fill='%237F1D1D'/><text x='50' y='60' font-size='6' fill='%23FEF2F2' font-family='sans-serif' text-anchor='middle' font-weight='bold'>JOOCYEE</text></svg>",
+    "createdAt": "2538-03-28T17:31:55.958Z"
   },
   {
     "id": "1793186471595qzjv",
@@ -60,7 +66,8 @@
     "expiry": "2029-05-01",
     "notes": "标签喷码 EXP 20290501",
     "icon": "💄",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='16' width='20' height='68' rx='3' fill='%2378350F'/><rect x='40' y='16' width='20' height='30' rx='2' fill='%2318181B'/><rect x='42' y='44' width='16' height='4' fill='%23D97706'/><text x='50' y='65' font-size='5' fill='%23FEF3C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>MGP</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='16' width='20' height='68' rx='3' fill='%2378350F'/><rect x='40' y='16' width='20' height='30' rx='2' fill='%2318181B'/><rect x='42' y='44' width='16' height='4' fill='%23D97706'/><text x='50' y='65' font-size='5' fill='%23FEF3C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>MGP</text></svg>",
+    "createdAt": "2026-10-28T11:21:11.595Z"
   },
   {
     "id": "1793186471595sig7",
@@ -69,7 +76,8 @@
     "expiry": "2029-09-16",
     "notes": "已开封 · EXP 20290916",
     "icon": "💄",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='5' fill='%23B45309'/><rect x='40' y='18' width='20' height='26' rx='4' fill='%2392400E'/><text x='50' y='60' font-size='6' fill='%23FEF3C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>JOOCYEE</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='5' fill='%23B45309'/><rect x='40' y='18' width='20' height='26' rx='4' fill='%2392400E'/><text x='50' y='60' font-size='6' fill='%23FEF3C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>JOOCYEE</text></svg>",
+    "createdAt": "2026-10-28T11:21:11.595Z"
   },
   {
     "id": "1793186471595z7a0",
@@ -78,7 +86,8 @@
     "expiry": "2029-09-30",
     "notes": "管身喷码 202909",
     "icon": "🌿",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23064E3B'/><rect x='40' y='32' width='20' height='26' rx='2' fill='%23FFFFFF'/><text x='50' y='46' font-size='4.5' fill='%23064E3B' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Mentholatum</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23064E3B'/><rect x='40' y='32' width='20' height='26' rx='2' fill='%23FFFFFF'/><text x='50' y='46' font-size='4.5' fill='%23064E3B' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Mentholatum</text></svg>",
+    "createdAt": "2026-10-28T11:21:11.595Z"
   },
   {
     "id": "1793191933727w37j",
@@ -87,7 +96,8 @@
     "expiry": "2028-08-08",
     "notes": "包装批号 202808",
     "icon": "🧴",
-    "image": ""
+    "image": "",
+    "createdAt": "2026-10-28T12:52:13.727Z"
   },
   {
     "id": "179319193372780a8",
@@ -96,7 +106,8 @@
     "expiry": "2029-06-30",
     "notes": "标签标记 2906",
     "icon": "✨",
-    "image": ""
+    "image": "",
+    "createdAt": "7652-05-25T15:02:52.780Z"
   },
   {
     "id": "1793191933727tcjx",
@@ -105,7 +116,8 @@
     "expiry": "2029-06-08",
     "notes": "包装标记 290608",
     "icon": "🧴",
-    "image": ""
+    "image": "",
+    "createdAt": "2026-10-28T12:52:13.727Z"
   },
   {
     "id": "17931919337277px2",
@@ -114,7 +126,8 @@
     "expiry": "2029-01-22",
     "notes": "底部批号 20290122",
     "icon": "💄",
-    "image": ""
+    "image": "",
+    "createdAt": "2538-03-29T08:42:17.277Z"
   },
   {
     "id": "1793191933727k3ue",
@@ -123,7 +136,8 @@
     "expiry": "2026-09-23",
     "notes": "批号 26092309S",
     "icon": "💊",
-    "image": ""
+    "image": "",
+    "createdAt": "2026-10-28T12:52:13.727Z"
   },
   {
     "id": "1793191933727xtcw",
@@ -132,7 +146,8 @@
     "expiry": "2027-10-09",
     "notes": "标签标记 271009",
     "icon": "✨",
-    "image": ""
+    "image": "",
+    "createdAt": "2026-10-28T12:52:13.727Z"
   },
   {
     "id": "1793191933727bm7c",
@@ -141,7 +156,8 @@
     "expiry": "2026-12-31",
     "notes": "标签标记 2612",
     "icon": "💊",
-    "image": ""
+    "image": "",
+    "createdAt": "2026-10-28T12:52:13.727Z"
   },
   {
     "id": "1793192063753qesg",
@@ -150,7 +166,8 @@
     "expiry": "2028-08-08",
     "notes": "包装批号 202808",
     "icon": "🧴",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='8' fill='%2318181B'/><rect x='40' y='50' width='20' height='15' fill='%23D97706'/><text x='50' y='38' font-size='6' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>MENTHOLATUM</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='8' fill='%2318181B'/><rect x='40' y='50' width='20' height='15' fill='%23D97706'/><text x='50' y='38' font-size='6' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>MENTHOLATUM</text></svg>",
+    "createdAt": "2026-10-28T12:54:23.753Z"
   },
   {
     "id": "1793192063753hthh",
@@ -159,7 +176,8 @@
     "expiry": "2029-06-30",
     "notes": "标签标记 2906",
     "icon": "✨",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='36' y='18' width='28' height='64' rx='6' fill='%231F2937'/><rect x='42' y='12' width='16' height='10' rx='2' fill='%23111827'/><text x='50' y='52' font-size='7' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>PRAMY</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='36' y='18' width='28' height='64' rx='6' fill='%231F2937'/><rect x='42' y='12' width='16' height='10' rx='2' fill='%23111827'/><text x='50' y='52' font-size='7' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>PRAMY</text></svg>",
+    "createdAt": "2026-10-28T12:54:23.753Z"
   },
   {
     "id": "1793192063753iv65",
@@ -168,7 +186,8 @@
     "expiry": "2029-06-08",
     "notes": "包装标记 290608",
     "icon": "🧴",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='36' y='20' width='28' height='60' rx='12' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='14' width='16' height='8' rx='3' fill='%239CA3AF'/><text x='50' y='52' font-size='6' fill='%23374151' font-family='sans-serif' text-anchor='middle' font-weight='bold'>特护霜</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='36' y='20' width='28' height='60' rx='12' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='14' width='16' height='8' rx='3' fill='%239CA3AF'/><text x='50' y='52' font-size='6' fill='%23374151' font-family='sans-serif' text-anchor='middle' font-weight='bold'>特护霜</text></svg>",
+    "createdAt": "2026-10-28T12:54:23.753Z"
   },
   {
     "id": "1793192063753vmyx",
@@ -177,7 +196,8 @@
     "expiry": "2029-01-22",
     "notes": "底部批号 20290122",
     "icon": "💄",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='5' fill='%239F1239'/><rect x='40' y='18' width='20' height='26' rx='4' fill='%23881337'/><text x='50' y='60' font-size='6' fill='%23FFE4E6' font-family='sans-serif' text-anchor='middle' font-weight='bold'>INTO YOU</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='40' y='18' width='20' height='64' rx='5' fill='%239F1239'/><rect x='40' y='18' width='20' height='26' rx='4' fill='%23881337'/><text x='50' y='60' font-size='6' fill='%23FFE4E6' font-family='sans-serif' text-anchor='middle' font-weight='bold'>INTO YOU</text></svg>",
+    "createdAt": "2026-10-28T12:54:23.753Z"
   },
   {
     "id": "1793192063753c7x3",
@@ -186,7 +206,8 @@
     "expiry": "2026-09-23",
     "notes": "批号 26092309S",
     "icon": "💊",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><path d='M35 22 L65 22 L58 78 L42 78 Z' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='40' y='78' width='20' height='8' rx='2' fill='%230284C7'/><text x='50' y='46' font-size='7' fill='%230369A1' font-family='sans-serif' text-anchor='middle' font-weight='bold'>芙清</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><path d='M35 22 L65 22 L58 78 L42 78 Z' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='40' y='78' width='20' height='8' rx='2' fill='%230284C7'/><text x='50' y='46' font-size='7' fill='%230369A1' font-family='sans-serif' text-anchor='middle' font-weight='bold'>芙清</text></svg>",
+    "createdAt": "2026-10-28T12:54:23.753Z"
   },
   {
     "id": "1793192063753rwjr",
@@ -195,15 +216,7 @@
     "expiry": "2027-10-09",
     "notes": "标签标记 271009",
     "icon": "✨",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='30' width='24' height='50' rx='4' fill='%23D97706'/><rect x='42' y='18' width='16' height='14' rx='3' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='1'/><text x='50' y='58' font-size='6' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>SKIN1004</text></svg>"
-  },
-  {
-    "id": "179319206375375ll",
-    "name": "达芙文 阿达帕林凝胶 0.1%",
-    "category": "药品",
-    "expiry": "2026-12-31",
-    "notes": "标签标记 2612",
-    "icon": "💊",
-    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><path d='M34 25 L66 25 L60 75 L40 75 Z' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='40' y='20' width='20' height='8' rx='2' fill='%230284C7'/><text x='50' y='48' font-size='6' fill='%230284C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Differin</text></svg>"
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='30' width='24' height='50' rx='4' fill='%23D97706'/><rect x='42' y='18' width='16' height='14' rx='3' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='1'/><text x='50' y='58' font-size='6' fill='%23FFFFFF' font-family='sans-serif' text-anchor='middle' font-weight='bold'>SKIN1004</text></svg>",
+    "createdAt": "2026-10-28T12:54:23.753Z"
   }
 ]
