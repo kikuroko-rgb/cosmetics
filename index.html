@@ -767,6 +767,7 @@
       -webkit-user-select: none;
       transition: transform 0.15s ease;
       border: 2px solid rgba(255, 255, 255, 0.8);
+      touch-action: manipulation;
     }
     .fab-cat:active {
       transform: scale(0.92);
@@ -1156,7 +1157,7 @@
       <div class="segment-tab" onclick="setStatusTab('使用中', this)">💧 使用中 <span class="badge-count" id="cntInUse">0</span></div>
     </div>
 
-    <!-- 2-Character Categories (Sorted Dynamically by Count Descending) -->
+    <!-- 2-Character Categories -->
     <div class="cat-scroller-wrap" id="catPillsContainer"></div>
   </header>
 
@@ -1205,7 +1206,7 @@
       <div id="filterResultCardsContainer" class="list-mode"></div>
     </div>
 
-    <!-- View 3: Calendar Timeline (新增、开封、到期) -->
+    <!-- View 3: Calendar Timeline -->
     <div id="tabCalendar" class="tab-page">
       <div class="calendar-container">
         <div class="cal-header-bar">
@@ -1311,8 +1312,8 @@
     </button>
   </nav>
 
-  <!-- Sheet: Manual Add / Edit Modal (Camera First) -->
-  <div class="sheet-backdrop" id="manualModal" onclick="closeModal('manualModal')">
+  <!-- Sheet: Manual Add / Edit Modal -->
+  <div class="sheet-backdrop" id="manualModal" onclick="handleBackdropClick(event, 'manualModal')">
     <div class="sheet-card" onclick="event.stopPropagation()">
       <div class="sheet-handle"></div>
       <div class="sheet-header-title">
@@ -1324,7 +1325,6 @@
         <input type="hidden" id="itemId">
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelected(event)">
 
-        <!-- Prominent Top Camera Viewfinder Box -->
         <div class="camera-banner" id="cameraBanner" onclick="document.getElementById('cameraInput').click()">
           <span style="font-size: 26px;">📷</span>
           <span style="font-size: 13px; font-weight: 600;">拍照或选取包装图</span>
@@ -1415,7 +1415,7 @@
   </div>
 
   <!-- Sheet: Centered Gemini Quick Import -->
-  <div class="sheet-backdrop modal-centered" id="aiModal" onclick="closeModal('aiModal')">
+  <div class="sheet-backdrop modal-centered" id="aiModal" onclick="handleBackdropClick(event, 'aiModal')">
     <div class="sheet-card" onclick="event.stopPropagation()">
       <div class="sheet-header-title">
         <h2>✨ Gemini 极速导入</h2>
@@ -1432,8 +1432,8 @@
     </div>
   </div>
 
-  <!-- Sheet: Duplicate Resolution Modal (查重冲突解决) -->
-  <div class="sheet-backdrop modal-centered" id="dupModal" style="z-index: 120;" onclick="event.stopPropagation()">
+  <!-- Sheet: Duplicate Resolution Modal -->
+  <div class="sheet-backdrop modal-centered" id="dupModal" style="z-index: 120;">
     <div class="sheet-card" onclick="event.stopPropagation()">
       <div class="sheet-header-title">
         <h2 style="color:var(--warning); display:flex; align-items:center; gap:6px;">⚠️ 发现重复物品 (<span id="dupCurrentIndex">1</span>/<span id="dupTotalCount">1</span>)</h2>
@@ -1461,7 +1461,7 @@
   </div>
 
   <!-- Sheet: GitHub Cloud Sync Settings -->
-  <div class="sheet-backdrop" id="repoModal" onclick="closeModal('repoModal')">
+  <div class="sheet-backdrop" id="repoModal" onclick="handleBackdropClick(event, 'repoModal')">
     <div class="sheet-card" onclick="event.stopPropagation()">
       <div class="sheet-handle"></div>
       <div class="sheet-header-title">
@@ -1549,12 +1549,6 @@
     let pendingDuplicatesQueue = [];
     let curDuplicateConflict = null;
 
-    /* Touch & Long Press */
-    let pressTimer = null;
-    let touchMoved = false;
-    let fabPressTimer = null;
-    let fabIsLongPress = false;
-
     /* HTTP Header Sanitizer */
     function cleanHeaderValue(str) {
       if (!str) return "";
@@ -1596,7 +1590,6 @@
       return String(tags).split(/[\s,，#]+/).map(t => t.trim()).filter(Boolean);
     }
 
-    /* Compute Estimated Consumption Time */
     function calculateConsumption(item) {
       const cat = normalizeCat(item.category || item.cat);
       const benchmark = CONSUMPTION_BENCHMARK[cat] || CONSUMPTION_BENCHMARK["其他"];
@@ -1649,7 +1642,6 @@
       return { days, text: `剩 ${days}天`, cls: "status-good", pillCls: "" };
     }
 
-    /* Dynamic Category Pill Rendering */
     function renderCategoryPills() {
       const container = document.getElementById("catPillsContainer");
       if (!container) return;
@@ -1670,7 +1662,6 @@
       });
       container.innerHTML = html;
 
-      // Update form & batch selects
       const itemCatSelect = document.getElementById("itemCat");
       const batchCatSelect = document.getElementById("batchTargetCatSelect");
       if (itemCatSelect) {
@@ -1724,12 +1715,14 @@
       document.getElementById("cntInUse").innerText = items.filter(i => i.status === "使用中").length;
     }
 
-    /* Long-Press for Batch Mode */
     function attachCardLongPress(cardEl, itemId) {
-      cardEl.addEventListener("touchstart", (e) => {
-        touchMoved = false;
-        pressTimer = setTimeout(() => {
-          if (!touchMoved) {
+      let cardPressTimer = null;
+      let cardMoved = false;
+
+      cardEl.addEventListener("touchstart", () => {
+        cardMoved = false;
+        cardPressTimer = setTimeout(() => {
+          if (!cardMoved) {
             if (navigator.vibrate) navigator.vibrate(50);
             if (!isBatchMode) toggleBatchMode();
             toggleSelectCard(itemId);
@@ -1738,22 +1731,22 @@
       }, { passive: true });
 
       cardEl.addEventListener("touchmove", () => {
-        touchMoved = true;
-        clearTimeout(pressTimer);
+        cardMoved = true;
+        clearTimeout(cardPressTimer);
       }, { passive: true });
 
       cardEl.addEventListener("touchend", () => {
-        clearTimeout(pressTimer);
+        clearTimeout(cardPressTimer);
       });
 
       cardEl.addEventListener("mousedown", () => {
-        pressTimer = setTimeout(() => {
+        cardPressTimer = setTimeout(() => {
           if (!isBatchMode) toggleBatchMode();
           toggleSelectCard(itemId);
         }, 500);
       });
-      cardEl.addEventListener("mouseup", () => clearTimeout(pressTimer));
-      cardEl.addEventListener("mouseleave", () => clearTimeout(pressTimer));
+      cardEl.addEventListener("mouseup", () => clearTimeout(cardPressTimer));
+      cardEl.addEventListener("mouseleave", () => clearTimeout(cardPressTimer));
     }
 
     function toggleBatchMode() {
@@ -1911,22 +1904,18 @@
       }
     }
 
-    /* Filter & Search Helper */
     function getFilteredItems() {
       let items = getItems();
       const query = (document.getElementById("searchInput").value || "").trim().toLowerCase();
 
-      // Lifecycle status filter
       if (currentStatusTab !== "全部") {
         items = items.filter(i => (i.status || "未开封") === currentStatusTab);
       }
 
-      // Two-character category filter
       if (currentCat !== "全部") {
         items = items.filter(i => normalizeCat(i.category || i.cat) === currentCat);
       }
 
-      // Keyword query
       if (query) {
         items = items.filter(i => {
           const nameMatch = (i.name || "").toLowerCase().includes(query);
@@ -1936,7 +1925,6 @@
         });
       }
 
-      // Sort
       items.sort(sortModes[sortModeIndex].fn);
       return items;
     }
@@ -2074,7 +2062,6 @@
       }
     }
 
-    /* Calendar Timeline Engine */
     function prevMonth() { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); }
     function nextMonth() { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); }
 
@@ -2107,17 +2094,14 @@
       const dateMap = {};
 
       items.forEach(it => {
-        // Expiry
         if (it.expiry) {
           if (!dateMap[it.expiry]) dateMap[it.expiry] = [];
           dateMap[it.expiry].push({ type: "到期", item: it });
         }
-        // Opened
         if (it.openedAt) {
           if (!dateMap[it.openedAt]) dateMap[it.openedAt] = [];
           dateMap[it.openedAt].push({ type: "开封", item: it });
         }
-        // Created / Added
         const addDateStr = it.createdAt ? it.createdAt.slice(0, 10) : "";
         if (addDateStr) {
           if (!dateMap[addDateStr]) dateMap[addDateStr] = [];
@@ -2220,13 +2204,11 @@
       });
     }
 
-    /* Dedicated Filter Dashboard */
     function renderDashboardView() {
       const tagCloudWrap = document.getElementById("tagCloudContainer");
       if (!tagCloudWrap) return;
       const items = getItems();
 
-      // Aggregate tags and frequencies
       const tagFreq = {};
       items.forEach(i => {
         parseItemTags(i.tags).forEach(t => {
@@ -2253,7 +2235,6 @@
         });
       }
 
-      // Filter matching items
       let matched = items.filter(it => {
         const d = calcDueDays(it.expiry).days;
         if (dashboardFilterExpiry === "临期" && (d < 0 || d > 30)) return false;
@@ -2304,7 +2285,7 @@
       renderDashboardView();
     }
 
-    /* Modal Controls */
+    /* Modal Controls & Safe Backdrop Click */
     function openModal(id) {
       const el = document.getElementById(id);
       if (el) el.style.display = "flex";
@@ -2313,6 +2294,13 @@
     function closeModal(id) {
       const el = document.getElementById(id);
       if (el) el.style.display = "none";
+    }
+
+    function handleBackdropClick(event, id) {
+      // 只有直接点在半透明灰色背景层上才关闭，防止子元素事件误冒泡
+      if (event.target === event.currentTarget) {
+        closeModal(id);
+      }
     }
 
     function openAddModal() {
@@ -2380,7 +2368,6 @@
 
       const reader = new FileReader();
       reader.onload = ev => {
-        // Compress image via Canvas
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -2465,14 +2452,15 @@
       closeModal("manualModal");
     }
 
-    /* Gemini Quick Import & Text Parser (with Price Detection) */
+    /* Gemini Quick Import */
     function openAISync() {
       openModal("aiModal");
       const inputEl = document.getElementById("aiInput");
       inputEl.value = "";
+      // 延迟聚焦，防止在移动设备上因弹窗动画未完成导致视口重绘闪退
       setTimeout(() => {
         inputEl.focus();
-      }, 100);
+      }, 300);
     }
 
     function processIncomingItemsWithDupCheck(incomingList) {
@@ -2486,31 +2474,25 @@
       const duplicateConflicts = [];
 
       incomingList.forEach(incoming => {
-        // Find match with exact same name and exact same expiry
         const matchedExisting = existingItems.find(ex =>
           (ex.name || "").trim().toLowerCase() === (incoming.name || "").trim().toLowerCase() &&
           (ex.expiry || "").trim() === (incoming.expiry || "").trim()
         );
 
         if (matchedExisting) {
-          duplicateConflicts.push({
-            incoming,
-            existing: matchedExisting
-          });
+          duplicateConflicts.push({ incoming, existing: matchedExisting });
         } else {
           nonDuplicates.push(incoming);
         }
       });
 
-      // If no duplicates, directly commit all
       if (duplicateConflicts.length === 0) {
-        commitImportedItems(nonDuplicates, existingItems, 0);
+        commitImportedItems(nonDuplicates, existingItems);
         closeModal("aiModal");
         alert(`成功导入 ${nonDuplicates.length} 件物品！`);
         return;
       }
 
-      // If duplicates detected, setup resolution queue
       pendingIncomingItems = nonDuplicates;
       pendingDuplicatesQueue = duplicateConflicts;
       closeModal("aiModal");
@@ -2519,7 +2501,6 @@
 
     function promptNextDuplicate() {
       if (pendingDuplicatesQueue.length === 0) {
-        // All conflicts resolved, finalize and save
         const existingItems = getItems();
         commitImportedItems(pendingIncomingItems, existingItems);
         closeModal("dupModal");
@@ -2553,16 +2534,13 @@
         saveItems(existingItems);
         promptNextDuplicate();
       } else if (action === "skip") {
-        // Discard incoming duplicate
         pendingDuplicatesQueue.shift();
         promptNextDuplicate();
       } else if (action === "new") {
-        // Import as separate entry
         pendingIncomingItems.push(curDuplicateConflict.incoming);
         pendingDuplicatesQueue.shift();
         promptNextDuplicate();
       } else if (action === "addAll") {
-        // Bulk add all remaining in queue
         pendingDuplicatesQueue.forEach(conflict => {
           const itemToUpdate = existingItems.find(x => x.id === conflict.existing.id);
           if (itemToUpdate) {
@@ -2574,14 +2552,12 @@
         pendingDuplicatesQueue = [];
         promptNextDuplicate();
       } else if (action === "skipAll") {
-        // Bulk skip all remaining in queue
         pendingDuplicatesQueue = [];
         promptNextDuplicate();
       }
     }
 
     function cancelDuplicateResolution() {
-      // Discard remaining queue and finalize what has been processed
       pendingDuplicatesQueue = [];
       const existingItems = getItems();
       commitImportedItems(pendingIncomingItems, existingItems);
@@ -2608,7 +2584,6 @@
         const nowIso = new Date().toISOString();
         const todayStr = nowIso.slice(0, 10);
 
-        // JSON test
         const jsonMatch = text.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
@@ -2639,7 +2614,6 @@
           return;
         }
 
-        // Line-by-line free text parser
         const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
         lines.forEach((line, idx) => {
           const dateMatch = line.match(/(\d{4}[-/年]\d{1,2}[-/月]\d{1,2}日?)|(\d{4}\.\d{1,2}\.\d{1,2})/);
@@ -2653,7 +2627,6 @@
 
           let cleanLine = line.replace(dateMatch[0], "");
 
-          // Price detection: ¥299, 299元, 299.00
           let price = "";
           const priceMatch = cleanLine.match(/[¥￥]\s*(\d+(\.\d{1,2})?)|(\d+(\.\d{1,2})?)\s*元/);
           if (priceMatch) {
@@ -2661,7 +2634,6 @@
             cleanLine = cleanLine.replace(priceMatch[0], "");
           }
 
-          // Quantity detection
           let qty = 1;
           const qtyMatch = cleanLine.match(/(?:[×*xX]\s*(\d+))|(\d+)\s*(?:瓶|支|盒|罐|袋|个|枚|片)/);
           if (qtyMatch) {
@@ -2702,7 +2674,7 @@
       }
     }
 
-    /* Title Dropdown & Modal Open/Close */
+    /* Title Dropdown & Menu */
     function toggleTitleMenu(e) {
       if (e) e.stopPropagation();
       const menu = document.getElementById("titleDropdownMenu");
@@ -2714,8 +2686,11 @@
       if (menu) menu.classList.remove("show");
     }
 
-    document.addEventListener("click", () => {
-      closeTitleMenu();
+    // 仅在点击外部时关闭顶栏菜单，不影响弹窗层
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#titleDropdownMenu") && !e.target.closest(".title-menu-trigger")) {
+        closeTitleMenu();
+      }
     });
 
     function switchNavTab(tab) {
@@ -2754,28 +2729,60 @@
       }
     }
 
-    /* Floating Cat (🐱) Tap & Long-Press */
+    /* Fixed Floating Cat (🐱) Tap & Long-Press Handling */
     const fabCat = document.getElementById("fabCat");
-    fabCat.addEventListener("mousedown", startFabPress);
-    fabCat.addEventListener("touchstart", startFabPress, { passive: true });
-    fabCat.addEventListener("mouseup", endFabPress);
-    fabCat.addEventListener("touchend", endFabPress);
+    let fabPressTimer = null;
+    let fabIsLongPress = false;
+    let fabTouchMoved = false;
 
-    function startFabPress() {
+    // 移动端 Touch 绑定
+    fabCat.addEventListener("touchstart", (e) => {
+      e.stopPropagation();
+      fabTouchMoved = false;
       fabIsLongPress = false;
       fabPressTimer = setTimeout(() => {
         fabIsLongPress = true;
         if (navigator.vibrate) navigator.vibrate(50);
         openAddModal();
-      }, 450);
-    }
+      }, 500);
+    }, { passive: false });
 
-    function endFabPress() {
+    fabCat.addEventListener("touchmove", () => {
+      fabTouchMoved = true;
+      clearTimeout(fabPressTimer);
+    }, { passive: true });
+
+    fabCat.addEventListener("touchend", (e) => {
+      e.stopPropagation();
+      e.preventDefault(); // 阻止手机端合成多余的 click 事件导致弹窗被立即关闭
+      clearTimeout(fabPressTimer);
+      if (!fabTouchMoved && !fabIsLongPress) {
+        openAISync();
+      }
+    });
+
+    // 桌面端鼠标绑定 (使用标志避免与 touch 重复执行)
+    let isDesktopMouse = true;
+    fabCat.addEventListener("touchstart", () => { isDesktopMouse = false; }, { passive: true });
+
+    fabCat.addEventListener("mousedown", (e) => {
+      if (!isDesktopMouse) return;
+      e.stopPropagation();
+      fabIsLongPress = false;
+      fabPressTimer = setTimeout(() => {
+        fabIsLongPress = true;
+        openAddModal();
+      }, 500);
+    });
+
+    fabCat.addEventListener("mouseup", (e) => {
+      if (!isDesktopMouse) return;
+      e.stopPropagation();
       clearTimeout(fabPressTimer);
       if (!fabIsLongPress) {
         openAISync();
       }
-    }
+    });
 
     /* GitHub Cloud Sync */
     function getGhConfig() {
