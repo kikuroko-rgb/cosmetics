@@ -25,11 +25,12 @@
     .header-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .header-left { display: flex; align-items: center; gap: 8px; }
     .header-title h1 { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -0.3px; }
+    .sync-badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: #E5E7EB; color: #6B7280; font-weight: 500; }
+    .sync-badge.online { background: #D1FAE5; color: #047857; }
     
     .btn-batch { background: #F3F4F6; border: none; color: var(--sub); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 12px; cursor: pointer; }
     .btn-batch.active { background: var(--primary); color: #fff; }
 
-    /* 顶栏控件行 */
     .controls-row { display: flex; gap: 6px; align-items: center; }
     .cat-select-dropdown {
       background: #F3F4F6; border: 1px solid var(--border); border-radius: 10px;
@@ -52,7 +53,6 @@
     .tab-page { display: none; }
     .tab-page.active { display: block; }
 
-    /* 列表卡片模式 */
     .list-mode { display: flex; flex-direction: column; gap: 10px; }
     .list-mode .item-card {
       background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
@@ -81,7 +81,6 @@
     .list-mode .countdown-days { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .list-mode .status-desc { font-size: 10px; font-weight: 600; margin-top: 1px; }
 
-    /* 画廊方块模式 */
     .grid-mode { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
     .grid-mode .item-card { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; cursor: pointer; position: relative; }
     .grid-mode .item-card.selected { border-color: var(--primary); background: #FFF9FA; }
@@ -100,7 +99,6 @@
     .batch-mode .select-checkbox { display: flex; }
     .item-card.selected .select-checkbox { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-    /* 日历组件 */
     .calendar-card { background: #FFF; border-radius: 16px; border: 1px solid var(--border); padding: 16px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 16px; }
     .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 8px; }
     .calendar-title { font-size: 17px; font-weight: 700; color: #111; }
@@ -116,7 +114,6 @@
     .dot-danger { background: var(--danger); } .dot-warning { background: var(--warning); } .dot-good { background: var(--success); }
     .cal-event-section h3 { font-size: 14px; color: var(--sub); margin-bottom: 10px; font-weight: 600; }
 
-    /* 底部导航栏与居中小猫按钮 */
     .bottom-tabbar {
       position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
       background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(16px);
@@ -130,7 +127,6 @@
     .tab-item.active { color: #111827; font-weight: 700; }
     .tab-item .tab-icon { font-size: 20px; line-height: 1; }
 
-    /* 居中小猫咪悬浮按钮 */
     .tab-cat-center {
       flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; justify-content: center;
       position: relative; top: -12px; cursor: pointer;
@@ -146,7 +142,6 @@
     .cat-avatar-btn:active { transform: scale(0.92); box-shadow: 0 3px 8px rgba(255, 107, 139, 0.3); }
     .cat-btn-label { font-size: 10px; font-weight: 600; color: #FF5A79; margin-top: 2px; }
 
-    /* 批量操作条 */
     .batch-toolbar {
       position: fixed; bottom: 60px; left: 0; right: 0; background: #FFF;
       border-top: 1px solid var(--border); padding: 10px 18px; display: none;
@@ -156,7 +151,6 @@
     .btn-batch-del { background: #FEE2E2; color: var(--danger); border: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .btn-batch-opt { background: #F3F4F6; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
 
-    /* 抽屉弹窗通用 */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100;
       display: none; align-items: flex-end; justify-content: center;
@@ -170,7 +164,6 @@
     .sheet-header h2 { font-size: 17px; font-weight: 700; color: #111; margin: 0; }
     .sheet-close { width: 28px; height: 28px; border-radius: 50%; background: #F3F4F6; border: none; color: var(--sub); font-size: 14px; cursor: pointer; }
 
-    /* 菜单列表样式 */
     .menu-options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
     .menu-opt-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -181,7 +174,6 @@
     .menu-opt-left { display: flex; align-items: center; gap: 10px; }
     .menu-opt-icon { font-size: 20px; }
 
-    /* 排序抽屉列表 */
     .sort-list-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
     .sort-opt-item {
       padding: 13px 14px; border-radius: 10px; border: 1px solid #E5E7EB; background: #F9FAFB;
@@ -189,7 +181,6 @@
     }
     .sort-opt-item.active { background: #FFF1F2; color: var(--primary); border-color: var(--primary); font-weight: 600; }
 
-    /* 筛选抽屉 */
     .sheet-section-title { font-size: 13px; font-weight: 600; color: #374151; margin: 14px 0 8px; }
     .filter-pills-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
     .filter-opt-btn {
@@ -217,11 +208,11 @@
     <div class="header-title">
       <div class="header-left">
         <h1 id="pageTitle">临期管家</h1>
+        <span class="sync-badge" id="syncStatusBadge">本地模式</span>
         <button class="btn-batch" id="btnBatchToggle" onclick="toggleBatchMode()">批量管理</button>
       </div>
     </div>
 
-    <!-- 顶栏控件：分类下拉 + 搜索框 + 列表切换 + 排序 + 筛选 -->
     <div class="controls-row" id="controlsRow">
       <select class="cat-select-dropdown" id="categorySelect" onchange="changeCategory(this.value)">
         <option value="全部">全部分类</option>
@@ -252,7 +243,6 @@
   </header>
 
   <main class="container">
-    <!-- 清单 Tab -->
     <div id="tabInventory" class="tab-page active">
       <div id="cardsContainer" class="list-mode"></div>
       <div class="empty-state" id="emptyState" style="display:none;">
@@ -262,7 +252,6 @@
       </div>
     </div>
 
-    <!-- 日历 Tab -->
     <div id="tabCalendar" class="tab-page">
       <div class="calendar-card">
         <div class="calendar-header">
@@ -338,7 +327,7 @@
     </div>
   </div>
 
-  <!-- 最右侧综合菜单抽屉（收纳 备份、恢复、导入、清空） -->
+  <!-- 最右侧综合菜单抽屉 -->
   <div class="modal-overlay" id="menuModal" onclick="closeMenuSheet()">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="sheet-header">
@@ -346,6 +335,20 @@
         <button class="sheet-close" onclick="closeMenuSheet()">✕</button>
       </div>
       <div class="menu-options-list">
+        <div class="menu-opt-row" onclick="openRepoConfigModal()">
+          <div class="menu-opt-left">
+            <span class="menu-opt-icon">🔑</span>
+            <span>配置 GitHub 仓库云同步</span>
+          </div>
+          <span style="color:#9CA3AF;">›</span>
+        </div>
+        <div class="menu-opt-row" onclick="triggerManualSync()">
+          <div class="menu-opt-left">
+            <span class="menu-opt-icon">🔄</span>
+            <span>立即与云端双向拉取</span>
+          </div>
+          <span style="color:#9CA3AF;">›</span>
+        </div>
         <div class="menu-opt-row" onclick="triggerMenuAction('backup')">
           <div class="menu-opt-left">
             <span class="menu-opt-icon">💾</span>
@@ -379,7 +382,24 @@
     </div>
   </div>
 
-  <!-- 批量操作工具条 -->
+  <!-- GitHub 仓库同步配置弹窗 -->
+  <div class="modal-overlay" id="repoModal" onclick="closeRepoConfigModal()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <h2>🔑 GitHub 仓库云同步配置</h2>
+        <button class="sheet-close" onclick="closeRepoConfigModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Personal Access Token (第一步复制的 ghp_... 钥匙)</label>
+        <input type="password" id="repoTokenInput" placeholder="粘贴你的 GitHub Token">
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-s" onclick="closeRepoConfigModal()">取消</button>
+        <button type="button" class="btn-p" onclick="saveRepoConfig()">保存并连接</button>
+      </div>
+    </div>
+  </div>
+
   <div class="batch-toolbar" id="batchToolbar">
     <div>
       <button class="btn-batch-opt" onclick="selectAll()">全选</button>
@@ -389,7 +409,6 @@
     <button class="btn-batch-del" onclick="deleteSelected()">批量删除</button>
   </div>
 
-  <!-- 底部常驻导航栏（居中小猫咪 + 最右菜单） -->
   <nav class="bottom-tabbar">
     <div class="tab-item active" id="navInventory" onclick="switchNavTab('inventory')">
       <div class="tab-icon">📦</div>
@@ -401,7 +420,6 @@
       <span>日历</span>
     </div>
 
-    <!-- 居中可爱小猫咪按钮 -->
     <div class="tab-cat-center" onclick="openModal()" title="点击添加新物品">
       <div class="cat-avatar-btn">🐱</div>
       <div class="cat-btn-label">添加</div>
@@ -466,6 +484,10 @@
     const K = "cosmetics_inventory_data";
     const LAYOUT_KEY = "cosmetics_display_layout";
     const SORT_KEY = "cosmetics_display_sort";
+    const TOKEN_KEY = "cosmetics_github_token";
+    const REPO_OWNER = "kikuroko-rgb";
+    const REPO_NAME = "cosmetics";
+    const FILE_PATH = "data.json";
 
     let curCat = "全部";
     let isBatchMode = false;
@@ -478,17 +500,122 @@
 
     let calViewDate = new Date();
     let calSelectedDateStr = new Date().toISOString().slice(0, 10);
+    let currentFileSha = ""; // 记录 GitHub 文件 SHA 避免冲突
 
     function getItems(){ const s=localStorage.getItem(K); return s?JSON.parse(s):[]; }
-    function saveItems(d){ localStorage.setItem(K,JSON.stringify(d)); }
     function calcDays(e){ const t=new Date(); t.setHours(0,0,0,0); const x=new Date(e); x.setHours(0,0,0,0); return Math.ceil((x-t)/86400000); }
+
+    function updateSyncBadge(online) {
+      const badge = document.getElementById("syncStatusBadge");
+      if (online) {
+        badge.innerText = "☁️ 仓库已连接";
+        badge.className = "sync-badge online";
+      } else {
+        badge.innerText = "本地模式";
+        badge.className = "sync-badge";
+      }
+    }
+
+    /* GitHub 仓库直读直写模块 */
+    async function pullFromRepo() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+      const headers = { "Accept": "application/vnd.github.v3+json" };
+      if (token) headers["Authorization"] = `token ${token}`;
+
+      try {
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          currentFileSha = data.sha;
+          // GitHub 内容是 Base64 编码，需解码
+          const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+          const cloudItems = JSON.parse(content);
+          if (Array.isArray(cloudItems) && cloudItems.length > 0) {
+            localStorage.setItem(K, JSON.stringify(cloudItems));
+            renderCards();
+            renderCalendar();
+          } else {
+            const local = getItems();
+            if (local.length > 0 && token) pushToRepo(local);
+          }
+          if (token) updateSyncBadge(true);
+        } else {
+          updateSyncBadge(false);
+        }
+      } catch (err) {
+        console.error("拉取仓库数据失败:", err);
+        updateSyncBadge(false);
+      }
+    }
+
+    async function pushToRepo(items) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return;
+
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+      // 将 JSON 字符串转为 UTF-8 Base64
+      const jsonStr = JSON.stringify(items, null, 2);
+      const b64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+      try {
+        const bodyData = {
+          message: "update cosmetics data",
+          content: b64Content
+        };
+        if (currentFileSha) bodyData.sha = currentFileSha;
+
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${token}`,
+            "Accept": "application/vnd.github.v3+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(bodyData)
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          currentFileSha = resData.content.sha;
+          updateSyncBadge(true);
+        }
+      } catch (err) {
+        console.error("推送仓库数据失败:", err);
+      }
+    }
+
+    function saveItems(d){ 
+      localStorage.setItem(K, JSON.stringify(d)); 
+      pushToRepo(d);
+    }
+
+    function openRepoConfigModal() {
+      closeMenuSheet();
+      document.getElementById("repoTokenInput").value = localStorage.getItem(TOKEN_KEY) || "";
+      document.getElementById("repoModal").style.display = "flex";
+    }
+    function closeRepoConfigModal() { document.getElementById("repoModal").style.display = "none"; }
+    function saveRepoConfig() {
+      const token = document.getElementById("repoTokenInput").value.trim();
+      if (!token) return alert("请粘贴 Token");
+      localStorage.setItem(TOKEN_KEY, token);
+      closeRepoConfigModal();
+      pullFromRepo();
+      alert("Token 保存成功，正在连接仓库！");
+    }
+
+    function triggerManualSync() {
+      closeMenuSheet();
+      pullFromRepo();
+      alert("正在同步仓库最新数据...");
+    }
 
     function changeCategory(val) {
       curCat = val;
       renderCards();
     }
 
-    /* 菜单抽屉 */
     function openMenuSheet() { document.getElementById("menuModal").style.display = "flex"; }
     function closeMenuSheet() { document.getElementById("menuModal").style.display = "none"; }
     function triggerMenuAction(action) {
@@ -498,7 +625,7 @@
       else if (action === 'gemini') openAISync();
       else if (action === 'clear') {
         if (confirm("确定要清空全部物品数据吗？此操作不可逆！")) {
-          localStorage.removeItem(K);
+          saveItems([]);
           renderCards();
           renderCalendar();
           alert("数据已清空！");
@@ -506,7 +633,6 @@
       }
     }
 
-    /* 排序抽屉 */
     function openSortSheet() {
       document.querySelectorAll("#sortOptionsGroup .sort-opt-item").forEach(row => {
         const isMatch = row.getAttribute("data-sort") === currentSort;
@@ -524,7 +650,6 @@
       renderCards();
     }
 
-    /* 筛选抽屉 */
     function openFilterSheet() { document.getElementById("filterModal").style.display = "flex"; }
     function closeFilterSheet() { document.getElementById("filterModal").style.display = "none"; }
     
@@ -867,12 +992,13 @@
     function exportData(){ const a=document.createElement("a"); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(getItems(),null,2)); a.download=`临期管家备份_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
     function importData(e){
       const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-      r.onload=evt=>{ try{ const d=JSON.parse(evt.target.result); if(Array.isArray(d)){ saveItems(d); renderCards(); renderCalendar(); alert("恢复成功！"); } }catch(err){ alert("解析失败"); } };
+      r.onload=evt=>{ try{ const d=JSON.parse(evt.target.result); if(Array.isArray(d)){ saveItems(d); renderCards(); alert("恢复成功！"); } }catch(err){ alert("解析失败"); } };
       r.readAsText(f);
     }
 
-    // 监听 URL 快速导入
     window.addEventListener("DOMContentLoaded", () => {
+      pullFromRepo();
+
       const params = new URLSearchParams(window.location.search);
       const dataParam = params.get("import");
       if (dataParam) {
