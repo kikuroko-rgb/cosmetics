@@ -67,15 +67,16 @@
     .list-mode .card-thumb img { width: 100%; height: 100%; object-fit: contain; }
     .list-mode .card-thumb .fallback-icon { font-size: 28px; }
 
-    .list-mode .card-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .list-mode .card-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .list-mode .title-row { display: flex; align-items: center; gap: 6px; }
     .list-mode .item-name { font-size: 15px; font-weight: 600; color: #111; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .list-mode .badge-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .list-mode .badge-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 1px; }
     .tag-pill { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
     .tag-category { background: #FEF3C7; color: #D97706; }
     .tag-opened { background: #E0F2FE; color: #0284C7; }
     .tag-unopened { background: #F3F4F6; color: #6B7280; }
-    .list-mode .expiry-sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
+    .tag-date { background: #F3F4F6; color: #4B5563; }
+    .list-mode .expiry-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
 
     .list-mode .card-right { text-align: right; flex-shrink: 0; min-width: 65px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
     .list-mode .countdown-days { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -87,7 +88,7 @@
     .grid-mode .card-thumb { width: 100%; height: 130px; background: #F9FAFB; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .grid-mode .card-thumb img { width: 100%; height: 100%; object-fit: contain; }
     .grid-mode .card-thumb .fallback-icon { font-size: 38px; }
-    .grid-mode .card-main { padding: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+    .grid-mode .card-main { padding: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 5px; }
     .grid-mode .item-name { font-size: 13px; font-weight: 600; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .grid-mode .expiry-sub { font-size: 11px; color: var(--sub); }
     .grid-mode .card-right { font-size: 12px; font-weight: 700; padding: 4px 6px; border-radius: 6px; text-align: center; }
@@ -488,6 +489,7 @@
       <h2 id="modalTitle">添加物品</h2>
       <form id="itemForm" onsubmit="saveItem(event)">
         <input type="hidden" id="itemId">
+        <input type="hidden" id="itemCreatedAt">
         <div class="form-group"><label>品名/规格 *</label><input type="text" id="itemName" placeholder="如：3CE云雾唇泥 #HIPAMINE" required></div>
         <div class="form-group"><label>分类</label><select id="itemCat"></select></div>
         <div class="form-group"><label>到期日期 *</label><input type="date" id="itemExpiry" required></div>
@@ -550,7 +552,7 @@
     let isBatchMode = false;
     let selectedIds = new Set();
     let currentLayout = localStorage.getItem(LAYOUT_KEY) || "list";
-    let currentSort = localStorage.getItem(SORT_KEY) || "expiry_asc";
+    let currentSort = localStorage.getItem(SORT_KEY) || "added_desc";
 
     let filterExpiryStatus = "全部";
     let filterOpenStatus = "全部";
@@ -561,6 +563,30 @@
 
     function getItems(){ const s=localStorage.getItem(K); return s?JSON.parse(s):[]; }
     function calcDays(e){ const t=new Date(); t.setHours(0,0,0,0); const x=new Date(e); x.setHours(0,0,0,0); return Math.ceil((x-t)/86400000); }
+
+    // 时间解析辅助函数：统一提取毫秒时间戳
+    function getItemTimestamp(item) {
+      if (item.createdAt) {
+        const t = new Date(item.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (item.id) {
+        const num = parseFloat(item.id);
+        if (!isNaN(num) && num > 1500000000000) return num;
+      }
+      return 0;
+    }
+
+    // 格式化展示添加日期：YYYY-MM-DD
+    function formatAddedDate(item) {
+      const ts = getItemTimestamp(item);
+      if (!ts) return "";
+      const d = new Date(ts);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day} 添加`;
+    }
 
     function updateSyncBadge(online) {
       const badge = document.getElementById("syncStatusBadge");
@@ -587,7 +613,15 @@
           const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
           const cloudItems = JSON.parse(content);
           if (Array.isArray(cloudItems) && cloudItems.length > 0) {
-            localStorage.setItem(K, JSON.stringify(cloudItems));
+            // 为没有 createdAt 的历史数据补充创建时间
+            const sanitized = cloudItems.map(it => {
+              if (!it.createdAt) {
+                const ts = getItemTimestamp(it);
+                it.createdAt = ts ? new Date(ts).toISOString() : new Date().toISOString();
+              }
+              return it;
+            });
+            localStorage.setItem(K, JSON.stringify(sanitized));
             renderCards();
             renderCalendar();
           } else {
@@ -874,31 +908,20 @@
       alert("批量修改分类成功！");
     }
 
-    function formatAddedDate(idVal) {
-      if (!idVal) return "";
-      const num = Number(idVal);
-      if (isNaN(num)) return idVal; // 兼容旧文本格式
-      const d = new Date(num);
-      if (isNaN(d.getTime())) return "";
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}添加`;
-    }
-
     function getFilteredItems() {
-      const items = getItems();
+      let items = getItems();
       const s = document.getElementById("searchInput").value.trim().toLowerCase();
 
+      // 严格排序逻辑
       items.sort((a, b) => {
         if (currentSort === "expiry_asc") {
           return new Date(a.expiry) - new Date(b.expiry);
         } else if (currentSort === "expiry_desc") {
           return new Date(b.expiry) - new Date(a.expiry);
         } else if (currentSort === "added_desc") {
-          return parseFloat(b.id || 0) - parseFloat(a.id || 0);
+          return getItemTimestamp(b) - getItemTimestamp(a);
         } else if (currentSort === "added_asc") {
-          return parseFloat(a.id || 0) - parseFloat(b.id || 0);
+          return getItemTimestamp(a) - getItemTimestamp(b);
         }
         return 0;
       });
@@ -939,7 +962,8 @@
       const openTag = isOpened 
         ? `<span class="tag-pill tag-opened">已开封</span>` 
         : `<span class="tag-pill tag-unopened">未开封</span>`;
-      const addedText = formatAddedDate(i.id);
+      
+      const addedLabel = formatAddedDate(i);
 
       if (!isGrid) {
         card.innerHTML = `
@@ -950,8 +974,9 @@
             <div class="badge-row">
               <span class="tag-pill tag-category">${i.category}</span>
               ${openTag}
+              ${addedLabel ? `<span class="tag-pill tag-date">${addedLabel}</span>` : ""}
             </div>
-            <div class="expiry-sub">到期: ${i.expiry} ${i.notes ? "· " + i.notes : ""} ${addedText ? "· " + addedText : ""}</div>
+            <div class="expiry-sub">到期: ${i.expiry} ${i.notes ? "· " + i.notes : ""}</div>
           </div>
           <div class="card-right">
             <div class="countdown-days ${colorClass}">${d < 0 ? Math.abs(d) : d}<span style="font-size:12px;font-weight:600;">天</span></div>
@@ -964,7 +989,8 @@
           <div class="card-thumb" data-img-id="${i.id}"></div>
           <div class="card-main">
             <div class="item-name">${i.name}</div>
-            <div class="expiry-sub">${i.category} · ${i.expiry} ${addedText ? "<br>" + addedText : ""}</div>
+            <div class="expiry-sub">${i.category} · 到期:${i.expiry}</div>
+            <div class="expiry-sub" style="color:#6B7280;">${addedLabel}</div>
             <div class="card-right ${bgClass}">${d < 0 ? "过期 " + Math.abs(d) + " 天" : "剩余 " + d + " 天"}</div>
           </div>
         `;
@@ -1084,12 +1110,27 @@
     function openAISync(){ document.getElementById("aiModal").style.display="flex"; document.getElementById("aiInput").value=""; }
     function closeAISync(){ document.getElementById("aiModal").style.display="none"; }
     async function pasteClip(){ try{ document.getElementById("aiInput").value=await navigator.clipboard.readText(); }catch(e){ alert("请长按粘贴"); } }
+    
     function applyAI(){
       const r=document.getElementById("aiInput").value.trim(); if(!r)return;
       try{
         const m=r.match(/\[[\s\S]*\]|\{[\s\S]*\}/); const p=JSON.parse(m?m[0]:r);
         const list=Array.isArray(p)?p:[p]; let items=getItems();
-        list.forEach(x=>{ if(x.name&&x.expiry) items.push({ id:Date.now()+Math.random().toString(36).substr(2,4), name:x.name, category:x.category||"面霜/乳液", expiry:x.expiry, notes:x.notes||"未开封", icon:x.icon||"🐱", image:x.image||"" }); });
+        const nowIso = new Date().toISOString();
+        list.forEach((x, idx)=>{ 
+          if(x.name&&x.expiry) {
+            items.push({ 
+              id: (Date.now() + idx).toString(), 
+              createdAt: x.createdAt || nowIso,
+              name: x.name, 
+              category: x.category||"面霜/乳液", 
+              expiry: x.expiry, 
+              notes: x.notes||"未开封", 
+              icon: x.icon||"🐱", 
+              image: x.image||"" 
+            }); 
+          }
+        });
         saveItems(items); closeAISync(); renderCards(); renderCalendar(); alert("成功导入 "+list.length+" 件！");
       }catch(e){ alert("解析失败，请确保复制完整数据"); }
     }
@@ -1098,32 +1139,64 @@
       const m=document.getElementById("manualModal"); document.getElementById("itemForm").reset();
       updateCategorySelects();
       if(i){
-        document.getElementById("modalTitle").innerText="编辑物品"; document.getElementById("itemId").value=i.id;
-        document.getElementById("itemName").value=i.name; document.getElementById("itemCat").value=i.category;
-        document.getElementById("itemExpiry").value=i.expiry; document.getElementById("itemNotes").value=i.notes||"";
-        document.getElementById("itemIcon").value=i.icon||"🐱"; document.getElementById("itemImage").value=i.image||"";
+        document.getElementById("modalTitle").innerText="编辑物品"; 
+        document.getElementById("itemId").value=i.id;
+        document.getElementById("itemCreatedAt").value=i.createdAt || "";
+        document.getElementById("itemName").value=i.name; 
+        document.getElementById("itemCat").value=i.category;
+        document.getElementById("itemExpiry").value=i.expiry; 
+        document.getElementById("itemNotes").value=i.notes||"";
+        document.getElementById("itemIcon").value=i.icon||"🐱"; 
+        document.getElementById("itemImage").value=i.image||"";
         document.getElementById("btnDel").style.display="block";
       }else{
-        document.getElementById("modalTitle").innerText="添加物品"; document.getElementById("itemId").value="";
-        document.getElementById("itemIcon").value="🐱"; document.getElementById("itemImage").value="";
+        document.getElementById("modalTitle").innerText="添加物品"; 
+        document.getElementById("itemId").value="";
+        document.getElementById("itemCreatedAt").value="";
+        document.getElementById("itemIcon").value="🐱"; 
+        document.getElementById("itemImage").value="";
         document.getElementById("btnDel").style.display="none";
       }
       m.style.display="flex";
     }
     function closeModal(){ document.getElementById("manualModal").style.display="none"; }
+
     function saveItem(e){
-      e.preventDefault(); const id=document.getElementById("itemId").value;
-      const name=document.getElementById("itemName").value.trim(), category=document.getElementById("itemCat").value, expiry=document.getElementById("itemExpiry").value, notes=document.getElementById("itemNotes").value.trim(), icon=document.getElementById("itemIcon").value.trim()||"🐱", image=document.getElementById("itemImage").value.trim()||"";
+      e.preventDefault(); 
+      const id=document.getElementById("itemId").value;
+      const createdAtVal=document.getElementById("itemCreatedAt").value;
+      const name=document.getElementById("itemName").value.trim();
+      const category=document.getElementById("itemCat").value;
+      const expiry=document.getElementById("itemExpiry").value;
+      const notes=document.getElementById("itemNotes").value.trim();
+      const icon=document.getElementById("itemIcon").value.trim()||"🐱";
+      const image=document.getElementById("itemImage").value.trim()||"";
+      
       let items=getItems();
-      if(id) items=items.map(x=>x.id===id?{...x,name,category,expiry,notes,icon,image}:x);
-      else items.push({ id:Date.now().toString(), name, category, expiry, notes, icon, image });
-      saveItems(items); closeModal(); renderCards(); renderCalendar();
+      if(id) {
+        items=items.map(x => x.id === id ? {
+          ...x, 
+          name, category, expiry, notes, icon, image, 
+          createdAt: createdAtVal || x.createdAt || new Date().toISOString()
+        } : x);
+      } else {
+        items.push({ 
+          id: Date.now().toString(), 
+          createdAt: new Date().toISOString(), 
+          name, category, expiry, notes, icon, image 
+        });
+      }
+      saveItems(items); 
+      closeModal(); 
+      renderCards(); 
+      renderCalendar();
     }
+
     function delItem(){ const id=document.getElementById("itemId").value; if(confirm("确定删除？")){ saveItems(getItems().filter(x=>x.id!==id)); closeModal(); renderCards(); renderCalendar(); } }
     function exportData(){ const a=document.createElement("a"); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(getItems(),null,2)); a.download=`临期管家备份_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
     function importData(e){
       const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-      r.onload=evt=>{ try{ const d=JSON.parse(evt.target.result); if(Array.isArray(d)){ saveItems(d); renderCards(); renderCalendar(); alert("恢复成功！"); } }catch(err){ alert("解析失败"); } };
+      r.onload=evt=>{ try{ const d=JSON.parse(evt.target.result); if(Array.isArray(d)){ saveItems(d); renderCards(); alert("恢复成功！"); } }catch(err){ alert("解析失败"); } };
       r.readAsText(f);
     }
 
@@ -1141,9 +1214,11 @@
           const list = Array.isArray(p) ? p : [p];
           if (confirm("检测到来自链接的 " + list.length + " 件物品数据，是否立即入库？")) {
             let items = getItems();
-            list.forEach(x => {
+            const nowIso = new Date().toISOString();
+            list.forEach((x, idx) => {
               if (x.name && x.expiry) items.push({
-                id: Date.now() + Math.random().toString(36).substr(2, 4),
+                id: (Date.now() + idx).toString(),
+                createdAt: x.createdAt || nowIso,
                 name: x.name,
                 category: x.category || "面霜/乳液",
                 expiry: x.expiry,
