@@ -114,7 +114,6 @@
     .dot-danger { background: var(--danger); } .dot-warning { background: var(--warning); } .dot-good { background: var(--success); }
     .cal-event-section h3 { font-size: 14px; color: var(--sub); margin-bottom: 10px; font-weight: 600; }
 
-    /* 底部导航栏布局（5列结构：清单、日历、居中导入、添加、菜单） */
     .bottom-tabbar {
       position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
       background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(16px);
@@ -128,7 +127,6 @@
     .tab-item.active { color: #111827; font-weight: 700; }
     .tab-item .tab-icon { font-size: 20px; line-height: 1; }
 
-    /* 居中 Gemini 导入小猫悬浮按钮 */
     .tab-cat-center {
       flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; justify-content: center;
       position: relative; top: -12px; cursor: pointer;
@@ -153,6 +151,14 @@
     .btn-batch-del { background: #FEE2E2; color: var(--danger); border: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .btn-batch-opt { background: #F3F4F6; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
 
+    /* 批量修改分类条 */
+    .batch-cat-bar {
+      position: fixed; bottom: 60px; left: 0; right: 0; background: #FFF9FA;
+      border-top: 1px solid var(--primary); padding: 10px 18px; display: none;
+      align-items: center; justify-content: space-between; z-index: 55; box-shadow: 0 -4px 10px rgba(255,90,121,0.1);
+    }
+    .batch-cat-bar.show { display: flex; }
+
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100;
       display: none; align-items: flex-end; justify-content: center;
@@ -175,6 +181,15 @@
     .menu-opt-row:active { background: #F3F4F6; }
     .menu-opt-left { display: flex; align-items: center; gap: 10px; }
     .menu-opt-icon { font-size: 20px; }
+
+    /* 分类管理列表样式 */
+    .cat-manage-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; background: #F9FAFB; border: 1px solid #E5E7EB;
+      border-radius: 10px; margin-bottom: 8px; font-size: 14px; font-weight: 500;
+    }
+    .cat-manage-actions { display: flex; gap: 6px; }
+    .btn-cat-act { background: #F3F4F6; border: 1px solid #D1D5DB; padding: 4px 8px; border-radius: 6px; font-size: 12px; cursor: pointer; }
 
     .sort-list-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
     .sort-opt-item {
@@ -215,18 +230,9 @@
       </div>
     </div>
 
-    <!-- 顶部控件：分类下拉 + 醒目的全宽搜索框 + 列表/画廊 + 排序 + 筛选 -->
     <div class="controls-row" id="controlsRow">
       <select class="cat-select-dropdown" id="categorySelect" onchange="changeCategory(this.value)">
         <option value="全部">全部分类</option>
-        <option value="唇部">💄 唇部护理/彩妆</option>
-        <option value="面霜/乳液">🧴 面霜/乳液</option>
-        <option value="面部精华">✨ 面部精华</option>
-        <option value="眼霜">👁️ 眼霜</option>
-        <option value="彩妆">💋 彩妆</option>
-        <option value="身体护理">🛀 身体护理</option>
-        <option value="药品">💊 药品/保健</option>
-        <option value="香氛其他">🌸 香氛其他</option>
       </select>
 
       <input type="search" class="search-box" id="searchInput" placeholder="搜索品名或备注..." oninput="renderCards()">
@@ -330,7 +336,22 @@
     </div>
   </div>
 
-  <!-- 最右侧综合菜单抽屉 -->
+  <!-- 分类管理抽屉 -->
+  <div class="modal-overlay" id="catManageModal" onclick="closeCatManageSheet()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <h2>🏷️ 管理分类与排序</h2>
+        <button class="sheet-close" onclick="closeCatManageSheet()">✕</button>
+      </div>
+      <div style="margin-bottom:14px; display:flex; gap:8px;">
+        <input type="text" id="newCatNameInput" placeholder="输入新分类名称..." style="flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:13px;">
+        <button onclick="addNewCategory()" style="padding:8px 14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:13px;">添加</button>
+      </div>
+      <div id="catManageListContainer" style="max-height:50vh; overflow-y:auto; margin-bottom:10px;"></div>
+    </div>
+  </div>
+
+  <!-- 菜单抽屉 -->
   <div class="modal-overlay" id="menuModal" onclick="closeMenuSheet()">
     <div class="modal-sheet" onclick="event.stopPropagation()">
       <div class="sheet-header">
@@ -338,6 +359,13 @@
         <button class="sheet-close" onclick="closeMenuSheet()">✕</button>
       </div>
       <div class="menu-options-list">
+        <div class="menu-opt-row" onclick="openCatManageSheet()">
+          <div class="menu-opt-left">
+            <span class="menu-opt-icon">🏷️</span>
+            <span>管理分类与排序</span>
+          </div>
+          <span style="color:#9CA3AF;">›</span>
+        </div>
         <div class="menu-opt-row" onclick="openRepoConfigModal()">
           <div class="menu-opt-left">
             <span class="menu-opt-icon">🔑</span>
@@ -386,7 +414,7 @@
         <button class="sheet-close" onclick="closeRepoConfigModal()">✕</button>
       </div>
       <div class="form-group">
-        <label>Personal Access Token (ghp_... 钥匙)</label>
+        <label>Personal Access Token (ghp_...)</label>
         <input type="password" id="repoTokenInput" placeholder="粘贴你的 GitHub Token">
       </div>
       <div class="btn-row">
@@ -396,6 +424,7 @@
     </div>
   </div>
 
+  <!-- 批量操作工具条（删除） -->
   <div class="batch-toolbar" id="batchToolbar">
     <div>
       <button class="btn-batch-opt" onclick="selectAll()">全选</button>
@@ -405,7 +434,16 @@
     <button class="btn-batch-del" onclick="deleteSelected()">批量删除</button>
   </div>
 
-  <!-- 底部常驻导航栏：[清单] [日历] [🐱 导入] [➕ 添加] [☰ 菜单] -->
+  <!-- 批量修改分类工具条 -->
+  <div class="batch-cat-bar" id="batchCatBar">
+    <div style="font-size:13px; font-weight:600; color:var(--primary);" id="batchCatText">已选 0 项</div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <select id="batchTargetCatSelect" style="padding:6px 8px; border-radius:6px; border:1px solid var(--primary); font-size:13px; outline:none;"></select>
+      <button onclick="applyBatchCategory()" style="padding:6px 12px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer; font-size:13px;">一键更改分类</button>
+    </div>
+  </div>
+
+  <!-- 底部常驻导航栏 -->
   <nav class="bottom-tabbar">
     <div class="tab-item active" id="navInventory" onclick="switchNavTab('inventory')">
       <div class="tab-icon">📦</div>
@@ -417,13 +455,11 @@
       <span>日历</span>
     </div>
 
-    <!-- 居中小猫：触发 Gemini 极速导入 -->
     <div class="tab-cat-center" onclick="openAISync()" title="点击极速导入数据">
       <div class="cat-avatar-btn">🐱</div>
       <div class="cat-btn-label">导入</div>
     </div>
 
-    <!-- 原搜索位置换成添加按钮 -->
     <div class="tab-item" onclick="openModal()" title="手动添加新物品">
       <div class="tab-icon" style="font-size:22px;font-weight:bold;color:var(--primary);">➕</div>
       <span>添加</span>
@@ -455,18 +491,7 @@
       <form id="itemForm" onsubmit="saveItem(event)">
         <input type="hidden" id="itemId">
         <div class="form-group"><label>品名/规格 *</label><input type="text" id="itemName" placeholder="如：3CE云雾唇泥 #HIPAMINE" required></div>
-        <div class="form-group"><label>分类</label>
-          <select id="itemCat">
-            <option value="唇部">💄 唇部 (润唇膏/唇釉/唇泥)</option>
-            <option value="面霜/乳液">面霜/乳液</option>
-            <option value="面部精华">面部精华</option>
-            <option value="眼霜">眼霜</option>
-            <option value="彩妆">彩妆</option>
-            <option value="身体护理">身体护理</option>
-            <option value="药品">💊 药品 (家庭常备/眼药水)</option>
-            <option value="香氛其他">香氛其他</option>
-          </select>
-        </div>
+        <div class="form-group"><label>分类</label><select id="itemCat"></select></div>
         <div class="form-group"><label>到期日期 *</label><input type="date" id="itemExpiry" required></div>
         <div class="form-group"><label>状态与备注（如：已开封 PAO 12M / 梳妆台收纳盒）</label><input type="text" id="itemNotes"></div>
         <div class="form-group"><label>图标 Emoji</label><input type="text" id="itemIcon" value="🐱" maxlength="2" style="width:60px;text-align:center;"></div>
@@ -482,12 +507,46 @@
 
   <script>
     const K = "cosmetics_inventory_data";
+    const CAT_KEY = "cosmetics_categories_list";
     const LAYOUT_KEY = "cosmetics_display_layout";
     const SORT_KEY = "cosmetics_display_sort";
     const TOKEN_KEY = "cosmetics_github_token";
     const REPO_OWNER = "kikuroko-rgb";
     const REPO_NAME = "cosmetics";
     const FILE_PATH = "data.json";
+
+    const defaultCategories = ["唇部", "面霜/乳液", "面部精华", "眼霜", "彩妆", "身体护理", "药品", "香氛其他"];
+    function getCategories() {
+      const s = localStorage.getItem(CAT_KEY);
+      return s ? JSON.parse(s) : defaultCategories;
+    }
+    function saveCategories(c) {
+      localStorage.setItem(CAT_KEY, JSON.stringify(c));
+      updateCategorySelects();
+    }
+
+    function updateCategorySelects() {
+      const cats = getCategories();
+      const dropdown = document.getElementById("categorySelect");
+      const itemCat = document.getElementById("itemCat");
+      const batchTarget = document.getElementById("batchTargetCatSelect");
+
+      const curVal = dropdown.value;
+      const curItemVal = itemCat.value;
+
+      dropdown.innerHTML = `<option value="全部">全部分类</option>`;
+      itemCat.innerHTML = "";
+      batchTarget.innerHTML = "";
+
+      cats.forEach(c => {
+        dropdown.innerHTML += `<option value="${c}">${c}</option>`;
+        itemCat.innerHTML += `<option value="${c}">${c}</option>`;
+        batchTarget.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+
+      if (cats.includes(curVal)) dropdown.value = curVal;
+      if (cats.includes(curItemVal)) itemCat.value = curItemVal;
+    }
 
     let curCat = "全部";
     let isBatchMode = false;
@@ -556,10 +615,7 @@
       const b64Content = btoa(unescape(encodeURIComponent(jsonStr)));
 
       try {
-        const bodyData = {
-          message: "update cosmetics data",
-          content: b64Content
-        };
+        const bodyData = { message: "update cosmetics data", content: b64Content };
         if (currentFileSha) bodyData.sha = currentFileSha;
 
         const res = await fetch(url, {
@@ -577,9 +633,7 @@
           currentFileSha = resData.content.sha;
           updateSyncBadge(true);
         }
-      } catch (err) {
-        console.error("推送仓库数据失败:", err);
-      }
+      } catch (err) { console.error("推送仓库数据失败:", err); }
     }
 
     function saveItems(d){ 
@@ -611,6 +665,65 @@
     function changeCategory(val) {
       curCat = val;
       renderCards();
+    }
+
+    /* 分类管理抽屉 */
+    function openCatManageSheet() {
+      closeMenuSheet();
+      renderCatManageList();
+      document.getElementById("catManageModal").style.display = "flex";
+    }
+    function closeCatManageSheet() { document.getElementById("catManageModal").style.display = "none"; }
+
+    function renderCatManageList() {
+      const cats = getCategories();
+      const container = document.getElementById("catManageListContainer");
+      container.innerHTML = "";
+      cats.forEach((c, idx) => {
+        container.innerHTML += `
+          <div class="cat-manage-item">
+            <span>${c}</span>
+            <div class="cat-manage-actions">
+              <button class="btn-cat-act" onclick="moveCategory(${idx}, -1)">⬆️</button>
+              <button class="btn-cat-act" onclick="moveCategory(${idx}, 1)">⬇️</button>
+              <button class="btn-cat-act" style="color:var(--danger);" onclick="deleteCategory('${c}')">删除</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addNewCategory() {
+      const input = document.getElementById("newCatNameInput");
+      const name = input.value.trim();
+      if (!name) return;
+      let cats = getCategories();
+      if (cats.includes(name)) return alert("分类已存在！");
+      cats.push(name);
+      saveCategories(cats);
+      input.value = "";
+      renderCatManageList();
+    }
+
+    function moveCategory(idx, dir) {
+      let cats = getCategories();
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= cats.length) return;
+      const temp = cats[idx];
+      cats[idx] = cats[targetIdx];
+      cats[targetIdx] = temp;
+      saveCategories(cats);
+      renderCatManageList();
+    }
+
+    function deleteCategory(name) {
+      let cats = getCategories();
+      if (cats.length <= 1) return alert("至少保留一个分类！");
+      if (confirm(`确定删除分类【${name}】吗？`)) {
+        cats = cats.filter(c => c !== name);
+        saveCategories(cats);
+        renderCatManageList();
+      }
     }
 
     function openMenuSheet() { document.getElementById("menuModal").style.display = "flex"; }
@@ -719,13 +832,14 @@
       selectedIds.clear();
       const btn = document.getElementById("btnBatchToggle");
       const toolbar = document.getElementById("batchToolbar");
+      const catBar = document.getElementById("batchCatBar");
       const container = document.getElementById("cardsContainer");
       if (isBatchMode) {
         btn.innerText = "完成"; btn.classList.add("active");
-        toolbar.classList.add("show"); container.classList.add("batch-mode");
+        toolbar.classList.add("show"); catBar.classList.add("show"); container.classList.add("batch-mode");
       } else {
         btn.innerText = "批量管理"; btn.classList.remove("active");
-        toolbar.classList.remove("show"); container.classList.remove("batch-mode");
+        toolbar.classList.remove("show"); catBar.classList.remove("show"); container.classList.remove("batch-mode");
       }
       updateSelectCount();
       renderCards();
@@ -737,13 +851,30 @@
     }
     function selectAll() { getFilteredItems().forEach(i => selectedIds.add(i.id)); updateSelectCount(); renderCards(); }
     function deselectAll() { selectedIds.clear(); updateSelectCount(); renderCards(); }
-    function updateSelectCount() { document.getElementById("selectCountText").innerText = "已选 " + selectedIds.size + " 项"; }
+    
+    function updateSelectCount() {
+      document.getElementById("selectCountText").innerText = "已选 " + selectedIds.size + " 项";
+      document.getElementById("batchCatText").innerText = "已选 " + selectedIds.size + " 项";
+    }
+
     function deleteSelected() {
       if (selectedIds.size === 0) return alert("请先勾选需要删除的物品");
       if (confirm("确定要批量删除已选中的 " + selectedIds.size + " 件物品吗？")) {
         saveItems(getItems().filter(i => !selectedIds.has(i.id)));
         selectedIds.clear(); updateSelectCount(); renderCards(); renderCalendar();
       }
+    }
+
+    function applyBatchCategory() {
+      if (selectedIds.size === 0) return alert("请先勾选需要更改分类的物品");
+      const targetCat = document.getElementById("batchTargetCatSelect").value;
+      let items = getItems();
+      items = items.map(i => selectedIds.has(i.id) ? {...i, category: targetCat} : i);
+      saveItems(items);
+      selectedIds.clear();
+      toggleBatchMode();
+      renderCards();
+      alert("批量修改分类成功！");
     }
 
     function getFilteredItems() {
@@ -767,7 +898,6 @@
         const d = calcDays(i.expiry);
         let matchCat = (curCat === "全部" || i.category === curCat);
         if (curCat === "唇部" && (i.category === "唇部" || i.name.includes("唇"))) matchCat = true;
-        if (curCat === "药品" && (i.category === "药品" || i.category.includes("药"))) matchCat = true;
 
         const matchSearch = matchCat &&
                             (i.name.toLowerCase().includes(s) || (i.notes && i.notes.toLowerCase().includes(s)));
@@ -956,6 +1086,7 @@
 
     function openModal(i=null){
       const m=document.getElementById("manualModal"); document.getElementById("itemForm").reset();
+      updateCategorySelects();
       if(i){
         document.getElementById("modalTitle").innerText="编辑物品"; document.getElementById("itemId").value=i.id;
         document.getElementById("itemName").value=i.name; document.getElementById("itemCat").value=i.category;
@@ -969,7 +1100,7 @@
       }
       m.style.display="flex";
     }
-    function closeModal(){ document.getElementById("manualModal").style.display="none"; }
+    function closeModal(){ document.getElementById("modalModal").style.display="none"; }
     function saveItem(e){
       e.preventDefault(); const id=document.getElementById("itemId").value;
       const name=document.getElementById("itemName").value.trim(), category=document.getElementById("itemCat").value, expiry=document.getElementById("itemExpiry").value, notes=document.getElementById("itemNotes").value.trim(), icon=document.getElementById("itemIcon").value.trim()||"🐱", image=document.getElementById("itemImage").value.trim()||"";
@@ -987,6 +1118,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
+      updateCategorySelects();
       pullFromRepo();
 
       const params = new URLSearchParams(window.location.search);
