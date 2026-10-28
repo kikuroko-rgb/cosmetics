@@ -1,1988 +1,218 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <meta name="referrer" content="no-referrer">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Cosmetics & Meds Vault</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #F4F4F6;
-      --surface: #FFFFFF;
-      --surface-subtle: #F9FAFB;
-      --border-subtle: rgba(0, 0, 0, 0.06);
-      --border-strong: rgba(0, 0, 0, 0.12);
-      
-      --text-main: #0F172A;
-      --text-muted: #64748B;
-      --text-tertiary: #94A3B8;
-
-      --accent: #E11D48; /* Sophisticated Coral Berry */
-      --accent-soft: rgba(225, 29, 72, 0.08);
-      --ai-accent: #6366F1;
-      --ai-soft: rgba(99, 102, 241, 0.09);
-
-      --danger: #DC2626;
-      --danger-bg: #FEF2F2;
-      --warning: #D97706;
-      --warning-bg: #FFFBEB;
-      --success: #059669;
-      --success-bg: #ECFDF5;
-
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-xl: 22px;
-      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-      --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
-      --shadow-sheet: 0 -8px 24px rgba(15, 23, 42, 0.12);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      padding-bottom: calc(100px + env(safe-area-inset-bottom));
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* iOS Native Header */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: rgba(244, 244, 246, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-subtle);
-      padding: max(env(safe-area-inset-top), 10px) 16px 10px;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
+<!-- ... existing code ... -->
     .app-title-group {
       display: flex;
       align-items: center;
       gap: 8px;
+      position: relative;
+    }
+
+    .btn-menu-trigger {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.15s ease, transform 0.1s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-menu-trigger:active {
+      transform: scale(0.94);
+      background: #E2E8F0;
     }
 
     .app-title-group h1 {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 800;
       letter-spacing: -0.03em;
       color: var(--text-main);
     }
 
-    .badge-sync {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 9999px;
-      background: rgba(100, 116, 139, 0.12);
-      color: var(--text-muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-    }
-
-    .badge-sync.online {
-      background: var(--success-bg);
-      color: var(--success);
-      box-shadow: inset 0 0 0 1px rgba(5, 150, 105, 0.2);
-    }
-
-    .btn-batch-toggle {
-      background: var(--surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 9999px;
-      cursor: pointer;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.15s ease;
-    }
-
-    .btn-batch-toggle.active {
-      background: var(--text-main);
-      color: #FFF;
-      border-color: var(--text-main);
-    }
-
-    /* Search & Compact Filter Bar */
-    .search-filter-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .search-wrapper {
-      position: relative;
-      flex: 1;
-    }
-
-    .search-wrapper input {
-      width: 100%;
-      height: 38px;
-      background: var(--surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 0 12px 0 34px;
-      font-size: 13.5px;
-      color: var(--text-main);
-      outline: none;
-      box-shadow: var(--shadow-sm);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .search-wrapper input:focus {
-      border-color: var(--text-main);
-      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05);
-    }
-
-    .search-icon {
+    /* Anchored Top-Left Floating Menu Popover */
+    .menu-popover {
       position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 14px;
-      color: var(--text-tertiary);
-      pointer-events: none;
-    }
-
-    .quick-actions-bar {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn-action-tool {
-      height: 38px;
-      padding: 0 10px;
-      background: var(--surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      box-shadow: var(--shadow-sm);
-      white-space: nowrap;
-      transition: all 0.15s ease;
-    }
-
-    .btn-action-tool:active {
-      transform: scale(0.97);
-    }
-
-    .btn-action-tool.active {
-      background: var(--text-main);
-      color: #FFF;
-      border-color: var(--text-main);
-    }
-
-    /* Horizontal Category Scroller */
-    .cat-scroller-wrap {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 8px 0 2px;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .cat-scroller-wrap::-webkit-scrollbar {
-      display: none;
-    }
-
-    .cat-pill {
-      flex: 0 0 auto;
-      padding: 5px 12px;
-      background: transparent;
-      border-radius: 9999px;
-      border: 1px solid transparent;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .cat-pill.active {
-      background: var(--surface);
-      border-color: var(--border-subtle);
-      color: var(--text-main);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .cat-pill-count {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      padding: 1px 5px;
-      border-radius: 9999px;
-      background: rgba(100, 116, 139, 0.1);
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-
-    .cat-pill.active .cat-pill-count {
-      background: rgba(15, 23, 42, 0.08);
-      color: var(--text-main);
-    }
-
-    .cat-pill-warning {
-      color: #B45309;
-    }
-
-    .cat-pill-warning .cat-pill-count {
-      background: var(--danger-bg);
-      color: var(--danger);
-    }
-
-    .cat-pill-warning.active {
-      background: #FFFBEB;
-      border-color: rgba(217, 119, 6, 0.2);
-      color: #92400E;
-    }
-
-    .cat-pill-warning.active .cat-pill-count {
-      background: var(--danger);
-      color: #FFF;
-    }
-
-    /* Main Container */
-    .container {
-      max-width: 840px;
-      margin: 0 auto;
-      padding: 14px 16px;
-    }
-
-    .tab-page {
-      display: none;
-    }
-
-    .tab-page.active {
-      display: block;
-    }
-
-    /* List Layout (App Native Cell Style) */
-    .list-mode {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .item-card {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-subtle);
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      position: relative;
-      cursor: pointer;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .item-card:active {
-      transform: scale(0.99);
-    }
-
-    .item-card.selected {
-      border-color: var(--accent);
-      background: #FFFBFB;
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-
-    .card-thumb {
-      width: 58px;
-      height: 58px;
-      border-radius: var(--radius-md);
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      flex-shrink: 0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .card-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .card-thumb .fallback-icon {
-      font-size: 24px;
-    }
-
-    .card-main {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .item-name {
-      font-size: 14.5px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--text-main);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .tags-container {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-
-    .tag-meta {
-      font-size: 10.5px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 6px;
-      letter-spacing: -0.01em;
-    }
-
-    .tag-cat { background: rgba(15, 23, 42, 0.05); color: #334155; }
-    .tag-opened { background: #F0F9FF; color: #0284C7; }
-    .tag-unopened { background: #F8FAFC; color: #64748B; border: 1px solid rgba(0,0,0,0.04); }
-    .tag-added { background: transparent; color: var(--text-tertiary); font-family: var(--font-mono); font-size: 10px; }
-
-    .expiry-line {
-      font-size: 11.5px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* Right countdown section */
-    .card-aside {
-      text-align: right;
-      flex-shrink: 0;
-      min-width: 68px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .countdown-num {
-      font-family: var(--font-mono);
-      font-size: 17px;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .countdown-unit {
-      font-size: 10px;
-      font-weight: 600;
-      margin-left: 1px;
-    }
-
-    .countdown-label {
-      font-size: 10px;
-      font-weight: 600;
-      margin-top: 3px;
-      padding: 2px 6px;
-      border-radius: 9999px;
-    }
-
-    .status-good { color: var(--success); }
-    .status-warning { color: var(--warning); }
-    .status-danger { color: var(--danger); }
-
-    .pill-good { background: var(--success-bg); color: var(--success); }
-    .pill-warning { background: var(--warning-bg); color: var(--warning); }
-    .pill-danger { background: var(--danger-bg); color: var(--danger); }
-
-    /* Grid/Gallery Mode */
-    .grid-mode {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
-    }
-
-    .grid-mode .item-card {
-      flex-direction: column;
-      padding: 0;
-      overflow: hidden;
-      align-items: stretch;
-    }
-
-    .grid-mode .card-thumb {
-      width: 100%;
-      height: 125px;
-      border-radius: 0;
-      border: none;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .grid-mode .card-main {
-      padding: 10px;
-      gap: 6px;
-    }
-
-    .grid-mode .item-name {
-      white-space: normal;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      font-size: 13px;
-      line-height: 1.3;
-    }
-
-    .grid-mode .grid-bottom-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-
-    /* Checkbox for batch */
-    .select-check-dot {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid #CBD5E1;
-      background: #FFF;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-      font-size: 12px;
-      color: transparent;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .batch-mode .select-check-dot {
-      display: flex;
-    }
-
-    .item-card.selected .select-check-dot {
-      background: var(--text-main);
-      border-color: var(--text-main);
-      color: #FFF;
-    }
-
-    /* Unified Native Bottom Batch Toolbar */
-    .batch-floating-panel {
-      position: fixed;
-      bottom: calc(76px + env(safe-area-inset-bottom));
-      left: 16px;
-      right: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: var(--radius-xl);
-      padding: 10px 14px;
-      color: #FFF;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-      z-index: 70;
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      animation: floatUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes floatUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .batch-floating-panel.show {
-      display: flex;
-    }
-
-    .batch-row-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .batch-action-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      color: #FFF;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 9999px;
-      cursor: pointer;
-    }
-
-    .batch-del-btn {
-      background: var(--danger);
-      color: #FFF;
-      border: none;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      cursor: pointer;
-    }
-
-    .batch-row-bottom {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding-top: 6px;
-    }
-
-    .batch-select {
-      flex: 1;
-      height: 32px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: var(--radius-sm);
-      color: #FFF;
-      padding: 0 8px;
-      font-size: 12px;
-      outline: none;
-    }
-
-    .batch-select option {
-      background: #1E293B;
-      color: #FFF;
-    }
-
-    .batch-apply-btn {
-      background: #FFF;
-      color: #0F172A;
-      border: none;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 0 12px;
-      height: 32px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-    }
-
-    /* iOS Glass Bottom Tabbar */
-    .native-tabbar {
-      position: fixed;
-      bottom: 0;
+      top: 44px;
       left: 0;
-      right: 0;
-      height: calc(64px + env(safe-area-inset-bottom));
-      padding-bottom: env(safe-area-inset-bottom);
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      z-index: 60;
-    }
-
-    .tab-btn {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      color: var(--text-tertiary);
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      transition: color 0.15s ease;
-    }
-
-    .tab-btn.active {
-      color: var(--text-main);
-    }
-
-    .tab-btn .tab-icon {
-      font-size: 19px;
-      line-height: 1;
-    }
-
-    .tab-btn .tab-title {
-      font-size: 10.5px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-
-    /* Center Prominent AI/Cat Trigger Button */
-    .tab-center-wrapper {
-      flex: 0 0 64px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      top: -14px;
-      cursor: pointer;
-    }
-
-    .btn-center-cat {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #1E293B, #0F172A);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
-      border: 3px solid #FFF;
-      font-size: 24px;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .btn-center-cat:active {
-      transform: scale(0.92);
-    }
-
-    .cat-tab-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-top: 3px;
-    }
-
-    /* Calendar Card */
-    .calendar-container {
-      background: var(--surface);
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--border-subtle);
-      padding: 16px;
-      box-shadow: var(--shadow-sm);
-      margin-bottom: 16px;
-    }
-
-    .cal-header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .cal-title {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .cal-nav-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .cal-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      margin-bottom: 8px;
-    }
-
-    .cal-grid-body {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      text-align: center;
-    }
-
-    .cal-day-item {
-      height: 46px;
-      border-radius: var(--radius-md);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      position: relative;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text-main);
-      transition: all 0.12s ease;
-    }
-
-    .cal-day-item.other-month {
-      color: #CBD5E1;
-    }
-
-    .cal-day-item.selected {
-      background: var(--text-main) !important;
-      color: #FFF !important;
-    }
-
-    .cal-day-item.today:not(.selected) {
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-
-    .cal-dots-group {
-      display: flex;
-      gap: 2px;
-      margin-top: 3px;
-      height: 4px;
-    }
-
-    .cal-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-    }
-
-    /* Modal / Bottom Sheet Overlays */
-    .sheet-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      width: 250px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08);
+      padding: 6px;
       z-index: 100;
       display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .sheet-card {
-      background: var(--surface);
-      width: 100%;
-      max-width: 520px;
-      border-radius: 26px 26px 0 0;
-      padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
-      max-height: 88vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-sheet);
-      animation: sheetIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes sheetIn {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .sheet-handle {
-      width: 36px;
-      height: 4px;
-      border-radius: 9999px;
-      background: #CBD5E1;
-      margin: 0 auto 16px;
-    }
-
-    .sheet-header-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .sheet-header-title h2 {
-      font-size: 17.5px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .sheet-close-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    /* Forms & Inputs */
-    .form-cell {
-      margin-bottom: 14px;
-    }
-
-    .form-cell label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .form-cell input, .form-cell select, .form-cell textarea {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      color: var(--text-main);
-      outline: none;
-      transition: border-color 0.15s ease;
-    }
-
-    .form-cell input:focus, .form-cell select:focus, .form-cell textarea:focus {
-      border-color: var(--text-main);
-      background: #FFF;
-    }
-
-    .form-btn-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-submit-main {
-      flex: 1;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      background: var(--text-main);
-      color: #FFF;
-      font-size: 14px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn-secondary {
-      padding: 12px 18px;
-      border-radius: var(--radius-md);
-      background: var(--surface-subtle);
-      color: var(--text-main);
-      font-size: 14px;
-      font-weight: 600;
-      border: 1px solid var(--border-subtle);
-      cursor: pointer;
-    }
-
-    .btn-danger-soft {
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      background: var(--danger-bg);
-      color: var(--danger);
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-    }
-
-    /* Sort & Menu Option Item */
-    .menu-list-wrap {
-      display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 2px;
+      animation: popoverFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      transform-origin: top left;
     }
 
-    .menu-nav-cell {
+    @keyframes popoverFadeIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .menu-popover.show {
+      display: flex;
+    }
+
+    .popover-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 13px 14px;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text-main);
-      transition: background 0.15s ease;
-    }
-
-    .menu-nav-cell:active {
-      background: #E2E8F0;
-    }
-
-    .menu-nav-cell.selected {
-      background: #FFF;
-      border-color: var(--text-main);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .cat-mgmt-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      margin-bottom: 8px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
-    }
-
-    .cat-ctrl-btns {
-      display: flex;
-      gap: 4px;
-    }
-
-    .cat-ctrl-btn {
-      background: #FFF;
-      border: 1px solid var(--border-subtle);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
       cursor: pointer;
+      text-align: left;
+      transition: background 0.12s ease;
+      width: 100%;
     }
 
-    .empty-prompt {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
+    .popover-item:hover, .popover-item:active {
+      background: var(--surface-subtle);
     }
-  </style>
-</head>
-<body>
 
+    .popover-item.danger {
+      color: var(--danger);
+    }
+
+    .popover-item.danger:hover, .popover-item.danger:active {
+      background: var(--danger-bg);
+    }
+
+    .popover-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 6px;
+    }
+
+    .popover-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      background: transparent;
+      display: none;
+    }
+
+    .popover-backdrop.show {
+      display: block;
+    }
+
+    .badge-sync {
+<!-- ... existing code ... -->
   <!-- iOS Styled Header -->
   <header>
     <div class="top-bar">
       <div class="app-title-group">
+        <button class="btn-menu-trigger" id="btnMenuTrigger" onclick="toggleMenuPopover(event)" title="打开菜单">☰</button>
         <h1>临期管家</h1>
         <span class="badge-sync" id="syncStatusBadge">● 本地</span>
+
+        <!-- Floating Left-Anchored Menu Popover -->
+        <div class="menu-popover" id="menuPopover" onclick="event.stopPropagation()">
+          <button class="popover-item" onclick="toggleLayoutFromMenu()">
+            <span id="popoverLayoutLabel">🔲 切换为画廊视图</span>
+          </button>
+          <div class="popover-divider"></div>
+          <button class="popover-item" onclick="openCatManageSheet()">
+            <span>🏷️ 管理分类与顺序</span>
+            <span style="color:var(--text-tertiary);">›</span>
+          </button>
+          <button class="popover-item" onclick="openRepoConfigModal()">
+            <span>🔑 GitHub 同步设置</span>
+            <span style="color:var(--text-tertiary);">›</span>
+          </button>
+          <button class="popover-item" onclick="triggerManualSync()">
+            <span>🔄 立即拉取云端数据</span>
+          </button>
+          <div class="popover-divider"></div>
+          <button class="popover-item" onclick="triggerMenuAction('backup')">
+            <span>💾 备份本地 JSON</span>
+          </button>
+          <button class="popover-item" onclick="triggerMenuAction('restore')">
+            <span>📂 恢复本地 JSON</span>
+          </button>
+          <div class="popover-divider"></div>
+          <button class="popover-item danger" onclick="triggerMenuAction('clear')">
+            <span>🗑️ 清空所有数据</span>
+          </button>
+        </div>
       </div>
       <button class="btn-batch-toggle" id="btnBatchToggle" onclick="toggleBatchMode()">批量</button>
     </div>
 
+    <!-- Backdrop for click-outside dismissal -->
+    <div class="popover-backdrop" id="popoverBackdrop" onclick="closeMenuPopover()"></div>
+
     <!-- Integrated Search & Actions -->
-    <div class="search-filter-row">
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="search" id="searchInput" placeholder="搜索名称或备注..." oninput="renderCards()">
-      </div>
-      <div class="quick-actions-bar">
-        <button class="btn-action-tool" id="btnLayoutToggle" onclick="toggleLayout()" title="列表/画廊">
-          <span id="layoutText">📋 列表</span>
-        </button>
-        <button class="btn-action-tool" id="btnOpenSort" onclick="openSortSheet()">
-          <span id="sortBtnText">⇅ 排序</span>
-        </button>
-        <button class="btn-action-tool" id="btnOpenFilter" onclick="openFilterSheet()">
-          <span>☰ 筛选</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Category Pill Scroller -->
-    <div class="cat-scroller-wrap" id="catPillsContainer">
-      <!-- Dynamic category pills will populate here -->
-    </div>
-  </header>
-
-  <!-- Main Views Container -->
-  <main class="container">
-    <!-- View 1: Inventory List -->
-    <div id="tabInventory" class="tab-page active">
-      <div id="cardsContainer" class="list-mode"></div>
-      <div class="empty-prompt" id="emptyState" style="display:none;">
-        <div style="font-size:36px; margin-bottom:8px;">📦</div>
-        <p style="font-weight:600; font-size:14px; color:var(--text-main);">没有找到相关物品</p>
-        <p style="font-size:12px; margin-top:4px; color:var(--text-tertiary);">点击底部中间的猫咪快速导入，或点击添加</p>
-      </div>
-    </div>
-
-    <!-- View 2: Expiry Calendar -->
-    <div id="tabCalendar" class="tab-page">
-      <div class="calendar-container">
-        <div class="cal-header-bar">
-          <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
-          <div class="cal-title" id="calMonthTitle">2026年 10月</div>
-          <button class="cal-nav-btn" onclick="nextMonth()">›</button>
-        </div>
-        <div class="cal-weekdays">
-          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-        </div>
-        <div class="cal-grid-body" id="calDaysGrid"></div>
-      </div>
-
-      <div class="calendar-events-wrap">
-        <h3 id="calSelectedDateText" style="font-size:13.5px; font-weight:700; color:var(--text-muted); margin-bottom:10px;">当天清单</h3>
-        <div id="calDayEventList" class="list-mode"></div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Unified Batch Floating Panel -->
-  <div class="batch-floating-panel" id="batchPanel">
-    <div class="batch-row-top">
-      <div style="display:flex; gap:6px; align-items:center;">
-        <button class="batch-action-btn" onclick="selectAll()">全选本页</button>
-        <button class="batch-action-btn" onclick="deselectAll()">清空</button>
-        <span style="font-size:12px; font-weight:700; margin-left:6px;" id="batchCountBadge">已选 0 项</span>
-      </div>
-      <button class="batch-del-btn" onclick="deleteSelected()">🗑️ 彻底删除</button>
-    </div>
-    <div class="batch-row-bottom">
-      <span style="font-size:12px; opacity:0.8;">划入分类：</span>
-      <select id="batchTargetCatSelect" class="batch-select"></select>
-      <button class="batch-apply-btn" onclick="applyBatchCategory()">确定修改</button>
-    </div>
-  </div>
-
-  <!-- iOS Styled Glass Bottom Tabbar -->
-  <nav class="native-tabbar">
-    <button class="tab-btn active" id="navInventory" onclick="switchNavTab('inventory')">
-      <span class="tab-icon">📦</span>
-      <span class="tab-title">清单</span>
-    </button>
-
-    <button class="tab-btn" id="navCalendar" onclick="switchNavTab('calendar')">
-      <span class="tab-icon">📅</span>
-      <span class="tab-title">日历</span>
-    </button>
-
-    <!-- Center Elevated AI / Cat Button -->
-    <div class="tab-center-wrapper" onclick="openAISync()" title="Gemini 极速导入">
-      <div class="btn-center-cat">🐱</div>
-      <span class="cat-tab-label">导入</span>
-    </div>
-
+<!-- ... existing code ... -->
     <button class="tab-btn" onclick="openModal()" title="手动添加新物品">
       <span class="tab-icon" style="color:var(--accent);">➕</span>
       <span class="tab-title">添加</span>
     </button>
-
-    <button class="tab-btn" id="navMenu" onclick="openMenuSheet()">
-      <span class="tab-icon">⚙️</span>
-      <span class="tab-title">设置</span>
-    </button>
   </nav>
 
   <!-- Sheet 1: Sorting Drawer -->
-  <div class="sheet-backdrop" id="sortModal" onclick="closeSortSheet()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2>排序方式</h2>
-        <button class="sheet-close-btn" onclick="closeSortSheet()">✕</button>
-      </div>
-      <div class="menu-list-wrap" id="sortOptionsGroup">
-        <div class="menu-nav-cell" data-sort="added_desc" onclick="selectSortOption('added_desc')">
-          <span>添加时间：最新优先</span>
-          <span class="check-mark"></span>
-        </div>
-        <div class="menu-nav-cell" data-sort="added_asc" onclick="selectSortOption('added_asc')">
-          <span>添加时间：最早优先</span>
-          <span class="check-mark"></span>
-        </div>
-        <div class="menu-nav-cell" data-sort="expiry_asc" onclick="selectSortOption('expiry_asc')">
-          <span>到期时间：临期优先 (升序)</span>
-          <span class="check-mark"></span>
-        </div>
-        <div class="menu-nav-cell" data-sort="expiry_desc" onclick="selectSortOption('expiry_desc')">
-          <span>到期时间：远期优先 (降序)</span>
-          <span class="check-mark"></span>
-        </div>
-        <div class="menu-nav-cell" data-sort="name_asc" onclick="selectSortOption('name_asc')">
-          <span>品名首字母：A → Z (拼音 / 英文正序)</span>
-          <span class="check-mark"></span>
-        </div>
-        <div class="menu-nav-cell" data-sort="name_desc" onclick="selectSortOption('name_desc')">
-          <span>品名首字母：Z → A (拼音 / 英文倒序)</span>
-          <span class="check-mark"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sheet 2: Filter Drawer -->
-  <div class="sheet-backdrop" id="filterModal" onclick="closeFilterSheet()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2>快速筛选</h2>
-        <button class="sheet-close-btn" onclick="closeFilterSheet()">✕</button>
-      </div>
-      <div class="form-cell">
-        <label>临期状态</label>
-        <div class="menu-list-wrap" id="filterExpiryGroup" style="display:flex; flex-direction:row; flex-wrap:wrap; gap:6px;">
-          <button class="btn-action-tool active" data-val="全部" onclick="setFilterOpt('expiryStatus', '全部', this)">全部</button>
-          <button class="btn-action-tool" data-val="正常" onclick="setFilterOpt('expiryStatus', '正常', this)">正常</button>
-          <button class="btn-action-tool" data-val="临期" onclick="setFilterOpt('expiryStatus', '临期', this)">30天内临期</button>
-          <button class="btn-action-tool" data-val="过期" onclick="setFilterOpt('expiryStatus', '过期', this)">已过期</button>
-        </div>
-      </div>
-      <div class="form-cell" style="margin-top:16px;">
-        <label>开封状态</label>
-        <div class="menu-list-wrap" id="filterOpenGroup" style="display:flex; flex-direction:row; flex-wrap:wrap; gap:6px;">
-          <button class="btn-action-tool active" data-val="全部" onclick="setFilterOpt('openStatus', '全部', this)">全部</button>
-          <button class="btn-action-tool" data-val="已开封" onclick="setFilterOpt('openStatus', '已开封', this)">已开封</button>
-          <button class="btn-action-tool" data-val="未开封" onclick="setFilterOpt('openStatus', '未开封', this)">未开封</button>
-        </div>
-      </div>
-      <div class="form-btn-row">
-        <button class="btn-secondary" onclick="resetAdvancedFilter()">重置</button>
-        <button class="btn-submit-main" onclick="applyAdvancedFilter()">应用筛选</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sheet 3: Category Management -->
-  <div class="sheet-backdrop" id="catManageModal" onclick="closeCatManageSheet()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2>管理分类与排序</h2>
-        <button class="sheet-close-btn" onclick="closeCatManageSheet()">✕</button>
-      </div>
-      <div style="display:flex; gap:8px; margin-bottom:14px;">
-        <input type="text" id="newCatNameInput" placeholder="输入新分类名称..." style="flex:1; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); font-size:13px; outline:none;">
-        <button onclick="addNewCategory()" class="btn-submit-main" style="flex:0 0 auto; padding:0 16px;">添加</button>
-      </div>
-      <div id="catManageListContainer" style="max-height:48vh; overflow-y:auto;"></div>
-    </div>
-  </div>
-
-  <!-- Sheet 4: Settings Menu -->
-  <div class="sheet-backdrop" id="menuModal" onclick="closeMenuSheet()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2>管家设置</h2>
-        <button class="sheet-close-btn" onclick="closeMenuSheet()">✕</button>
-      </div>
-      <div class="menu-list-wrap">
-        <div class="menu-nav-cell" onclick="openCatManageSheet()">
-          <span>🏷️ 管理自定义分类与前后顺序</span>
-          <span style="color:var(--text-tertiary);">›</span>
-        </div>
-        <div class="menu-nav-cell" onclick="openRepoConfigModal()">
-          <span>🔑 配置 GitHub Token 云端数据同步</span>
-          <span style="color:var(--text-tertiary);">›</span>
-        </div>
-        <div class="menu-nav-cell" onclick="triggerManualSync()">
-          <span>🔄 立即从 GitHub 仓库拉取最新数据</span>
-          <span style="color:var(--text-tertiary);">›</span>
-        </div>
-        <div class="menu-nav-cell" onclick="triggerMenuAction('backup')">
-          <span>💾 备份数据到本地 JSON 文件</span>
-          <span style="color:var(--text-tertiary);">›</span>
-        </div>
-        <div class="menu-nav-cell" onclick="triggerMenuAction('restore')">
-          <span>📂 从本地 JSON 文件还原数据</span>
-          <span style="color:var(--text-tertiary);">›</span>
-        </div>
-        <div class="menu-nav-cell" onclick="triggerMenuAction('clear')" style="color:var(--danger);">
-          <span>🗑️ 清空所有物品数据</span>
-          <span style="color:var(--danger);">›</span>
-        </div>
-      </div>
-      <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-    </div>
-  </div>
-
-  <!-- Sheet 5: GitHub Token Config -->
-  <div class="sheet-backdrop" id="repoModal" onclick="closeRepoConfigModal()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2>GitHub 仓库直连配置</h2>
-        <button class="sheet-close-btn" onclick="closeRepoConfigModal()">✕</button>
-      </div>
-      <div class="form-cell">
-        <label>Personal Access Token (ghp_...)</label>
-        <input type="password" id="repoTokenInput" placeholder="粘贴你的 GitHub Token 密钥">
-      </div>
-      <div class="form-btn-row">
-        <button type="button" class="btn-secondary" onclick="closeRepoConfigModal()">取消</button>
-        <button type="button" class="btn-submit-main" onclick="saveRepoConfig()">保存并连接</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sheet 6: Gemini Import Modal -->
-  <div class="sheet-backdrop" id="aiModal" onclick="closeAISync()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2>✨ Gemini 极速导入</h2>
-        <button class="sheet-close-btn" onclick="closeAISync()">✕</button>
-      </div>
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">粘贴由 Gemini 生成的结构化 JSON 代码，系统将自动入库：</p>
-      <div class="form-cell">
-        <textarea id="aiInput" rows="6" placeholder="[ { &quot;name&quot;: &quot;...&quot;, &quot;expiry&quot;: &quot;...&quot; } ]"></textarea>
-      </div>
-      <div class="form-btn-row">
-        <button type="button" class="btn-secondary" onclick="pasteClip()">读取剪贴板</button>
-        <button type="button" class="btn-submit-main" onclick="applyAI()">确认解析导入</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sheet 7: Manual Add / Edit Modal -->
-  <div class="sheet-backdrop" id="manualModal" onclick="closeModal()">
-    <div class="sheet-card" onclick="event.stopPropagation()">
-      <div class="sheet-handle"></div>
-      <div class="sheet-header-title">
-        <h2 id="modalTitle">添加物品</h2>
-        <button class="sheet-close-btn" onclick="closeModal()">✕</button>
-      </div>
-      <form id="itemForm" onsubmit="saveItem(event)">
-        <input type="hidden" id="itemId">
-        
-        <div class="form-cell">
-          <label>品名 / 规格型号 *</label>
-          <input type="text" id="itemName" placeholder="例如：3CE 云雾唇泥 #HIPAMINE" required>
-        </div>
-        
-        <div class="form-cell">
-          <label>所属分类</label>
-          <select id="itemCat"></select>
-        </div>
-        
-        <div style="display:flex; gap:10px;">
-          <div class="form-cell" style="flex:1;">
-            <label>添加日期 *</label>
-            <input type="date" id="itemCreatedAt" required>
-          </div>
-          <div class="form-cell" style="flex:1;">
-            <label>开封日期 (可选)</label>
-            <input type="date" id="itemOpenedAt">
-          </div>
-        </div>
-
-        <div class="form-cell">
-          <label>到期日期 *</label>
-          <input type="date" id="itemExpiry" required>
-        </div>
-        
-        <div class="form-cell">
-          <label>状态与备注（如：PAO 12M / 梳妆台收纳）</label>
-          <input type="text" id="itemNotes" placeholder="状态、批号或存放位置">
-        </div>
-        
-        <div style="display:flex; gap:10px;">
-          <div class="form-cell" style="width:70px;">
-            <label>图标</label>
-            <input type="text" id="itemIcon" value="🐱" maxlength="2" style="text-align:center;">
-          </div>
-          <div class="form-cell" style="flex:1;">
-            <label>图片数据 / URL (可选)</label>
-            <input type="text" id="itemImage" placeholder="Base64 或 SVG 图片数据">
-          </div>
-        </div>
-
-        <div class="form-btn-row">
-          <button type="button" class="btn-danger-soft" id="btnDel" style="display:none;" onclick="delItem()">删除</button>
-          <button type="button" class="btn-secondary" onclick="closeModal()">取消</button>
-          <button type="submit" class="btn-submit-main">保存入库</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    const K = "cosmetics_inventory_data";
-    const CAT_KEY = "cosmetics_categories_list";
-    const LAYOUT_KEY = "cosmetics_display_layout";
-    const SORT_KEY = "cosmetics_display_sort";
-    const TOKEN_KEY = "cosmetics_github_token";
-    const REPO_OWNER = "kikuroko-rgb";
-    const REPO_NAME = "cosmetics";
-    const FILE_PATH = "data.json";
-
-    const defaultCategories = ["全部", "唇部", "面霜/乳液", "面部精华", "眼霜", "彩妆", "身体护理", "药品", "香氛其他"];
-    
-    function getCategories() {
-      const s = localStorage.getItem(CAT_KEY);
-      if (!s) return defaultCategories;
-      try {
-        const parsed = JSON.parse(s);
-        if (!parsed.includes("全部")) parsed.unshift("全部");
-        return parsed;
-      } catch(e) {
-        return defaultCategories;
-      }
-    }
-
-    function saveCategories(cats) {
-      localStorage.setItem(CAT_KEY, JSON.stringify(cats));
-      renderCategoryPills();
-      updateCategorySelects();
-    }
-
-    let curCat = "全部";
-    let isBatchMode = false;
-    let selectedIds = new Set();
-    let currentLayout = localStorage.getItem(LAYOUT_KEY) || "list";
-    let currentSort = localStorage.getItem(SORT_KEY) || "added_desc";
-
-    let filterExpiryStatus = "全部";
-    let filterOpenStatus = "全部";
-
-    let calViewDate = new Date();
-    let calSelectedDateStr = new Date().toISOString().slice(0, 10);
-    let currentFileSha = "";
-
-    function getItems(){ 
-      const s = localStorage.getItem(K); 
-      return s ? JSON.parse(s) : []; 
-    }
-
-    function calcDays(e){ 
-      const t = new Date(); t.setHours(0,0,0,0); 
-      const x = new Date(e); x.setHours(0,0,0,0); 
-      return Math.ceil((x - t)/86400000); 
-    }
-
-    function getItemTimestamp(item) {
-      if (item.createdAt) {
-        const t = new Date(item.createdAt).getTime();
-        if (!isNaN(t)) return t;
-      }
-      if (item.id) {
-        const num = parseFloat(item.id);
-        if (!isNaN(num) && num > 1500000000000) return num;
-      }
-      return 0;
-    }
-
-    function formatAddedDate(item) {
-      const ts = getItemTimestamp(item);
-      if (!ts) return "";
-      const d = new Date(ts);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day} 添加`;
-    }
-
-    function formatOpenedTag(item) {
-      if (item.openedAt) {
-        return `<span class="tag-meta tag-opened">已开封 (${item.openedAt})</span>`;
-      }
-      const isNotesOpened = item.notes && (item.notes.includes("开封") || item.notes.includes("已开"));
-      if (isNotesOpened) {
-        return `<span class="tag-meta tag-opened">已开封</span>`;
-      }
-      return `<span class="tag-meta tag-unopened">未开封</span>`;
-    }
-
-    function updateSyncBadge(online) {
-      const badge = document.getElementById("syncStatusBadge");
-      if (online) {
-        badge.innerText = "● 已连云端";
-        badge.className = "badge-sync online";
+<!-- ... existing code ... -->
+    /* Modal Controls */
+    function toggleMenuPopover(e) {
+      if (e) e.stopPropagation();
+      const popover = document.getElementById("menuPopover");
+      const backdrop = document.getElementById("popoverBackdrop");
+      const isShowing = popover.classList.contains("show");
+      if (isShowing) {
+        closeMenuPopover();
       } else {
-        badge.innerText = "● 本地模式";
-        badge.className = "badge-sync";
+        updatePopoverLayoutLabel();
+        popover.classList.add("show");
+        backdrop.classList.add("show");
       }
     }
 
-    /* GitHub Direct Sync Integration */
-    async function pullFromRepo() {
-      const token = localStorage.getItem(TOKEN_KEY);
-      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-      const headers = { "Accept": "application/vnd.github.v3+json" };
-      if (token) headers["Authorization"] = `token ${token}`;
+    function closeMenuPopover() {
+      const popover = document.getElementById("menuPopover");
+      const backdrop = document.getElementById("popoverBackdrop");
+      if (popover) popover.classList.remove("show");
+      if (backdrop) backdrop.classList.remove("show");
+    }
 
-      try {
-        const res = await fetch(url, { headers });
-        if (res.ok) {
-          const data = await res.json();
-          currentFileSha = data.sha;
-          const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
-          const cloudItems = JSON.parse(content);
-          if (Array.isArray(cloudItems) && cloudItems.length > 0) {
-            const sanitized = cloudItems.map(it => {
-              if (!it.createdAt) {
-                const ts = getItemTimestamp(it);
-                it.createdAt = ts ? new Date(ts).toISOString() : new Date().toISOString();
-              }
-              return it;
-            });
-            localStorage.setItem(K, JSON.stringify(sanitized));
-            renderCards();
-            renderCalendar();
-          } else {
-            const local = getItems();
-            if (local.length > 0 && token) pushToRepo(local);
-          }
-          if (token) updateSyncBadge(true);
-        } else {
-          updateSyncBadge(false);
-        }
-      } catch (err) {
-        console.error("拉取数据失败", err);
-        updateSyncBadge(false);
+    function updatePopoverLayoutLabel() {
+      const label = document.getElementById("popoverLayoutLabel");
+      if (label) {
+        label.innerText = currentLayout === "list" ? "🔲 切换为画廊视图" : "📋 切换为列表视图";
       }
     }
 
-    async function pushToRepo(items) {
-      const token = localStorage.getItem(TOKEN_KEY);
-      if (!token) return;
-
-      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-      const jsonStr = JSON.stringify(items, null, 2);
-      const b64Content = btoa(unescape(encodeURIComponent(jsonStr)));
-
-      try {
-        const bodyData = { message: "update cosmetics data", content: b64Content };
-        if (currentFileSha) bodyData.sha = currentFileSha;
-
-        const res = await fetch(url, {
-          method: "PUT",
-          headers: {
-            "Authorization": `token ${token}`,
-            "Accept": "application/vnd.github.v3+json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(bodyData)
-        });
-
-        if (res.ok) {
-          const resData = await res.json();
-          currentFileSha = resData.content.sha;
-          updateSyncBadge(true);
-        }
-      } catch (err) {
-        console.error("推送数据失败", err);
-      }
+    function toggleLayoutFromMenu() {
+      toggleLayout();
+      updatePopoverLayoutLabel();
+      closeMenuPopover();
     }
 
-    function saveItems(d){ 
-      localStorage.setItem(K, JSON.stringify(d)); 
-      renderCategoryPills();
-      pushToRepo(d);
-    }
-
-    /* Category Pill Navigation */
-    function renderCategoryPills() {
-      const container = document.getElementById("catPillsContainer");
-      const cats = getCategories();
-      const allItems = getItems();
-
-      // 计算各分类计数
-      const counts = { "全部": allItems.length, "临期": 0 };
-      cats.forEach(c => { if (c !== "全部") counts[c] = 0; });
-
-      allItems.forEach(it => {
-        const d = calcDays(it.expiry);
-        if (d <= 30) counts["临期"]++;
-
-        if (counts[it.category] !== undefined) {
-          counts[it.category]++;
-        } else if (it.name && it.name.includes("唇") && counts["唇部"] !== undefined) {
-          counts["唇部"]++;
-        }
-      });
-
-      container.innerHTML = "";
-
-      // 1. 全部
-      const allBtn = document.createElement("button");
-      allBtn.className = "cat-pill" + (curCat === "全部" ? " active" : "");
-      allBtn.innerHTML = `<span>全部</span><span class="cat-pill-count">${counts["全部"]}</span>`;
-      allBtn.onclick = () => { curCat = "全部"; renderCategoryPills(); renderCards(); };
-      container.appendChild(allBtn);
-
-      // 2. 单独的常驻临期标签
-      const warningBtn = document.createElement("button");
-      warningBtn.className = "cat-pill cat-pill-warning" + (curCat === "临期" ? " active" : "");
-      warningBtn.innerHTML = `<span>⚠️ 临期</span><span class="cat-pill-count">${counts["临期"]}</span>`;
-      warningBtn.onclick = () => { curCat = "临期"; renderCategoryPills(); renderCards(); };
-      container.appendChild(warningBtn);
-
-      // 3. 其它用户自定义分类
-      cats.forEach(c => {
-        if (c === "全部") return;
-        const btn = document.createElement("button");
-        btn.className = "cat-pill" + (c === curCat ? " active" : "");
-        const num = counts[c] || 0;
-        btn.innerHTML = `<span>${c}</span><span class="cat-pill-count">${num}</span>`;
-        btn.onclick = () => {
-          curCat = c;
-          renderCategoryPills();
-          renderCards();
-        };
-        container.appendChild(btn);
-      });
-    }
-
-    function updateCategorySelects() {
-      const cats = getCategories().filter(c => c !== "全部");
-      const itemCat = document.getElementById("itemCat");
-      const batchTarget = document.getElementById("batchTargetCatSelect");
-
-      itemCat.innerHTML = "";
-      batchTarget.innerHTML = "";
-
-      cats.forEach(c => {
-        itemCat.innerHTML += `<option value="${c}">${c}</option>`;
-        batchTarget.innerHTML += `<option value="${c}">${c}</option>`;
-      });
-    }
-
-    /* Sorting and Multi-Dimensional Logic */
-    function openSortSheet() {
-      document.querySelectorAll("#sortOptionsGroup .menu-nav-cell").forEach(row => {
-        const isMatch = row.getAttribute("data-sort") === currentSort;
-        row.classList.toggle("selected", isMatch);
-        row.querySelector(".check-mark").innerText = isMatch ? "✓" : "";
-      });
-      document.getElementById("sortModal").style.display = "flex";
-    }
-    function closeSortSheet() { document.getElementById("sortModal").style.display = "none"; }
-    
-    function selectSortOption(sortKey) {
-      currentSort = sortKey;
-      localStorage.setItem(SORT_KEY, sortKey);
-      closeSortSheet();
-      renderCards();
-    }
-
-    /* Filters Sheet */
-    function openFilterSheet() { document.getElementById("filterModal").style.display = "flex"; }
-    function closeFilterSheet() { document.getElementById("filterModal").style.display = "none"; }
-    
-    function setFilterOpt(type, val, btn) {
-      if (type === "expiryStatus") {
-        filterExpiryStatus = val;
-        document.querySelectorAll("#filterExpiryGroup button").forEach(b => b.classList.toggle("active", b === btn));
-      } else if (type === "openStatus") {
-        filterOpenStatus = val;
-        document.querySelectorAll("#filterOpenGroup button").forEach(b => b.classList.toggle("active", b === btn));
-      }
-    }
-
-    function resetAdvancedFilter() {
-      filterExpiryStatus = "全部";
-      filterOpenStatus = "全部";
-      document.querySelectorAll("#filterExpiryGroup button").forEach(b => b.classList.toggle("active", b.getAttribute("data-val") === "全部"));
-      document.querySelectorAll("#filterOpenGroup button").forEach(b => b.classList.toggle("active", b.getAttribute("data-val") === "全部"));
-      closeFilterSheet();
-      renderCards();
-    }
-
-    function applyAdvancedFilter() {
-      closeFilterSheet();
-      renderCards();
-    }
-
-    /* Tab navigation */
-    function switchNavTab(tab) {
-      document.getElementById("navInventory").classList.toggle("active", tab === "inventory");
-      document.getElementById("navCalendar").classList.toggle("active", tab === "calendar");
-      document.getElementById("tabInventory").classList.toggle("active", tab === "inventory");
-      document.getElementById("tabCalendar").classList.toggle("active", tab === "calendar");
-
-      if (tab === "calendar") renderCalendar();
-      else renderCards();
-    }
-
-    function toggleLayout() {
-      currentLayout = currentLayout === "list" ? "grid" : "list";
-      localStorage.setItem(LAYOUT_KEY, currentLayout);
-      updateLayoutButton();
-      renderCards();
-    }
-
-    function updateLayoutButton() {
-      const btnText = document.getElementById("layoutText");
-      const container = document.getElementById("cardsContainer");
-      if (currentLayout === "list") {
-        btnText.innerText = "📋 列表";
-        container.className = "list-mode";
-      } else {
-        btnText.innerText = "🔲 画廊";
-        container.className = "grid-mode";
-      }
-    }
-
-    /* Batch Operations */
-    function toggleBatchMode() {
-      isBatchMode = !isBatchMode;
-      selectedIds.clear();
-      const btn = document.getElementById("btnBatchToggle");
-      const panel = document.getElementById("batchPanel");
-      const container = document.getElementById("cardsContainer");
-      if (isBatchMode) {
-        btn.innerText = "完成"; btn.classList.add("active");
-        panel.classList.add("show"); container.classList.add("batch-mode");
-      } else {
-        btn.innerText = "批量"; btn.classList.remove("active");
-        panel.classList.remove("show"); container.classList.remove("batch-mode");
-      }
-      updateSelectCount();
-      renderCards();
-    }
-
-    function toggleSelect(id) {
-      if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
-      updateSelectCount(); renderCards();
-    }
-    function selectAll() { getFilteredItems().forEach(i => selectedIds.add(i.id)); updateSelectCount(); renderCards(); }
-    function deselectAll() { selectedIds.clear(); updateSelectCount(); renderCards(); }
-    
-    function updateSelectCount() {
-      const badge = document.getElementById("batchCountBadge");
-      if (badge) badge.innerText = "已选 " + selectedIds.size + " 项";
-    }
-
-    function deleteSelected() {
-      if (selectedIds.size === 0) return alert("请先勾选需要删除的物品");
-      if (confirm(`确定要彻底删除已选中的 ${selectedIds.size} 件物品吗？此操作不可逆！`)) {
-        saveItems(getItems().filter(i => !selectedIds.has(i.id)));
-        selectedIds.clear(); 
-        updateSelectCount(); 
-        renderCards(); 
-        renderCalendar();
-      }
-    }
-
-    function applyBatchCategory() {
-      if (selectedIds.size === 0) return alert("请先勾选需要更改分类的物品");
-      const targetCat = document.getElementById("batchTargetCatSelect").value;
-      let items = getItems();
-      items = items.map(i => selectedIds.has(i.id) ? {...i, category: targetCat} : i);
-      saveItems(items);
-      selectedIds.clear();
-      toggleBatchMode();
-      renderCards();
-      alert("批量修改分类成功！");
-    }
-
-    /* Filter & Multi-Sort Algorithm */
-    function getFilteredItems() {
-      let items = getItems();
-      const s = document.getElementById("searchInput").value.trim().toLowerCase();
-
-      items.sort((a, b) => {
-        if (currentSort === "expiry_asc") {
-          return new Date(a.expiry) - new Date(b.expiry);
-        } else if (currentSort === "expiry_desc") {
-          return new Date(b.expiry) - new Date(a.expiry);
-        } else if (currentSort === "added_desc") {
-          return getItemTimestamp(b) - getItemTimestamp(a);
-        } else if (currentSort === "added_asc") {
-          return getItemTimestamp(a) - getItemTimestamp(b);
-        } else if (currentSort === "name_asc") {
-          return (a.name || "").localeCompare(b.name || "", "zh-Hans-CN", { sensitivity: "base" });
-        } else if (currentSort === "name_desc") {
-          return (b.name || "").localeCompare(a.name || "", "zh-Hans-CN", { sensitivity: "base" });
-        }
-        return 0;
-      });
-
-      return items.filter(i => {
-        const d = calcDays(i.expiry);
-        
-        let matchCat = false;
-        if (curCat === "全部") {
-          matchCat = true;
-        } else if (curCat === "临期") {
-          matchCat = (d <= 30);
-        } else {
-          matchCat = (i.category === curCat);
-          if (curCat === "唇部" && (i.category === "唇部" || i.name.includes("唇"))) matchCat = true;
-        }
-
-        const matchSearch = matchCat &&
-                            (i.name.toLowerCase().includes(s) || (i.notes && i.notes.toLowerCase().includes(s)));
-        if (!matchSearch) return false;
-
-        if (filterExpiryStatus === "正常" && d <= 30) return false;
-        if (filterExpiryStatus === "临期" && (d < 0 || d > 30)) return false;
-        if (filterExpiryStatus === "过期" && d >= 0) return false;
-
-        const isOpened = Boolean(i.openedAt) || (i.notes && (i.notes.includes("开封") || i.notes.includes("已开")));
-        if (filterOpenStatus === "已开封" && !isOpened) return false;
-        if (filterOpenStatus === "未开封" && isOpened) return false;
-
-        return true;
-      });
-    }
-
-    function createCardElement(i, isGrid = false) {
-      const d = calcDays(i.expiry);
-      let colorClass = "status-good", pillClass = "pill-good", statusText = "充足";
-      if (d < 0) { colorClass = "status-danger"; pillClass = "pill-danger"; statusText = "已过期"; }
-      else if (d <= 30) { colorClass = "status-warning"; pillClass = "pill-warning"; statusText = "临期"; }
-
-      const isSel = selectedIds.has(i.id);
-      const card = document.createElement("div");
-      card.className = "item-card" + (isSel ? " selected" : "");
-      card.onclick = () => isBatchMode ? toggleSelect(i.id) : openModal(i);
-
-      const openTag = formatOpenedTag(i);
-      const addedLabel = formatAddedDate(i);
-
-      if (!isGrid) {
-        card.innerHTML = `
-          <div class="select-check-dot">✓</div>
-          <div class="card-thumb" data-img-id="${i.id}"></div>
-          <div class="card-main">
-            <div class="title-row">
-              <span class="item-name">${i.name}</span>
-            </div>
-            <div class="tags-container">
-              <span class="tag-meta tag-cat">${i.category}</span>
-              ${openTag}
-              ${addedLabel ? `<span class="tag-meta tag-added">${addedLabel}</span>` : ""}
-            </div>
-            <div class="expiry-line">
-              <span>到期: ${i.expiry}</span>
-              ${i.notes ? `<span style="opacity:0.6;">· ${i.notes}</span>` : ""}
-            </div>
-          </div>
-          <div class="card-aside">
-            <div class="countdown-num ${colorClass}">
-              ${d < 0 ? Math.abs(d) : d}<span class="countdown-unit">天</span>
-            </div>
-            <div class="countdown-label ${pillClass}">${statusText}</div>
-          </div>
-        `;
-      } else {
-        card.innerHTML = `
-          <div class="select-check-dot">✓</div>
-          <div class="card-thumb" data-img-id="${i.id}"></div>
-          <div class="card-main">
-            <div class="item-name">${i.name}</div>
-            <div class="tags-container">
-              <span class="tag-meta tag-cat">${i.category}</span>
-              ${openTag}
-            </div>
-            <div class="grid-bottom-row">
-              <span style="font-size:11px; color:var(--text-tertiary);">${i.expiry}</span>
-              <span class="countdown-label ${pillClass}">${d < 0 ? '超' + Math.abs(d) + '天' : d + '天'}</span>
-            </div>
-          </div>
-        `;
-      }
-      return card;
-    }
-
-    function hydrateImages(items) {
-      document.querySelectorAll("[data-img-id]").forEach(el => {
-        const id = el.getAttribute("data-img-id");
-        const item = items.find(x => x.id === id);
-        if (item && item.image && item.image.trim()) {
-          const img = document.createElement("img");
-          img.src = item.image;
-          el.innerHTML = "";
-          el.appendChild(img);
-        } else if (item) {
-          el.innerHTML = `<span class="fallback-icon">${item.icon || "🐱"}</span>`;
-        }
-      });
-    }
-
-    function renderCards() {
-      renderCategoryPills();
-      updateLayoutButton();
-      const container = document.getElementById("cardsContainer");
-      container.innerHTML = "";
-      const filtered = getFilteredItems();
-
-      document.getElementById("emptyState").style.display = filtered.length === 0 ? "block" : "none";
-      filtered.forEach(i => {
-        container.appendChild(createCardElement(i, currentLayout === "grid"));
-      });
-      hydrateImages(filtered);
-    }
-
-    /* Calendar Engine */
-    function prevMonth() { calViewDate.setMonth(calViewDate.getMonth() - 1); renderCalendar(); }
-    function nextMonth() { calViewDate.setMonth(calViewDate.getMonth() + 1); renderCalendar(); }
-
-    function renderCalendar() {
-      const year = calViewDate.getFullYear();
-      const month = calViewDate.getMonth();
-      document.getElementById("calMonthTitle").innerText = `${year}年 ${month + 1}月`;
-
-      const daysGrid = document.getElementById("calDaysGrid");
-      daysGrid.innerHTML = "";
-
-      const firstDayOfMonth = new Date(year, month, 1);
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      
-      let startDay = firstDayOfMonth.getDay() - 1;
-      if (startDay === -1) startDay = 6;
-
-      const items = getItems();
-      const dateMap = {};
-      items.forEach(item => {
-        if (!dateMap[item.expiry]) dateMap[item.expiry] = [];
-        dateMap[item.expiry].push(item);
-      });
-
-      const prevMonthDays = new Date(year, month, 0).getDate();
-      for (let i = startDay - 1; i >= 0; i--) {
-        const dCell = document.createElement("div");
-        dCell.className = "cal-day-item other-month";
-        dCell.innerText = prevMonthDays - i;
-        daysGrid.appendChild(dCell);
-      }
-
-      const todayStr = new Date().toISOString().slice(0, 10);
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dCell = document.createElement("div");
-        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        
-        let cellClass = "cal-day-item";
-        if (dateStr === todayStr) cellClass += " today";
-        if (dateStr === calSelectedDateStr) cellClass += " selected";
-        dCell.className = cellClass;
-        
-        let dotsHtml = "";
-        if (dateMap[dateStr]) {
-          const dayItems = dateMap[dateStr];
-          dotsHtml = `<div class="cal-dots-group">`;
-          if (dayItems.some(x => calcDays(x.expiry) < 0)) dotsHtml += `<span class="cal-dot" style="background:var(--danger)"></span>`;
-          if (dayItems.some(x => calcDays(x.expiry) >= 0 && calcDays(x.expiry) <= 30)) dotsHtml += `<span class="cal-dot" style="background:var(--warning)"></span>`;
-          if (dayItems.some(x => calcDays(x.expiry) > 30)) dotsHtml += `<span class="cal-dot" style="background:var(--success)"></span>`;
-          dotsHtml += `</div>`;
-        }
-
-        dCell.innerHTML = `<span>${day}</span>${dotsHtml}`;
-        dCell.onclick = () => { calSelectedDateStr = dateStr; renderCalendar(); };
-        daysGrid.appendChild(dCell);
-      }
-
-      renderCalendarDayEvents(dateMap[calSelectedDateStr] || []);
-    }
-
-    function renderCalendarDayEvents(dayItems) {
-      const listEl = document.getElementById("calDayEventList");
-      document.getElementById("calSelectedDateText").innerText = `${calSelectedDateStr} 到期清单 (${dayItems.length}件)`;
-      listEl.innerHTML = "";
-
-      if (dayItems.length === 0) {
-        listEl.innerHTML = `
-          <div class="empty-prompt" style="padding:24px 10px;">
-            <p style="font-size:13px; color:var(--text-tertiary);">当天无任何物品到期</p>
-          </div>
-        `;
-        return;
-      }
-      dayItems.forEach(i => { listEl.appendChild(createCardElement(i, false)); });
-      hydrateImages(dayItems);
-    }
-
-    /* Category Management Sheet */
     function openCatManageSheet() {
-      closeMenuSheet();
+      closeMenuPopover();
       renderCatManageList();
       document.getElementById("catManageModal").style.display = "flex";
     }
     function closeCatManageSheet() { document.getElementById("catManageModal").style.display = "none"; }
-
-    function renderCatManageList() {
-      const cats = getCategories().filter(c => c !== "全部");
-      const container = document.getElementById("catManageListContainer");
-      container.innerHTML = "";
-      cats.forEach((c, idx) => {
-        container.innerHTML += `
-          <div class="cat-mgmt-row">
-            <span>${c}</span>
-            <div class="cat-ctrl-btns">
-              <button class="cat-ctrl-btn" onclick="moveCategory(${idx + 1}, -1)">⬆</button>
-              <button class="cat-ctrl-btn" onclick="moveCategory(${idx + 1}, 1)">⬇</button>
-              <button class="cat-ctrl-btn" style="color:var(--danger);" onclick="deleteCategory('${c}')">删除</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function addNewCategory() {
-      const input = document.getElementById("newCatNameInput");
-      const name = input.value.trim();
-      if (!name) return;
-      let cats = getCategories();
-      if (cats.includes(name)) return alert("分类已存在！");
-      cats.push(name);
-      saveCategories(cats);
-      input.value = "";
-      renderCatManageList();
-    }
-
-    function moveCategory(idx, dir) {
-      let cats = getCategories();
-      const targetIdx = idx + dir;
-      if (targetIdx <= 0 || targetIdx >= cats.length) return;
-      const temp = cats[idx];
-      cats[idx] = cats[targetIdx];
-      cats[targetIdx] = temp;
-      saveCategories(cats);
-      renderCatManageList();
-    }
-
-    function deleteCategory(name) {
-      let cats = getCategories();
-      if (cats.length <= 2) return alert("至少保留一个分类！");
-      if (confirm(`确定删除分类【${name}】吗？`)) {
-        cats = cats.filter(c => c !== name);
-        saveCategories(cats);
-        renderCatManageList();
-      }
-    }
-
-    /* Modal Controls */
-    function openMenuSheet() { document.getElementById("menuModal").style.display = "flex"; }
-    function closeMenuSheet() { document.getElementById("menuModal").style.display = "none"; }
-    
+<!-- ... existing code ... -->
     function triggerMenuAction(action) {
-      closeMenuSheet();
+      closeMenuPopover();
       if (action === 'backup') exportData();
       else if (action === 'restore') document.getElementById('importFile').click();
       else if (action === 'clear') {
@@ -1996,7 +226,7 @@
     }
 
     function openRepoConfigModal() {
-      closeMenuSheet();
+      closeMenuPopover();
       document.getElementById("repoTokenInput").value = localStorage.getItem(TOKEN_KEY) || "";
       document.getElementById("repoModal").style.display = "flex";
     }
@@ -2012,180 +242,10 @@
     }
 
     function triggerManualSync() {
-      closeMenuSheet();
+      closeMenuPopover();
       pullFromRepo();
       alert("正在同步 GitHub 仓库数据...");
     }
 
     function openAISync(){ document.getElementById("aiModal").style.display = "flex"; document.getElementById("aiInput").value = ""; }
-    function closeAISync(){ document.getElementById("aiModal").style.display = "none"; }
-    async function pasteClip(){ try{ document.getElementById("aiInput").value = await navigator.clipboard.readText(); }catch(e){ alert("请长按粘贴"); } }
-
-    function applyAI(){
-      const r = document.getElementById("aiInput").value.trim(); if (!r) return;
-      try{
-        const m = r.match(/\[[\s\S]*\]|\{[\s\S]*\}/); 
-        const p = JSON.parse(m ? m[0] : r);
-        const list = Array.isArray(p) ? p : [p]; 
-        let items = getItems();
-        const nowIso = new Date().toISOString();
-        list.forEach((x, idx) => { 
-          if(x.name && x.expiry) {
-            items.push({ 
-              id: (Date.now() + idx).toString(), 
-              createdAt: x.createdAt || x.addedDate || nowIso,
-              openedAt: x.openedAt || x.openedDate || "",
-              name: x.name, 
-              category: x.category || "面霜/乳液", 
-              expiry: x.expiry, 
-              notes: x.notes || (x.openedAt || x.openedDate ? "已开封" : "未开封"), 
-              icon: x.icon || "🐱", 
-              image: x.image || "" 
-            }); 
-          }
-        });
-        saveItems(items); closeAISync(); renderCards(); renderCalendar(); alert("成功导入 " + list.length + " 件物品！");
-      } catch(e) { alert("解析失败，请确保复制完整 JSON 数据"); }
-    }
-
-    function openModal(i = null){
-      const m = document.getElementById("manualModal"); 
-      document.getElementById("itemForm").reset();
-      updateCategorySelects();
-      const todayDateStr = new Date().toISOString().slice(0, 10);
-      if (i) {
-        document.getElementById("modalTitle").innerText = "编辑物品"; 
-        document.getElementById("itemId").value = i.id;
-        const initialCreated = i.createdAt ? i.createdAt.slice(0, 10) : todayDateStr;
-        document.getElementById("itemCreatedAt").value = initialCreated;
-        document.getElementById("itemOpenedAt").value = i.openedAt || "";
-        document.getElementById("itemName").value = i.name; 
-        document.getElementById("itemCat").value = i.category;
-        document.getElementById("itemExpiry").value = i.expiry; 
-        document.getElementById("itemNotes").value = i.notes || "";
-        document.getElementById("itemIcon").value = i.icon || "🐱"; 
-        document.getElementById("itemImage").value = i.image || "";
-        document.getElementById("btnDel").style.display = "block";
-      } else {
-        document.getElementById("modalTitle").innerText = "添加物品"; 
-        document.getElementById("itemId").value = "";
-        document.getElementById("itemCreatedAt").value = todayDateStr;
-        document.getElementById("itemOpenedAt").value = "";
-        document.getElementById("itemIcon").value = "🐱"; 
-        document.getElementById("itemImage").value = "";
-        document.getElementById("btnDel").style.display = "none";
-      }
-      m.style.display = "flex";
-    }
-    function closeModal(){ document.getElementById("manualModal").style.display = "none"; }
-
-    function saveItem(e){
-      e.preventDefault(); 
-      const id = document.getElementById("itemId").value;
-      const createdAtInput = document.getElementById("itemCreatedAt").value;
-      const openedAt = document.getElementById("itemOpenedAt").value.trim();
-      const name = document.getElementById("itemName").value.trim();
-      const category = document.getElementById("itemCat").value;
-      const expiry = document.getElementById("itemExpiry").value;
-      const notes = document.getElementById("itemNotes").value.trim();
-      const icon = document.getElementById("itemIcon").value.trim() || "🐱";
-      const image = document.getElementById("itemImage").value.trim() || "";
-      
-      const createdIso = createdAtInput ? new Date(createdAtInput + "T12:00:00").toISOString() : new Date().toISOString();
-      let items = getItems();
-      if (id) {
-        items = items.map(x => x.id === id ? {
-          ...x, 
-          name, category, expiry, notes, icon, image, openedAt,
-          createdAt: createdIso
-        } : x);
-      } else {
-        items.push({ 
-          id: Date.now().toString(), 
-          createdAt: createdIso, 
-          openedAt,
-          name, category, expiry, notes, icon, image 
-        });
-      }
-      saveItems(items); 
-      closeModal(); 
-      renderCards(); 
-      renderCalendar();
-    }
-
-    function delItem(){ 
-      const id = document.getElementById("itemId").value; 
-      if (confirm("确定要删除这件物品吗？")) { 
-        saveItems(getItems().filter(x => x.id !== id)); 
-        closeModal(); 
-        renderCards(); 
-        renderCalendar(); 
-      } 
-    }
-
-    function exportData(){ 
-      const a = document.createElement("a"); 
-      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getItems(), null, 2)); 
-      a.download = `临期管家备份_${new Date().toISOString().slice(0,10)}.json`; 
-      a.click(); 
-    }
-
-    function importData(e){
-      const f = e.target.files[0]; if (!f) return; 
-      const r = new FileReader();
-      r.onload = evt => { 
-        try { 
-          const d = JSON.parse(evt.target.result); 
-          if (Array.isArray(d)) { 
-            saveItems(d); 
-            renderCards(); 
-            renderCalendar(); 
-            alert("本地备份还原成功！"); 
-          } 
-        } catch(err) { alert("文件解析失败"); } 
-      };
-      r.readAsText(f);
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      renderCategoryPills();
-      updateCategorySelects();
-      pullFromRepo();
-
-      const params = new URLSearchParams(window.location.search);
-      const dataParam = params.get("import");
-      if (dataParam) {
-        try {
-          const decoded = decodeURIComponent(dataParam);
-          const jsonMatch = decoded.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
-          const p = JSON.parse(jsonMatch ? jsonMatch[0] : decoded);
-          const list = Array.isArray(p) ? p : [p];
-          if (confirm("检测到来自分享链接的 " + list.length + " 件物品数据，是否立即入库？")) {
-            let items = getItems();
-            const nowIso = new Date().toISOString();
-            list.forEach((x, idx) => {
-              if (x.name && x.expiry) items.push({
-                id: (Date.now() + idx).toString(),
-                createdAt: x.createdAt || x.addedDate || nowIso,
-                openedAt: x.openedAt || x.openedDate || "",
-                name: x.name,
-                category: x.category || "面霜/乳液",
-                expiry: x.expiry,
-                notes: x.notes || "未开封",
-                icon: x.icon || "🐱",
-                image: x.image || ""
-              });
-            });
-            saveItems(items);
-            window.history.replaceState({}, document.title, window.location.pathname);
-            renderCards();
-            alert("成功导入 " + list.length + " 件物品！");
-          }
-        } catch(e) { console.error("URL解析失败", e); }
-      }
-    });
-
-    renderCards();
-  </script>
-</body>
-</html>
+<!-- ... existing code ... -->
