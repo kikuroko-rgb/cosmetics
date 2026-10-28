@@ -7,7 +7,9 @@
     "notes": "底部批号 2814 推算",
     "icon": "🧴",
     "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F9FAFB'/><rect x='38' y='20' width='24' height='60' rx='10' fill='%23FFFFFF' stroke='%23E5E7EB' stroke-width='2'/><rect x='42' y='35' width='16' height='4' fill='%230284C7' rx='1'/><text x='50' y='58' font-size='7' fill='%230284C7' font-family='sans-serif' text-anchor='middle' font-weight='bold'>Curél</text></svg>",
-    "createdAt": "2026-10-28T11:21:11.595Z"
+    "createdAt": "2026-10-28T11:21:11.595Z",
+    "status": "使用中",
+    "openedAt": "2026-10-28"
   },
   {
     "id": "179318647159590ql",
