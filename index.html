@@ -151,7 +151,6 @@
     .btn-batch-del { background: #FEE2E2; color: var(--danger); border: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .btn-batch-opt { background: #F3F4F6; border: none; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
 
-    /* 批量修改分类条 */
     .batch-cat-bar {
       position: fixed; bottom: 60px; left: 0; right: 0; background: #FFF9FA;
       border-top: 1px solid var(--primary); padding: 10px 18px; display: none;
@@ -182,7 +181,6 @@
     .menu-opt-left { display: flex; align-items: center; gap: 10px; }
     .menu-opt-icon { font-size: 20px; }
 
-    /* 分类管理列表样式 */
     .cat-manage-item {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 12px; background: #F9FAFB; border: 1px solid #E5E7EB;
@@ -667,7 +665,6 @@
       renderCards();
     }
 
-    /* 分类管理抽屉 */
     function openCatManageSheet() {
       closeMenuSheet();
       renderCatManageList();
@@ -877,6 +874,18 @@
       alert("批量修改分类成功！");
     }
 
+    function formatAddedDate(idVal) {
+      if (!idVal) return "";
+      const num = Number(idVal);
+      if (isNaN(num)) return idVal; // 兼容旧文本格式
+      const d = new Date(num);
+      if (isNaN(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}添加`;
+    }
+
     function getFilteredItems() {
       const items = getItems();
       const s = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -930,6 +939,7 @@
       const openTag = isOpened 
         ? `<span class="tag-pill tag-opened">已开封</span>` 
         : `<span class="tag-pill tag-unopened">未开封</span>`;
+      const addedText = formatAddedDate(i.id);
 
       if (!isGrid) {
         card.innerHTML = `
@@ -941,7 +951,7 @@
               <span class="tag-pill tag-category">${i.category}</span>
               ${openTag}
             </div>
-            <div class="expiry-sub">到期: ${i.expiry} ${i.notes ? "· " + i.notes : ""}</div>
+            <div class="expiry-sub">到期: ${i.expiry} ${i.notes ? "· " + i.notes : ""} ${addedText ? "· " + addedText : ""}</div>
           </div>
           <div class="card-right">
             <div class="countdown-days ${colorClass}">${d < 0 ? Math.abs(d) : d}<span style="font-size:12px;font-weight:600;">天</span></div>
@@ -954,7 +964,7 @@
           <div class="card-thumb" data-img-id="${i.id}"></div>
           <div class="card-main">
             <div class="item-name">${i.name}</div>
-            <div class="expiry-sub">${i.category} · ${i.expiry}</div>
+            <div class="expiry-sub">${i.category} · ${i.expiry} ${addedText ? "<br>" + addedText : ""}</div>
             <div class="card-right ${bgClass}">${d < 0 ? "过期 " + Math.abs(d) + " 天" : "剩余 " + d + " 天"}</div>
           </div>
         `;
@@ -1100,7 +1110,7 @@
       }
       m.style.display="flex";
     }
-    function closeModal(){ document.getElementById("modalModal").style.display="none"; }
+    function closeModal(){ document.getElementById("manualModal").style.display="none"; }
     function saveItem(e){
       e.preventDefault(); const id=document.getElementById("itemId").value;
       const name=document.getElementById("itemName").value.trim(), category=document.getElementById("itemCat").value, expiry=document.getElementById("itemExpiry").value, notes=document.getElementById("itemNotes").value.trim(), icon=document.getElementById("itemIcon").value.trim()||"🐱", image=document.getElementById("itemImage").value.trim()||"";
