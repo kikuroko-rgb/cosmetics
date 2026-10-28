@@ -143,7 +143,7 @@
     .cat-avatar-btn:active { transform: scale(0.92); box-shadow: 0 3px 8px rgba(139, 92, 246, 0.3); }
     .cat-btn-label { font-size: 10px; font-weight: 700; color: #8B5CF6; margin-top: 2px; }
 
-    /* 全新双层一体化批量管理工具面板 */
+    /* 双层批量管理操作面板 */
     .batch-panel {
       position: fixed; bottom: 60px; left: 0; right: 0;
       background: #FFFFFF; border-top: 1px solid #E5E7EB;
@@ -295,6 +295,14 @@
         <button class="sheet-close" onclick="closeSortSheet()">✕</button>
       </div>
       <div class="sort-list-group" id="sortOptionsGroup">
+        <div class="sort-opt-item" data-sort="added_desc" onclick="selectSortOption('added_desc')">
+          <span>添加时间：最新优先</span>
+          <span class="sort-check"></span>
+        </div>
+        <div class="sort-opt-item" data-sort="added_asc" onclick="selectSortOption('added_asc')">
+          <span>添加时间：最早优先</span>
+          <span class="sort-check"></span>
+        </div>
         <div class="sort-opt-item" data-sort="expiry_asc" onclick="selectSortOption('expiry_asc')">
           <span>到期时间：由近到远（临期优先）</span>
           <span class="sort-check"></span>
@@ -303,12 +311,12 @@
           <span>到期时间：由远到近</span>
           <span class="sort-check"></span>
         </div>
-        <div class="sort-opt-item active" data-sort="added_desc" onclick="selectSortOption('added_desc')">
-          <span>添加时间：最新优先</span>
-          <span class="sort-check">✓</span>
+        <div class="sort-opt-item" data-sort="name_asc" onclick="selectSortOption('name_asc')">
+          <span>品名首字母：A → Z（拼音/字母正序）</span>
+          <span class="sort-check"></span>
         </div>
-        <div class="sort-opt-item" data-sort="added_asc" onclick="selectSortOption('added_asc')">
-          <span>添加时间：最早优先</span>
+        <div class="sort-opt-item" data-sort="name_desc" onclick="selectSortOption('name_desc')">
+          <span>品名首字母：Z → A（拼音/字母倒序）</span>
           <span class="sort-check"></span>
         </div>
       </div>
@@ -430,7 +438,7 @@
     </div>
   </div>
 
-  <!-- 双层一体化批量管理面板：上层选控与删除，下层分类归类 -->
+  <!-- 双层批量管理操作面板 -->
   <div class="batch-panel" id="batchPanel">
     <div class="batch-panel-row">
       <div style="display:flex; gap:6px; align-items:center;">
@@ -919,6 +927,7 @@
       let items = getItems();
       const s = document.getElementById("searchInput").value.trim().toLowerCase();
 
+      // 多维排序逻辑：增加首字母拼音正倒序
       items.sort((a, b) => {
         if (currentSort === "expiry_asc") {
           return new Date(a.expiry) - new Date(b.expiry);
@@ -928,6 +937,10 @@
           return getItemTimestamp(b) - getItemTimestamp(a);
         } else if (currentSort === "added_asc") {
           return getItemTimestamp(a) - getItemTimestamp(b);
+        } else if (currentSort === "name_asc") {
+          return (a.name || "").localeCompare(b.name || "", "zh-Hans-CN", { sensitivity: "base" });
+        } else if (currentSort === "name_desc") {
+          return (b.name || "").localeCompare(a.name || "", "zh-Hans-CN", { sensitivity: "base" });
         }
         return 0;
       });
