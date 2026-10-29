@@ -2453,16 +2453,11 @@
     }
 
     /* Gemini Quick Import */
-    function openAISync() {
-      openModal("aiModal");
-      const inputEl = document.getElementById("aiInput");
-      inputEl.value = "";
-      // 延迟聚焦，防止在移动设备上因弹窗动画未完成导致视口重绘闪退
-      setTimeout(() => {
-        inputEl.focus();
-      }, 300);
-    }
-
+function openAISync() {
+  openModal("aiModal");
+  const inputEl = document.getElementById("aiInput");
+  if (inputEl) inputEl.value = "";
+}
     function processIncomingItemsWithDupCheck(incomingList) {
       if (!incomingList || incomingList.length === 0) {
         alert("未解析到任何有效物品数据");
@@ -2914,24 +2909,53 @@
     }
 
     function importDataJson(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        try {
-          const parsed = JSON.parse(ev.target.result);
-          if (Array.isArray(parsed)) {
-            saveItems(parsed);
-            alert(`成功还原 ${parsed.length} 件物品！`);
-          } else {
-            alert("JSON 格式不正确");
-          }
-        } catch (err) {
-          alert("文件解析失败");
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      const incomingList = Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
+      
+      if (!incomingList || incomingList.length === 0) {
+        alert("更新包中未检测到有效数据");
+        return;
+      }
+
+      let existingItems = getItems();
+      let addedCount = 0;
+      let updatedCount = 0;
+
+      incomingList.forEach(incoming => {
+        if (!incoming.name) return;
+        
+        // 智能比对：遇到已有条目就更新图片/备注，新物品直接追加，绝不冲掉其它已有物品
+        const matchIndex = existingItems.findIndex(ex => 
+          (incoming.id && ex.id === incoming.id) ||
+          ((ex.name || "").trim().toLowerCase() === (incoming.name || "").trim().toLowerCase() && 
+           (ex.expiry || "").trim() === (incoming.expiry || "").trim())
+        );
+
+        if (matchIndex !== -1) {
+          existingItems[matchIndex] = { ...existingItems[matchIndex], ...incoming };
+          updatedCount++;
+        } else {
+          if (!incoming.id) incoming.id = (Date.now() + Math.floor(Math.random() * 1000)).toString();
+          existingItems.unshift(incoming);
+          addedCount++;
         }
-      };
-      reader.readAsText(file);
+      });
+
+      saveItems(existingItems); // 保存并自动推送到 GitHub
+      e.target.value = "";
+      alert(`✅ 增量包更新成功！\n新增物品：${addedCount} 件\n更新物品：${updatedCount} 件\n现有总库存：${existingItems.length} 件`);
+    } catch (err) {
+      console.error(err);
+      alert("❌ 更新包解析失败，请检查文件格式");
     }
+  };
+  reader.readAsText(file);
+}
 
     function clearAllItemsPrompt() {
       closeTitleMenu();
