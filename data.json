@@ -1,5 +1,22 @@
 [
   {
+    "id": "1793275545185",
+    "name": "SKIN1004 马达加斯加积雪草安瓶精华 20ml",
+    "category": "精华",
+    "cat": "精华",
+    "status": "未开封",
+    "createdAt": "2026-10-29T12:05:45.183Z",
+    "openedAt": "",
+    "expiry": "2027-10-09",
+    "price": null,
+    "capacity": "20ml",
+    "quantity": 1,
+    "isSample": true,
+    "tags": "小样 积雪草 舒缓",
+    "notes": "0.67 FL.OZ. / 手写到期日 27 10 09",
+    "image": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23F8FAFC'/><rect x='38' y='14' width='24' height='22' rx='3' fill='%23FFFFFF' stroke='%23E2E8F0' stroke-width='1.5'/><rect x='34' y='36' width='32' height='48' rx='6' fill='%23FEF3C7' stroke='%23F59E0B' stroke-width='1.5'/><rect x='38' y='46' width='24' height='26' fill='%23FFFFFF' rx='1'/><text x='50' y='62' font-family='sans-serif' font-size='8' font-weight='bold' fill='%231E293B' text-anchor='middle'>27 10</text></svg>"
+  },
+  {
     "id": "1793275313373",
     "name": "达芙文 Differin 阿达帕林凝胶 30g",
     "category": "药品",
