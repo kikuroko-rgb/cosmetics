@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "id": "1793275313373",
+    "name": "达芙文 Differin 阿达帕林凝胶 30g",
+    "category": "药品",
+    "cat": "药品",
+    "status": "未开封",
+    "createdAt": "2026-10-29T12:01:53.372Z",
+    "openedAt": "",
+    "expiry": "2026-12-31",
+    "price": null,
+    "capacity": "30g",
+    "quantity": 1,
+    "isSample": false,
+    "tags": "外用药 祛痘 维A酸",
+    "notes": "高德美 GALDERMA / 手写到期日 26 12",
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    "id": "1793275313372",
+    "name": "SKIN1004 理肤天使马达加斯加积雪草舒缓安瓶精华 30ml",
+    "category": "精华",
+    "cat": "精华",
+    "status": "未开封",
+    "createdAt": "2026-10-29T12:01:53.372Z",
+    "openedAt": "",
+    "expiry": "2027-10-09",
+    "price": null,
+    "capacity": "30ml",
+    "quantity": 1,
+    "isSample": false,
+    "tags": "舒缓 修护 积雪草",
+    "notes": "手写到期日 27 10 09",
+    "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&auto=format&fit=crop&q=80"
+  }
+]
