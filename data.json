@@ -1,6 +1,6 @@
 [
   {
-    "id": "1793281580335",
+    "id": "item_skin1004_20ml",
     "name": "SKIN1004 马达加斯加积雪草安瓶精华 20ml",
     "category": "精华",
     "cat": "精华",
@@ -8,16 +8,16 @@
     "createdAt": "2026-10-29T13:46:20.334Z",
     "openedAt": "",
     "expiry": "2027-10-09",
-    "price": null,
+    "price": "",
     "capacity": "20ml",
     "quantity": 1,
     "isSample": true,
     "tags": "小样 积雪草 舒缓",
     "notes": "0.67 FL.OZ. / 手写到期日 27 10 09",
-    "image": ""
+    "image": "data:image/svg+xml;utf8,MADAGASCARCENTELLAAMPOULE100% PURE CENTELLAFROM MADAGASCAR20ml / 0.67 FL.OZ.SKIN1004"
   },
   {
-    "id": "1793281580334",
+    "id": "item_differin_30g",
     "name": "达芙文 Differin 阿达帕林凝胶 30g",
     "category": "药品",
     "cat": "药品",
@@ -25,12 +25,12 @@
     "createdAt": "2026-10-29T13:46:20.334Z",
     "openedAt": "",
     "expiry": "2026-12-31",
-    "price": null,
+    "price": "",
     "capacity": "30g",
     "quantity": 1,
     "isSample": false,
     "tags": "高德美 祛痘 维A酸",
     "notes": "手写到期日 26 12 / 批号 4051117",
-    "image": ""
+    "image": "data:image/svg+xml;utf8,OTCGALDERMAPALENE阿达帕林凝胶达芙文 Differin"
   }
 ]
